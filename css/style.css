@@ -65,7 +65,7 @@ body {
 .social {
   display: grid;
   place-items: center;
-  grid-template-columns: 25% 25% 25% 25%;
+  grid-template-columns: 33% 33% 33%;
   height: 100%;
 }
 
@@ -125,7 +125,7 @@ body {
 }
 .social {
 
-  grid-template-columns: 25% 25% 25% 25%;
+  grid-template-columns: 33% 33% 33%;
   align-items: start;
 }
 
