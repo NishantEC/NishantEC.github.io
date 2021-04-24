@@ -41,7 +41,7 @@ div{
 }
 
 .profile{
-  background-color: rgb(206, 20, 57);
+  background-color: rgb(155, 18, 45);
   display: grid;
   grid-template-rows:40% 60% ;
   place-items: center;
