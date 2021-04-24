@@ -36,14 +36,14 @@ div{
   height: 95%;
   width: 90%;
   display: grid;
-  grid-template-rows: 25% 75%;
+  grid-template-rows: 35% 65%;
 }
 
 .profile{
-  background-color: rgb(220, 20, 60);
+  background-color: rgb(206, 20, 57);
   display: grid;
-  grid-template-columns:40% 60% ;
-  align-items: center;
+  grid-template-rows:40% 60% ;
+  place-items: center;
 }
 .pfp{
   background-image: url(../images/pfp.jpg);
@@ -52,41 +52,47 @@ div{
   border-radius: 50%;
   height: 80px;
   width: 80px;
-  margin: 20px;
+  margin-top: 60px;
 }
 .title{
 
   background-color: rgba(255, 228, 196, 0);
   display: grid;
   text-align: center;
+
 }
 .name{
   text-transform: uppercase;
   color: #ffffff;
   font-stretch: ultra-expanded;
   font-weight: 700;
+  padding: 2px;
   
 }
 .bio{
   color:#d6d6d6;
   font-size: medium;
+  padding: 2px;
 }
 .links{
-  background-color: rgb(139, 0, 139);
+  background-color: rgb(104, 14, 104);
   display: grid;
+  place-items: center;
 
 
 }
 a{
   border-radius: 15px;
   text-align: center;
-  line-height: 58px;
+  width:86%;
+  height: 65%;
+  line-height: 60px;
   text-transform: uppercase;
   font-weight: 700;
   color: #363636;
-  margin: 20px;
+  margin: auto;
   display: block;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(226, 226, 226);
 }
 @media all and (max-width:700px) {
   .background {
