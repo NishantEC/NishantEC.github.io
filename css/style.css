@@ -36,6 +36,7 @@ div{
   height: 95%;
   width: 90%;
   display: grid;
+  place-items: center;
   grid-template-rows: 35% 65%;
 }
 
@@ -44,6 +45,8 @@ div{
   display: grid;
   grid-template-rows:40% 60% ;
   place-items: center;
+  height: 90%;
+  width: 90%;
 }
 .pfp{
   background-image: url(../images/pfp.jpg);
@@ -75,10 +78,14 @@ div{
   padding: 2px;
 }
 .links{
-  background-color: rgb(104, 14, 104);
+  background-color: rgba(104, 14, 104, 0);
   display: grid;
   place-items: center;
-
+  height: 100%;
+  width: 100%;
+}
+a img{
+  height: 18px;
 
 }
 a{
@@ -86,10 +93,11 @@ a{
   text-align: center;
   width:86%;
   height: 65%;
-  line-height: 60px;
+  line-height: 70px;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: 600;
   color: #363636;
+  font-size: 23px;
   margin: auto;
   display: block;
   background-color: rgb(226, 226, 226);
