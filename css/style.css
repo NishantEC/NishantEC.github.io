@@ -62,19 +62,20 @@ div{
   background-color: rgba(255, 228, 196, 0);
   display: grid;
   text-align: center;
+  margin-top: 30px;
 
 }
 .name{
   text-transform: uppercase;
   color: #ffffff;
-  font-stretch: ultra-expanded;
   font-weight: 700;
+  font-size: 100%;
   padding: 2px;
   
 }
 .bio{
   color:#d6d6d6;
-  font-size: medium;
+  font-size: 80%;
   padding: 2px;
 }
 .links{
@@ -84,20 +85,17 @@ div{
   height: 100%;
   width: 100%;
 }
-a img{
-  height: 18px;
 
-}
 a{
   border-radius: 15px;
   text-align: center;
   width:86%;
   height: 65%;
-  line-height: 70px;
+  line-height: 62px;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
   color: #363636;
-  font-size: 23px;
+
   margin: auto;
   display: block;
   background-color: rgb(226, 226, 226);
