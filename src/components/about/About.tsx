@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import pfpImg from "../../assets/me.jpeg";
 
 import ParallaxRoller from "../parallaxRoller/ParallaxRoller";
-import reactIcon from "../../assets/React-icon.png";
+import reactIcon from "../../assets/react-icon.png";
 import tailwindIcon from "../../assets/tailwind-icon.png";
 import angularIcon from "../../assets/angular-icon.png";
 import reduxIcon from "../../assets/redux-icon.png";
