@@ -1,5 +1,5 @@
 import React from "react";
-import "./Hero.scss";
+import "./hero.scss";
 import pfpImg from "../../assets/me.jpeg";
 import { motion } from "framer-motion";
 
