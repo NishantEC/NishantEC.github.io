@@ -2,6 +2,7 @@ import { motion } from 'framer-motion'
 import React from 'react'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../features/store'
+import './cursor.scss'
 
 
 
@@ -62,6 +63,7 @@ function Cursor () {
       damping: 100,
       stiffness: 1000,
     }}
+    className='cursor'
 
    >
 

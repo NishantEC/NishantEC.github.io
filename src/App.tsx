@@ -22,7 +22,6 @@ function App() {
       setIsItLoading(false)
     }, 2000);
   
-
   }, [])
   
 const heroRef = useRef(null)
