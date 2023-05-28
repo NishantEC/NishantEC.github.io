@@ -1,0 +1,23 @@
+.words-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: start;
+    gap: 0.35rem;
+    & > span{
+        font-size: 14px;
+        font-weight: 400;
+        @media (max-width: 768px) {
+            font-size: 10px;
+        }
+        
+        .boldText{
+            font-weight: 600;
+            opacity:1;
+        }
+        .normalText{
+            font-weight: 400;
+            opacity: 0.7;
+        }
+    }
+}

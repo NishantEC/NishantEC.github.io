@@ -1,0 +1,9 @@
+.scroller{
+    display: flex;
+    gap: 2rem;
+    @media (max-width: 768px) {
+        gap: 1rem;
+    }
+
+}
+

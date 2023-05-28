@@ -1,0 +1,114 @@
+.about-container {
+
+    min-height: 100vh;
+    width: 100VW;
+    display: flex;
+flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    gap: 64px;
+    overflow: hidden;
+    padding: 4rem 0rem;
+
+
+    .header {
+        width: 100vw;
+        font-weight: 500;
+        font-size: 22px;
+        letter-spacing: -0.2px;
+        color: rgba(0, 0, 0, 0.87);
+        display: flex;
+        align-items: center;
+        height: fit-content;
+        position: relative;
+        padding-left: 64px;
+        @media (max-width: 768px) {
+            padding-left: 32px;
+        }
+        
+        display: flex;
+        gap: 10px;
+        svg {
+            // filter: invert(1);
+            width: 20px;
+            height: 20px;
+        }
+    }
+    .about-wrapper{
+        width: 80%;
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+
+        @media (max-width: 768px) {
+flex-direction: column;
+        }
+
+        .text{
+
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+}
+
+.skills-wrapper{
+    width: 80%;
+    overflow-x: hidden;
+    display: flex;
+    align-items: center;
+
+    height:8rem;
+
+    // box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),inset 0px 0px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    @media (max-width: 768px) {
+        width: 100%;
+        height: 3rem;
+    }
+
+    .skillIcon{
+        max-height: 3rem;
+
+        object-fit: contain;
+        filter: grayscale(20%);
+        opacity: 0.8;
+        @media (max-width: 768px) {
+            max-height: 2rem;
+        }
+    }
+}
+.pfp-wrapper{
+
+    height: 100%;
+    display: grid;
+    place-content: center;
+}
+.pfp {
+
+    height: 250px;
+    aspect-ratio: 1/1;
+    border-radius: 2rem;
+    background-color: #ffffff50;
+
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05),inset 0px 0px 10px rgba(0, 0, 0, 0.2);
+    
+            padding: 0.5rem;
+
+    
+            backdrop-filter: blur(50px);
+    @media (max-width: 768px) {
+        width: 150px;
+        height: 150px;
+        border-radius: 2rem;
+    }
+    img {
+        border-radius: 1.5rem;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+
+
+    }
+}

@@ -1,0 +1,40 @@
+nav {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    padding: 24px 64px;
+    display: flex;
+    justify-content: space-between;
+    backdrop-filter: blur(10px);
+    z-index: 99999;
+    flex-direction: row;
+
+
+    @media (max-width: 768px) {  
+      padding: 12px 12px;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+  
+    .logo {
+      font-weight: 600;
+      font-size: 20px;
+      letter-spacing: 1px;
+      a{
+        text-decoration: none;
+
+      }
+    }
+  
+    .nav-options {
+      display: flex;
+      gap: 36px;
+      a{
+        text-decoration: none;
+      }
+    }
+  
+  }
+  
