@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./Navbar.scss";
+import "./navbar.scss";
 import { motion } from "framer-motion";
 
 type Props = {
