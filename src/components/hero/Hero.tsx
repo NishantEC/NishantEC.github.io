@@ -82,7 +82,7 @@ function Hero({ref}:any) {
             >
             Passionate developer creating captivating user experiences. Expertise in modern tech for efficient web applications. Let's bring your project to life with seamless interfaces.
             </motion.div>
-            <motion.div className="btn"
+            <motion.a className="btn"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1,boxShadow: "0px 0px 0 #000000" }}
             transition={{
@@ -102,6 +102,8 @@ function Hero({ref}:any) {
             whileHover={{
               boxShadow: "40px 0px 0 #000000"
             }}
+            target="_blank"
+            href="https://drive.google.com/uc?export=download&id=1NfQwMkYEDxyueloIO7O6kVlF0QNfDaFC"
             >
               {"Resume"}
               <svg
@@ -117,7 +119,7 @@ function Hero({ref}:any) {
                   fill-opacity="0.87"
                 />
               </svg>
-            </motion.div>
+            </motion.a>
           </div>
         </div>
       </div>

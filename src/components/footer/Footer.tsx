@@ -9,10 +9,10 @@ const Footer = () => {
         <div className="footer-wrapper">
             <div className="contact-details">
                 <div className='text'>
-                    +91 7987482823
+                    guptanishant1307@gmail.com
                 </div>
                 <div className='text'>
-                    guptanishant1307@gmail.com
+                    +91 7987482823
                 </div>
             </div>
 
