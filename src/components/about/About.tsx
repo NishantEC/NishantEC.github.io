@@ -58,7 +58,7 @@ function About() {
       </motion.div>
 
       <div className="about-wrapper">
-      <div className="pfp-wrapper">
+        <div className="pfp-wrapper">
           <motion.div
             className="pfp"
             viewport={{ once: true }}
@@ -101,7 +101,6 @@ function About() {
           <FocusedText text="Currently, I work at BleedingEdge Technologies where I build accessible, human-centered web applications that solve real-world problems. My expertise in utilizing modern technologies and frameworks allows me to create efficient and user-friendly web applications." />
           <FocusedText text="Overall, I am committed to making a positive impact through my work as a frontend developer and constantly strive to improve my skills and knowledge to create even better products." />
         </motion.div>
-        
       </div>
 
       <motion.div
