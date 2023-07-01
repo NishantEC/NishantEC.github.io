@@ -92,10 +92,10 @@ function Projects() {
             translateY,
           }}
           animate={{
-            border: "5px solid rgba(255,255,255, 0.15)",
+            border: "5px solid rgba(98, 66, 185, 0.15)",
           }}
           whileHover={{
-            border: "5px solid rgba(255,255,255, 0.9)",
+            border: "5px solid rgba(98, 66, 185, 0.9)",
             y: -5,
           }}
         >

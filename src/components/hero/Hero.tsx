@@ -22,7 +22,7 @@ function Hero({ref}:any) {
                   delay: 0.2,
                 }}
               >
-                I am
+                Hello! I am
               </motion.span>
               <motion.span
                 className="name"
@@ -86,7 +86,7 @@ function Hero({ref}:any) {
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1,boxShadow: "0px 0px 0 #000000" }}
             transition={{
-              type: "spring",
+
               duration: 0.5,
               scale:{
               delay: 0.7,

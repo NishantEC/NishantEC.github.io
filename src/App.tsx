@@ -20,7 +20,7 @@ function App() {
   useEffect(() => {
     setTimeout(() => {
       setIsItLoading(false)
-    }, 2000);
+    }, 3000);
   
   }, [])
   
@@ -40,10 +40,15 @@ const isHeroInView = useInView(heroRef)
       }
     >
       <Cursor />
+
       <AnimatePresence>
-      {isItLoading ? <Loader/>: 
-      <>
-      <div className="App-wrapper">
+
+      {isItLoading ? <Loader/>: null}
+
+      </AnimatePresence>
+      <div className="App-wrapper"
+      style={{opacity: isItLoading ? 0 : 1}}
+      >
         <Navbar isHeroInView={isHeroInView} />
         <div ref={heroRef}>
         <Hero />
@@ -52,17 +57,15 @@ const isHeroInView = useInView(heroRef)
         <Projects />
         <ContactForm/>
         <Footer/>
+      </div>      
+        <div 
+        className="blob-cont loading">
+        <div className="yellow blob"></div>
+        <div  className="red blob"></div>
+        <div className="blue blob"></div>
       </div>
 
-      
-        <motion.div     layoutId='loader-wrapper' className="blob-cont loading">
-        <motion.div layoutId='yellow-blob' className="yellow blob"></motion.div>
-        <motion.div layoutId='red-blob' className="red blob"></motion.div>
-        <motion.div layoutId='blue-blob' className="blue blob"></motion.div>
-      </motion.div>
-      </>
-}
-      </AnimatePresence>
+
 
     </div>
   );

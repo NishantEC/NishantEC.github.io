@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0; 
   box-sizing: border-box;
-  cursor: none;
+
   font-family: 'Poppins', sans-serif;
   scroll-behavior: smooth;
   color: #252525;
@@ -180,7 +180,7 @@ body{
   flex-direction: column;
   align-items: center;
   // overflow-y: scroll;
-  cursor: none;
+
   &>div{
     width: 100%;
   }

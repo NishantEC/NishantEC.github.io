@@ -92,6 +92,7 @@
         padding: 0 128px;
         display: flex;
         justify-content: center;
+        align-items: center;
         @media (max-width: 768px) {
             flex-direction: column;
             padding: 0 32px;
@@ -104,10 +105,11 @@
             border: none;
             border: 2px solid #ccc;
             border-radius: 0.5rem;
-            background-color: #cfcfcf;
-
+            color: #fff;
+            background-color: rgb(98, 66, 185);
+            max-width: 25rem;
             &:hover {
-                background-color: #e8e8e8;
+                background-color: rgb(98, 66, 185, 0.9);
             }
         }
     }

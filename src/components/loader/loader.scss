@@ -1,6 +1,6 @@
 .loader-wrapper{
-    position: absolute;
-    z-index: -1;
+    position: fixed;
+    z-index: 9999999;
 
     width: 100%;
     height: 100vh;
@@ -8,12 +8,16 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    background-color: #252525;
+
+
 
 
 }
 .loader-hello{
     font-size: 2.5rem;
     font-weight: 400;
+    color: #fff;
 
 }
 

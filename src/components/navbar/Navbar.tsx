@@ -21,8 +21,8 @@ const Navbar = ({ isHeroInView }: Props) => {
     };
   }, []);
 
-  const isSmallScreen = windowWidth < 768; 
-  console.log(isSmallScreen);
+  const isSmallScreen = windowWidth < 360; 
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -10 }}
