@@ -103,7 +103,7 @@ function Hero({ref}:any) {
               boxShadow: "40px 0px 0 #000000"
             }}
             target="_blank"
-            href="https://drive.google.com/uc?export=download&id=1NfQwMkYEDxyueloIO7O6kVlF0QNfDaFC"
+            href="https://drive.google.com/uc?export=download&id=1J6k8wKtTXIj23oTMZkenhy_TaC1MVaaJ"
             >
               {"Resume"}
               <svg
