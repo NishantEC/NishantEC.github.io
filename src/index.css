@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, serif;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --bg: var(--color-stone-50);
+    --surface: white;
+    --fg: var(--color-stone-800);
+    /* stone-500 measured 4.61:1 on --bg — over the line by 0.11, with nothing
+     * left for the opacity modifiers this palette uses everywhere. stone-600
+     * buys the headroom back. Dark mode's stone-400 was already fine. */
+    --muted: var(--color-stone-600);
+    --border: --alpha(var(--color-stone-900) / 18%);
+    --accent: oklch(0.52 0.19 288);
+  }
+
+  .dark {
+    color-scheme: dark;
+    --bg: hsl(24 5% 10%);
+    --surface: hsl(24 5% 15%);
+    --fg: var(--color-stone-100);
+    --muted: var(--color-stone-400);
+    --border: --alpha(var(--color-stone-50) / 10%);
+    --accent: oklch(0.72 0.15 288);
+  }
+
+  /* The app is a fixed shell with its own scrollers inside it, so the document
+   * itself must never scroll. Sizing the shell to 100vh is not enough on its
+   * own: an overflowing descendant still lets the *page* scroll behind it,
+   * which slid the tab strip off the top of the window. */
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  #root {
+    height: 100%;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 14px;
+
+    @media (width > 480px) {
+      font-size: 16px;
+    }
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  img {
+    -webkit-user-drag: none;
+  }
+
+  button,
+  input:where([type='button'], [type='reset'], [type='submit']) {
+    cursor: pointer;
+  }
+
+  a[target='_blank'] {
+    cursor: alias;
+  }
+}
+
+@layer components {
+  /* Container-relative, not viewport-relative — the column has to be able to
+   * shrink into the sidebar when a project pane is open. */
+  .section {
+    width: 100%;
+    max-width: 40rem;
+  }
+
+  /* Solid surface for the tab fusion. The radial-gradient corners need an
+   * opaque colour to punch against; a translucent one breaks the seam.
+   *
+   * It resolves to the page colour, which is what makes the pane and the
+   * sidebar read as one continuous surface with the tab strip as a lighter
+   * band above them. Kept as its own token rather than collapsed into `--bg`,
+   * because the panel is a distinct role that currently shares a value — the
+   * fusion has to follow the pane, and one token is what guarantees it. */
+  :root,
+  .dark {
+    --panel: var(--bg);
+  }
+
+  /* The theme swap is a circular reveal, not a cross-fade. The default
+   * old/new fade would run underneath the clip-path and turn the wipe into a
+   * dissolve, so both layers are stripped of their animation and the incoming
+   * one is stacked on top for the clip to cut into. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+
+  ::view-transition-old(root) {
+    z-index: 0;
+  }
+
+  ::view-transition-new(root) {
+    z-index: 1;
+  }
+
+  /* Squircled corners need a much larger radius to read as equivalent to a
+   * plain rounded one, so the radius grows only where corner-shape applies. */
+  .squircle {
+    border-radius: var(--radius-2xl);
+
+    @supports (corner-shape: squircle) {
+      corner-shape: squircle;
+      border-radius: 3rem;
+    }
+  }
+
+  .squircle-sm {
+    border-radius: var(--radius-xl);
+
+    @supports (corner-shape: squircle) {
+      corner-shape: squircle;
+      border-radius: 2rem;
+    }
+  }
+
+  .squircle-xs {
+    border-radius: var(--radius-lg);
+
+    @supports (corner-shape: squircle) {
+      corner-shape: squircle;
+      border-radius: 1.25rem;
+    }
+  }
+
+  /* `border-radius: inherit` on a pseudo-element does NOT bring `corner-shape`
+   * with it, so an overlay would draw a circular arc at the (much larger)
+   * squircle radius and bow outside its own element's edge. */
+  .squircle::before,
+  .squircle::after,
+  .squircle-sm::before,
+  .squircle-sm::after,
+  .squircle-xs::before,
+  .squircle-xs::after {
+    corner-shape: inherit;
+  }
+
+  /* Triangle-wave rule. Masked, not painted, so it inherits the border colour. */
+  .wave {
+    --wave: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='8' viewBox='0 0 22 8'%3E%3Cpath d='M0 7 L11 1 L22 7' fill='none' stroke='black' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E");
+    border: 0;
+    height: 8px;
+    width: 100%;
+    background-color: var(--border);
+    -webkit-mask: var(--wave) repeat-x center / 22px 8px;
+    mask: var(--wave) repeat-x center / 22px 8px;
+  }
+
+  .bold-icon path {
+    stroke-width: 2px;
+  }
+
+  .tooltip-trigger {
+    position: relative;
+  }
+
+  .tooltip {
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .tooltip-trigger:hover .tooltip,
+  .tooltip-trigger:focus-visible .tooltip {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility corner-* {
+  corner-shape: --value('round', 'bevel', 'notch', 'scoop', 'squircle', [*]);
+}
+
+/* Menu entry choreography: scales up as a small pill, then widens into the bar. */
+@keyframes menu-in {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+    width: var(--pill-width);
+    pointer-events: none;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+    width: var(--pill-width);
+  }
+  100% {
+    width: 320px;
+    pointer-events: none;
+  }
+}
+
+@keyframes menu-status-in {
+  0% {
+    opacity: 0;
+    filter: blur(4px);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes ping-out {
+  90%,
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+.menu-shell {
+  --pill-width: 45px;
+  animation: menu-in 0.6s 0.2s var(--ease-in-out) backwards;
+
+  @media (width > 480px) {
+    --pill-width: 52px;
+  }
+}
+
+.menu-status {
+  animation: menu-status-in 0.5s 0.6s var(--ease-in-out) backwards;
+}
+
+/* Opt-in, like any indefinite loop: an animation that never ends is exactly
+ * what `prefers-reduced-motion` is asking about. The dot stays either way — it
+ * just stops pulsing, so the "recently pushed" cue never rides on motion alone. */
+@media (prefers-reduced-motion: no-preference) {
+  .ping {
+    animation: ping-out 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Inline chip with a beam that traces its border while hovered.
+ * The angle is a registered custom property, which is what makes the conic
+ * gradient animatable at all — plain custom properties can't be tweened.
+ * ------------------------------------------------------------------------ */
+
+@property --beam-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes beam-spin {
+  to {
+    --beam-angle: 1turn;
+  }
+}
+
+.beam-chip {
+  position: relative;
+  display: inline-block;
+  border-radius: 6px;
+  padding: 0 5px;
+  margin: 0 1px;
+  background: --alpha(var(--fg) / 6%);
+  color: var(--fg);
+  text-decoration: none;
+  transition: background 0.25s ease;
+}
+
+.beam-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--beam-angle),
+    transparent 0turn,
+    var(--accent) 0.09turn,
+    transparent 0.2turn
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.beam-chip[data-active]::before {
+  opacity: 1;
+  animation: beam-spin 1.96s linear infinite;
+}
+
+.beam-chip[data-active] {
+  background: --alpha(var(--fg) / 10%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beam-chip[data-active]::before {
+    animation: none;
+  }
+}
+
