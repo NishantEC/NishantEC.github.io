@@ -1,0 +1,13 @@
+---
+title: Video, as characters
+slug: video-to-ascii
+blurb: A clip played back as ASCII, with the mapping left open. The frames are baked; which characters they land on, how hard the curve is and what colour they come out is all decided in the browser, per frame.
+date: '2026-08-28'
+demo: ascii
+---
+
+Each frame is a grid of brightnesses. Turning one into text is just picking a
+character per cell — the ramp is that lookup, ordered from empty to solid, and
+contrast is the curve applied before the lookup.
+
+Nothing here is a picture of the output. Move a control and the frame is rebuilt.

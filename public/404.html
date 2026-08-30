@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Nishant Gupta</title>
+    <script>
+      // GitHub Pages has no server-side rewrite, so a direct hit on /vault/x
+      // returns this file. Stash the requested path and hand control back to
+      // the app entry, which restores it before React mounts.
+      sessionStorage.setItem('redirect-path', location.pathname + location.search + location.hash);
+      location.replace('/');
+    </script>
+    <meta name="robots" content="noindex" />
+  </head>
+  <body></body>
+</html>

@@ -1,0 +1,54 @@
+---
+title: hale
+slug: hale
+tagline: Local-first WHOOP 4.0 tracker. Reads the strap over BLE and computes recovery on-device in Rust — no cloud, no account.
+status: wip
+year: '2026'
+role: Everything
+stack: ['Rust', 'React Native', 'Expo', 'UniFFI', 'SQLite', 'Turborepo']
+repo: https://github.com/NishantEC/hale
+accent: oklch(0.65 0.19 15)
+order: 3
+featured: true
+draft: true
+---
+
+## The problem
+
+A fitness strap measures your body continuously and then requires a subscription and a
+round trip to someone else's server to tell you what it found. The sensor is on your
+wrist; the data is not yours.
+
+hale is the same hardware with the cloud removed.
+
+## The approach
+
+The app talks to the strap directly over Bluetooth, ingests raw sensor records, and stores
+them in SQLite on the phone. A Rust compute engine — sleep detection, activity detection,
+sleep staging, wellness and derived metrics — runs on the device via a native module, so
+recovery and strain are computed locally and never leave it.
+
+Backup follows the same principle: the OS's own backup covers derived data, while raw
+records stay device-local and are recomputable from scratch. There is no account, because
+there's nothing to have an account with.
+
+It's a small pnpm and Turborepo workspace: an Expo app, and the Rust crate it links.
+
+## The hard part
+
+**Reading a device that doesn't want to be read.** This is clean-room interoperability
+work — ingesting and decoding a sensor stream from hardware you own, with no vendor
+documentation to lean on. Most of the effort is in that decode, and it's the part that
+breaks when firmware changes.
+
+**Getting Rust onto a phone properly.** The compute engine is compiled through UniFFI into
+a native module the React Native app links directly, rather than reimplementing the
+physiology in JavaScript or shipping it to a server. That's the decision that makes
+"on-device" true rather than marketing. The cost is a real build pipeline: the iOS
+bindings and a roughly 44MB static framework are generated artifacts, deliberately not
+committed, so a first build has a step you can't skip.
+
+## Where it stands
+
+Working and in development. It is explicitly not affiliated with WHOOP — an independent
+interoperability project for hardware you own, and the repo says so up front.

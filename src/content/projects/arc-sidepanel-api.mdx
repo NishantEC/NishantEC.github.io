@@ -1,0 +1,80 @@
+---
+title: arc-sidepanel-api
+slug: arc-sidepanel-api
+tagline: Arc doesn't implement chrome.sidePanel, so extensions that rely on it silently break. This patches them so they work anyway — and tells you when you don't need it.
+status: shipped
+year: '2026'
+role: Everything
+stack: ['TypeScript', 'Node', 'Chrome Extensions', 'Native Messaging']
+repo: https://github.com/NishantEC/arc-sidepanel-api
+accent: oklch(0.68 0.16 320)
+order: 5
+featured: true
+draft: true
+---
+
+## The problem
+
+Arc doesn't implement `chrome.sidePanel`, and has said it doesn't intend to. Any
+extension built on that API — Claude among plenty of others — doesn't error, doesn't
+warn, and doesn't do anything: you click the icon and nothing happens, because there's
+no surface for it to render into.
+
+Silent failure is the annoying part. Nothing tells you the extension is fine and the
+browser is the problem.
+
+## The part I'm most pleased with: it talks you out of it
+
+Some extensions ship *two* sidebars — the native `chrome.sidePanel` one and their own,
+rendered straight into the page. Sider and CSS Peeper both do this, and their in-page
+version already works in Arc untouched. Patching those swaps a maintained UI for mine,
+which is a straight downgrade.
+
+So the patcher detects that case and says so *before* offering to patch, pointing you at
+the extension's own display-mode setting instead. A tool whose first job is to tell you
+that you don't need it is a better tool, and `detect.js` carries its own test suite
+precisely because that judgement has to be right.
+
+## Two ways to be a side panel
+
+You pick one per extension:
+
+**Overlay** docks to the right and squeezes the page beside it, the way a real side panel
+narrows the viewport. Drag its left edge to resize, and the width persists. It works on
+any page a content script can reach and follows you between tabs.
+
+**Split tab** opens the panel as an actual browser tab. Drag it into an Arc split once and
+Arc remembers the layout per space. It resizes with Arc's own divider, and no page's CSP
+can touch it — but it costs a tab and needs that one manual drag.
+
+## How it works
+
+Three packages. `core` is the patch engine: it detects `chrome.sidePanel` usage from a
+manifest, copies the extension without touching the original, and injects a service
+worker shim that intercepts `chrome.sidePanel.*` calls and routes them to whichever panel
+style you chose. `native-host` is a small Node process registered as a Chrome Native
+Messaging host. `extension` is the settings page you actually use — it lists your
+extensions, flags the ones using the API, warns about the ones that don't need patching,
+and gives you a style picker and a Patch button.
+
+## The hard part
+
+**Chromium won't let an extension do any of this, on purpose.** Extensions are sandboxed
+from the filesystem and from each other, and none can install another extension — not
+with any permission, not for anyone.
+
+So the piece that touches disk is the native host. It's the only component with
+filesystem access, which keeps the boundary explicit rather than smuggled: the extension
+asks, the host acts, and the privilege is visible.
+
+One manual step survives and can't be removed — after patching you click "Load Unpacked"
+yourself. Chromium refuses to let software do that for you, which is correct.
+
+## Limits, stated plainly
+
+Arc's Split View is native Arc UI with no extension API behind it, so nothing here can
+trigger the split for you; split-tab mode just hands Arc a real tab worth splitting.
+
+Patching costs the extension's automatic updates — re-run it after Arc updates the
+original. It may also change the extension's ID if its manifest didn't pin a signing key,
+which only matters when a page does a strict origin check. macOS only for now.

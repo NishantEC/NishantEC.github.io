@@ -1,0 +1,58 @@
+---
+title: the-resume-thing
+slug: the-resume-thing
+tagline: Turns your real GitHub and Linear work into an evidence-backed résumé where every claim links to its source.
+status: wip
+year: '2026'
+role: Everything
+stack: ['Next.js', 'React', 'TypeScript', 'Prisma', 'Vercel AI SDK', 'Tectonic']
+repo: https://github.com/NishantEC/the-resume-thing
+accent: oklch(0.72 0.16 65)
+order: 4
+featured: true
+draft: true
+---
+
+## The problem
+
+Solo and open-source developers have no manager, no performance review and no employer
+brand vouching for them, and their work is scattered across half a dozen tools. The
+difficulty isn't writing a résumé — it's legibility. Proving what you did.
+
+Meanwhile the obvious fix, "ask an LLM to write my résumé", produces confident sentences
+nobody can check, which is worse than nothing in the one setting where you'll be asked to
+defend every line.
+
+## The approach
+
+It connects to the places you actually work — GitHub repos, PRs, issues and commits;
+Linear issues and projects — and normalises them into one provider-agnostic activity
+graph. An LLM drafts accomplishments from that graph, and **every bullet carries the PR,
+issue or commit it came from**. The model is constrained to the evidence rather than
+trusted to be honest.
+
+You then review, rather than accept: suggestions arrive as a keyboard-driven queue you
+apply, edit, regenerate or dismiss.
+
+The output is a real typeset document, not an HTML approximation — LaTeX rendered to PDF
+through Tectonic, with the source editable in a built-in CodeMirror editor with live
+preview.
+
+## The hard part
+
+**Making the model unable to invent things.** "Don't hallucinate" is not an
+implementation. The design does the work instead: claims are synthesised only from
+ingested activity, and each one keeps a link back to its source, so an unsourced bullet
+can't exist by construction. Verifiability is the feature — everything else is
+convenience.
+
+**Syncing without destroying your edits.** A background worker keeps pulling new work,
+which means the interesting case isn't the first run, it's the hundredth. Drafting is
+additive: new suggestions accumulate alongside what you've already accepted and edited,
+and never overwrite it. Get that wrong once and the tool eats an afternoon of someone's
+writing.
+
+## Where it stands
+
+Early and evolving, built in the open. Next.js 16 and React 19 on Prisma and SQLite, with
+GitHub and Linear OAuth wired through Better Auth.

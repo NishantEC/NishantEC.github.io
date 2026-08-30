@@ -1,0 +1,60 @@
+---
+title: herm
+slug: herm
+tagline: A headless AI agent workstation on GCP, reachable from any device over Tailscale — with no public ingress.
+status: wip
+year: '2026'
+role: Everything
+stack: ['Terraform', 'Shell', 'GCP', 'Tailscale', 'cloud-init']
+repo: https://github.com/NishantEC/herm
+accent: oklch(0.62 0.17 258)
+order: 2
+featured: true
+draft: true
+---
+
+## The problem
+
+An always-on coding agent is far more useful than one that lives inside a laptop that
+sleeps. But the obvious way to get one — a VM with a port open so you can reach it — puts
+an autonomous process with shell access and your provider tokens on the public internet.
+
+I wanted the always-on part without the open port.
+
+## The approach
+
+`herm` provisions a small private GCP VM running Hermes Agent, joins it to your Tailscale
+tailnet, and exposes an OpenAI-compatible gateway that only your own devices can reach.
+The VPC firewall denies all ingress from `0.0.0.0/0`; the tailnet is the only way in. From
+your laptop, phone or CI, it's just there.
+
+Infrastructure is Terraform, first boot is a rendered startup script, and a single CLI
+wraps both — `herm up`, `ssh`, `logs`, `backup`, `upgrade`, `down`. Managing the VM happens
+over Tailscale SSH, so the management path has no public surface either.
+
+State lives on a persistent disk that survives rebuilds, with nightly backups to GCS.
+Skills are installed and toggled from your laptop without reprovisioning or root.
+
+## The hard part
+
+**The security model is the product.** Everything else is provisioning. This is an
+autonomous agent with a shell and your API keys on a box you're not looking at, so the
+question isn't "does it work" but "what happens when it does something you didn't ask
+for". Fourteen of the riskier agent toolsets — browser control, computer-use, most
+outbound messaging — are disabled out of the box rather than opt-out. The deny-all
+firewall rule is what carries the actual guarantee, and it's written down in a threat
+model rather than implied.
+
+**Honest gap, documented rather than hidden:** the VM keeps an ephemeral external IPv4 so
+first boot can fetch packages. Nothing can reach it inbound, but the egress path is wider
+than I'd like. Replacing it with Cloud NAT and an egress allowlist is the next real piece
+of work.
+
+**Cost had to stay boring.** An always-on VM you forget about is a bill you discover
+later. It runs about $13/month idle, sets a budget alert by default, and has an opt-in
+reaper that halts the box after a configurable idle period.
+
+## Where it stands
+
+v0.2.0 — early, validated end to end on a real GCP project, and in use. Rough edges
+expected, and the changelog says so.
