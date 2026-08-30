@@ -8,6 +8,7 @@ import {
   type JellySpeed,
 } from '../../data/jelly-atlas';
 import { type Atlas, loadAtlas } from '../../utils/atlas';
+import { compose, offsetAt, PATH_SECONDS, TRAVEL_COLS, TRAVEL_ROWS } from '../../utils/jellyPath';
 import { useFrameClock } from '../../utils/useFrameClock';
 import { ControlStack, Segmented, Select, Slider, Swatch } from '../ui/Controls';
 
@@ -83,6 +84,11 @@ const AsciiArt = () => {
 
   const [ramp, setRamp] = useState<RampName>('standard');
   const [speed, setSpeed] = useState<JellySpeed>(JELLY_SPEED_DEFAULT);
+  /**
+   * Composes a journey across the frame from frames that only pulse in place.
+   * Additive and self-contained — see `jellyPath.ts`.
+   */
+  const [drift, setDrift] = useState(true);
   const [contrast, setContrast] = useState(0.85);
   const [zoom, setZoom] = useState(1);
   const [invert, setInvert] = useState(false);
@@ -98,6 +104,7 @@ const AsciiArt = () => {
   const [cellRatio, setCellRatio] = useState(FALLBACK_RATIO);
   const [grid, setGrid] = useState({ cols: COLS, rows: ROWS_HINT });
   const [ready, setReady] = useState(false);
+  const atlasSizeRef = useRef({ cols: COLS, rows: ROWS_HINT });
 
   const stageRef = useRef<HTMLDivElement>(null);
   const atlasRef = useRef<Atlas | null>(null);
@@ -133,22 +140,32 @@ const AsciiArt = () => {
     const atlas = atlasRef.current;
     if (!atlas?.frames) return;
 
-    const frame = atlas.frames[frameRef.current % atlas.count];
+    const source = atlas.frames[frameRef.current % atlas.count];
+
+    // The path cycle runs on wall-clock time, not on the frame index, so it
+    // stays the same journey whether the pulse is playing at 15 or 30fps.
+    const cycle = (performance.now() / 1000 / PATH_SECONDS) % 1;
+    const frame = drift
+      ? compose(source, atlas.cols, atlas.rows, offsetAt(cycle, atlas.cols))
+      : source;
+    const cols = drift ? atlas.cols + TRAVEL_COLS : atlas.cols;
+    const rows = drift ? atlas.rows + TRAVEL_ROWS : atlas.rows;
+
     const chars = RAMPS[ramp];
     const last = chars.length - 1;
 
     const lines: string[] = [];
-    for (let y = 0; y < atlas.rows; y++) {
+    for (let y = 0; y < rows; y++) {
       let line = '';
-      for (let x = 0; x < atlas.cols; x++) {
-        let t = frame[y * atlas.cols + x];
+      for (let x = 0; x < cols; x++) {
+        let t = frame[y * cols + x];
         if (invert) t = 1 - t;
         line += chars[Math.min(last, Math.max(0, Math.round(t ** contrast * last)))];
       }
       lines.push(line);
     }
     setArt(lines.join('\n'));
-  }, [ramp, contrast, invert]);
+  }, [ramp, contrast, invert, drift]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount only — `draw` changes with every control, and reloading the sheet on each one would be absurd. Playback lives in its own effect below.
   useEffect(() => {
@@ -160,6 +177,7 @@ const AsciiArt = () => {
       // The atlas is cropped to its subject, so it is narrower than COLS and the
       // fit has to work from what it actually reports.
       setGrid({ cols: atlas.cols, rows: atlas.rows });
+      atlasSizeRef.current = { cols: atlas.cols, rows: atlas.rows };
       setReady(true);
       draw();
     });
@@ -180,6 +198,13 @@ const AsciiArt = () => {
   useEffect(() => {
     draw();
   }, [draw]);
+
+  // Drifting needs a wider, taller grid to move through, so the fit follows it.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `ready` is the signal that the atlas size ref has been filled, not a value read from it.
+  useEffect(() => {
+    const { cols, rows } = atlasSizeRef.current;
+    setGrid(drift ? { cols: cols + TRAVEL_COLS, rows: rows + TRAVEL_ROWS } : { cols, rows });
+  }, [drift, ready]);
 
   const applyPalette = (name: PaletteName) => {
     setPalette(name);
@@ -298,11 +323,15 @@ const AsciiArt = () => {
             />
             <Segmented label="invert" value={invert} onChange={setInvert} />
             <Select label="speed" value={speed} options={JELLY_SPEED_NAMES} onChange={setSpeed} />
+            <Segmented label="drift" value={drift} onChange={setDrift} />
             <Segmented label="animation" value={playing} onChange={setPlaying} />
           </ControlStack>
 
           <p className="mt-auto px-0.5 text-xs text-muted">
-            {grid.cols}×{grid.rows} · {(JELLY_ATLAS.count / JELLY_SPEEDS[speed]).toFixed(1)}s loop
+            {grid.cols}×{grid.rows} ·{' '}
+            {drift
+              ? `${PATH_SECONDS}s journey`
+              : `${(JELLY_ATLAS.count / JELLY_SPEEDS[speed]).toFixed(1)}s loop`}
           </p>
         </div>
       </div>
