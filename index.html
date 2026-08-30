@@ -1,10 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scrollbar-thin">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon"  href="/title-icon.png" />
+    <link rel="icon" href="/title-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nishant Gupta</title>
+
+    <title>Nishant Gupta • Frontend Engineer</title>
+    <meta
+      name="description"
+      content="Frontend engineer in Bangalore building AI-facing product interfaces at Healthifyme, and developer tools on the side."
+    />
+    <link rel="canonical" href="https://nishantec.github.io/" />
+    <meta name="theme-color" content="#1b1918" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fafaf9" media="(prefers-color-scheme: light)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nishantec.github.io/" />
+    <meta property="og:title" content="Nishant Gupta • Frontend Engineer" />
+    <meta
+      property="og:description"
+      content="Frontend engineer in Bangalore building AI-facing product interfaces at Healthifyme, and developer tools on the side."
+    />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:creator" content="@NishCodes" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Nishant Gupta",
+        "url": "https://nishantec.github.io/",
+        "jobTitle": "Frontend Engineer",
+        "email": "mailto:guptanishant1307@gmail.com",
+        "address": { "@type": "PostalPlace", "addressLocality": "Bangalore", "addressCountry": "IN" },
+        "worksFor": { "@type": "Organization", "name": "Healthifyme" },
+        "sameAs": [
+          "https://github.com/NishantEC",
+          "https://www.linkedin.com/in/nishantxgupta/",
+          "https://x.com/NishCodes"
+        ]
+      }
+    </script>
+
+    <!-- Applies the stored theme before first paint so dark mode never flashes white. -->
+    <script>
+      (() => {
+        const stored = localStorage.getItem('theme');
+        const dark =
+          stored === 'dark' ||
+          (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.classList.toggle('dark', dark);
+      })();
+
+      // Restores the path stashed by 404.html on a direct hit to a deep link.
+      const redirect = sessionStorage.getItem('redirect-path');
+      if (redirect) {
+        sessionStorage.removeItem('redirect-path');
+        history.replaceState(null, '', redirect);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -6,29 +6,48 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "format": "biome format --write",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@motionone/utils": "^10.15.1",
-    "@reduxjs/toolkit": "^1.9.5",
-    "emailjs-com": "^3.2.0",
-    "framer-motion": "^10.12.12",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-redux": "^8.0.5",
-    "sass": "^1.62.1"
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "matter-js": "^0.20.0",
+    "motion": "^13.1.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-resizable-panels": "^4.12.2",
+    "react-router": "^8.3.0",
+    "tailwind-merge": "^3.0.1"
   },
   "devDependencies": {
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
-    "@typescript-eslint/eslint-plugin": "^5.57.1",
-    "@typescript-eslint/parser": "^5.57.1",
-    "@vitejs/plugin-react": "^4.0.0",
-    "eslint": "^8.38.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.3.4",
-    "typescript": "^5.0.2",
-    "vite": "^4.3.2"
+    "@biomejs/biome": "^2.5.6",
+    "@iconify-json/heroicons": "^1.2.3",
+    "@iconify-json/logos": "^1.2.11",
+    "@iconify-json/simple-icons": "^1.2.92",
+    "@mdx-js/react": "^3.1.1",
+    "@mdx-js/rollup": "^3.1.1",
+    "@svgr/core": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/matter-js": "^0.20.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "puppeteer": "^25.5.0",
+    "remark-frontmatter": "^5.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx-frontmatter": "^5.2.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "unplugin-icons": "^23.0.1",
+    "vite": "^8.1.5"
+  },
+  "dependenciesMeta": {
+    "puppeteer": {
+      "built": true
+    }
   }
 }
