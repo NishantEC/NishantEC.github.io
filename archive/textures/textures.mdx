@@ -1,0 +1,22 @@
+---
+title: Textures, over anything
+slug: textures
+blurb: Print textures — ordered dither, halftone, duotone, glyph grids — applied to an image, a video, or your camera, in real time and entirely in the tab.
+date: '2026-08-31'
+demo: texture
+---
+
+Every one of these is the same two steps: draw the frame to a canvas, then
+either rewrite its bytes or throw them away and redraw it as a grid of marks.
+`drawImage` takes a video element exactly as it takes an image, so nothing below
+that line knows which it was handed.
+
+The filters here are the half that survive real time. Watercolour, ink wash and
+a full CMYK risograph cost 75–258ms on a third of a megapixel — four to thirteen
+frames a second, which is fine for a still and useless for video. These cost
+single-digit milliseconds on a whole frame, so they run at whatever rate the
+decoder can feed them.
+
+The video clock is `requestVideoFrameCallback`, not a timer: it fires once per
+decoded frame, so the texture never runs twice on the same one and never misses
+one.
