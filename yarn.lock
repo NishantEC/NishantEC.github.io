@@ -1391,6 +1391,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dialkit@npm:^1.4.3":
+  version: 1.4.3
+  resolution: "dialkit@npm:1.4.3"
+  peerDependencies:
+    motion: ">=11.0.0"
+    motion-v: ">=2.0.0"
+    react: ">=18.0.0"
+    react-dom: ">=18.0.0"
+    solid-js: ">=1.6.0"
+    svelte: ">=5.8.0"
+    vue: ">=3.3.0"
+  peerDependenciesMeta:
+    motion-v:
+      optional: true
+    react:
+      optional: true
+    react-dom:
+      optional: true
+    solid-js:
+      optional: true
+    svelte:
+      optional: true
+    vue:
+      optional: true
+  checksum: 10c0/d69382a9f3049c030ec4d6d69d03124d8b864590ce66042f65c2c3d0d0b90ef7b46f782acbc4a18deb3f91b378858081fcadefcebf78ddf1c4ef843b6692ff01
+  languageName: node
+  linkType: hard
+
 "dot-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "dot-case@npm:3.0.4"
@@ -3134,6 +3162,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.0.4"
     class-variance-authority: "npm:^0.7.1"
     clsx: "npm:^2.1.1"
+    dialkit: "npm:^1.4.3"
     matter-js: "npm:^0.20.0"
     motion: "npm:^13.1.1"
     puppeteer: "npm:^25.5.0"

@@ -1,3 +1,5 @@
+import { DialRoot, useDialKitController } from 'dialkit';
+import 'dialkit/styles.css';
 import { useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -9,7 +11,6 @@ import {
 } from '../../data/jelly-atlas';
 import { type Atlas, loadAtlas } from '../../utils/atlas';
 import { useFrameClock } from '../../utils/useFrameClock';
-import { ControlStack, Segmented, Select, Slider, Swatch } from '../ui/Controls';
 
 /**
  * A short clip played back as ASCII, with the mapping exposed as controls.
@@ -61,8 +62,6 @@ const PALETTES = {
   blueprint: { ink: '#93c5fd', ink2: '#1d4ed8', bg: '#050b16' },
 } as const;
 
-type PaletteName = keyof typeof PALETTES | 'custom';
-
 const RAMPS_LIST = Object.keys(RAMPS) as RampName[];
 const PALETTE_LIST = [...(Object.keys(PALETTES) as (keyof typeof PALETTES)[]), 'custom' as const];
 
@@ -70,28 +69,57 @@ const AsciiArt = () => {
   const reduceMotion = useReducedMotion();
 
   /**
-   * Playback is a control, not a fact of the component.
+   * Every control is DialKit's, declared once as a config object rather than as
+   * a state hook plus a row of markup each. `useDialKitController` is the
+   * variant that also hands back a setter, which the palette presets need —
+   * choosing one has to push its colours into the panel's own values, and
+   * `useDialKit` alone is read-only.
    *
-   * Two separate rules land here. Motion has to be opt-in under
-   * `prefers-reduced-motion`, so the loop starts stopped for anyone who asked
-   * for that — they still get a rendered frame and every other control. And
-   * auto-playing content needs a visible way to stop it whatever the
-   * preference is, which is why this is a row in the stack rather than a bare
-   * `reduceMotion` check.
+   * Playback starts stopped under `prefers-reduced-motion`. The config's
+   * defaults are static, so the preference is applied through `setValues` on
+   * mount instead. Motion has to be opt-in there, and auto-playing content
+   * needs a visible stop whatever the preference is — which is what the
+   * `animation` toggle is for.
    */
-  const [playing, setPlaying] = useState(!reduceMotion);
+  const dial = useDialKitController('ASCII', {
+    ramp: { type: 'select' as const, options: [...RAMPS_LIST], default: 'standard' },
+    palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'mono' },
+    ink: { type: 'color' as const, default: PALETTES.mono.ink },
+    ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
+    background: { type: 'color' as const, default: PALETTES.mono.bg },
+    gradient: false as boolean,
+    contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
+    zoom: [1, 0.5, 2.5, 0.05] as [number, number, number, number],
+    invert: false as boolean,
+    speed: {
+      type: 'select' as const,
+      options: [...JELLY_SPEED_NAMES],
+      default: JELLY_SPEED_DEFAULT,
+    },
+    animation: true as boolean,
+  });
 
-  const [ramp, setRamp] = useState<RampName>('standard');
-  const [speed, setSpeed] = useState<JellySpeed>(JELLY_SPEED_DEFAULT);
-  const [contrast, setContrast] = useState(0.85);
-  const [zoom, setZoom] = useState(1);
-  const [invert, setInvert] = useState(false);
+  const v = dial.values;
+  const ramp = v.ramp as RampName;
+  const speed = v.speed as JellySpeed;
+  const { contrast, zoom, invert, gradient, ink, ink2 } = v;
+  const bg = v.background;
+  const playing = v.animation;
 
-  const [palette, setPalette] = useState<PaletteName>('mono');
-  const [ink, setInk] = useState<string>(PALETTES.mono.ink);
-  const [ink2, setInk2] = useState<string>(PALETTES.mono.ink2);
-  const [bg, setBg] = useState<string>(PALETTES.mono.bg);
-  const [gradient, setGradient] = useState(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: applies the preference once; adding `dial` would re-fire it and override the reader turning playback back on.
+  useEffect(() => {
+    if (reduceMotion) dial.setValues({ animation: false });
+  }, [reduceMotion]);
+
+  // A preset is a starting point: it writes its colours in, and editing one
+  // afterwards is what makes the palette read `custom`.
+  const lastPalette = useRef(v.palette);
+  useEffect(() => {
+    if (v.palette === lastPalette.current) return;
+    lastPalette.current = v.palette;
+    const preset = PALETTES[v.palette as keyof typeof PALETTES];
+    if (preset) dial.setValues({ ink: preset.ink, ink2: preset.ink2, background: preset.bg });
+  }, [v.palette, dial]);
 
   const [art, setArt] = useState('');
   const [fontPx, setFontPx] = useState(7);
@@ -181,22 +209,6 @@ const AsciiArt = () => {
     draw();
   }, [draw]);
 
-  const applyPalette = (name: PaletteName) => {
-    setPalette(name);
-    if (name === 'custom') return;
-    const preset = PALETTES[name];
-    setInk(preset.ink);
-    setInk2(preset.ink2);
-    setBg(preset.bg);
-  };
-
-  const editColour = (index: number, value: string) => {
-    // Editing a colour means these are no longer any preset's colours.
-    setPalette('custom');
-    if (index === 0) setInk(value);
-    else setInk2(value);
-  };
-
   return (
     // One ring around the whole instrument. The art gets its own border inside
     // it, and the radii are concentric — the inner 10px plus the 6px of padding
@@ -245,63 +257,13 @@ const AsciiArt = () => {
           </pre>
         </div>
 
-        {/* Controls run down the right of the art, inside the same ring —
-            free-standing rows rather than a second boxed group, so the ring
-            stays the only frame on screen. */}
+        {/* DialKit's own panel, rendered inline rather than as the floating
+            popover it defaults to. `productionEnabled` because these controls
+            are the point of the piece, not a debug affordance to strip. */}
         <div className="flex min-w-0 flex-col gap-1.5 sm:w-[230px] sm:shrink-0">
-          <ControlStack>
-            <Select label="ramp" value={ramp} options={RAMPS_LIST} onChange={setRamp} />
-            <Select
-              label="palette"
-              value={palette}
-              options={PALETTE_LIST}
-              onChange={applyPalette}
-            />
-            <Swatch
-              label={gradient ? 'ramp from → to' : 'ramp'}
-              values={
-                gradient
-                  ? [
-                      { title: 'Ramp start colour', value: ink },
-                      { title: 'Ramp end colour', value: ink2 },
-                    ]
-                  : [{ title: 'Ramp colour', value: ink }]
-              }
-              onChange={editColour}
-            />
-            <Swatch
-              label="background"
-              values={[{ title: 'Background colour', value: bg }]}
-              onChange={(_, value) => {
-                setPalette('custom');
-                setBg(value);
-              }}
-            />
-            <Segmented label="gradient" value={gradient} onChange={setGradient} />
-            <Slider
-              label="contrast"
-              value={contrast}
-              min={0.3}
-              max={2.5}
-              step={0.05}
-              format={(v) => v.toFixed(2)}
-              onChange={setContrast}
-            />
-            <Slider
-              label="zoom"
-              value={zoom}
-              min={0.5}
-              max={2.5}
-              step={0.05}
-              format={(v) => `${v.toFixed(2)}×`}
-              onChange={setZoom}
-            />
-            <Segmented label="invert" value={invert} onChange={setInvert} />
-            <Select label="speed" value={speed} options={JELLY_SPEED_NAMES} onChange={setSpeed} />
-            <Segmented label="animation" value={playing} onChange={setPlaying} />
-          </ControlStack>
+          <DialRoot mode="inline" theme="dark" productionEnabled defaultOpen />
 
-          <p className="mt-auto px-0.5 text-xs text-muted">
+          <p className="mt-auto px-0.5 text-muted text-xs">
             {grid.cols}×{grid.rows} · {(JELLY_ATLAS.count / JELLY_SPEEDS[speed]).toFixed(1)}s loop
           </p>
         </div>
