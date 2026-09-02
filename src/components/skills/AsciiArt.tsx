@@ -24,6 +24,7 @@ import {
   type Sampled,
   sample,
 } from '../../utils/videoToAscii';
+import ClipActions from './ClipActions';
 import CompareSlider from './CompareSlider';
 import CookingGlyph from './CookingGlyph';
 import DialPanel from './DialPanel';
@@ -173,30 +174,16 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
         default: JELLY_SPEED_DEFAULT,
       },
       playback: true as boolean,
-      /* Only where they can do something. Density is explained at the top of
-         the file; the rest need a clip, and the demo has one that cannot be
-         swapped, cleared or compared against a source it does not have. */
+      /* Only where it can do something. See the note at the top of the file.
+         What to *show* and what to replace the clip with live in `ClipActions`
+         under the stage instead — they act on the clip, not on the render. */
       ...(variant === 'playground'
-        ? {
-            density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
-            compare: true as boolean,
-            choose: { type: 'action' as const, label: 'Choose another' },
-            clear: { type: 'action' as const, label: 'Clear' },
-          }
+        ? { density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' } }
         : {}),
     },
-    {
-      // Explicit, because `DialPanel` addresses the panel by id and a derived
-      // one would silently change if the display name ever did.
-      id: panelId,
-      // These were three buttons in a row under the card, which put the controls
-      // for a clip in two places — everything that shapes it inside the panel,
-      // everything that replaces it outside. They are rows in the panel now.
-      onAction: (action) => {
-        if (action === 'choose') fileRef.current?.click();
-        if (action === 'clear') reset();
-      },
-    },
+    // Explicit, because `DialPanel` addresses the panel by id and a derived one
+    // would silently change if the display name ever did.
+    { id: panelId },
   );
 
   const v = dial.values;
@@ -206,7 +193,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const bg = v.background;
   const playing = v.playback;
   const density = (v.density ?? 'normal') as DensityName;
-  const compare = v.compare !== false;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: applies the preference once; adding `dial` would re-fire it and override the reader turning playback back on.
   useEffect(() => {
@@ -254,6 +240,8 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /** Whether the source video is drawn beside the characters. */
+  const [showSource, setShowSource] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -682,35 +670,55 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             railBelow ? 'flex-col' : 'flex-col sm:flex-row'
           }`}
         >
-          <div
-            ref={stageRef}
-            // Padded in the demo, flush in the playground. The fit is measured
-            // from this element's *content* box, so padding here is what gives
-            // the jellyfish air: at zoom 1 it was sized to the stage exactly and
-            // sat edge to edge, reading as a crop rather than a subject. The
-            // playground stays flush because its stage already takes the clip's
-            // own aspect — insetting there would letterbox a video that fits.
-            className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] ${
-              isPlayground ? '' : 'p-6 sm:p-8'
-            } ${railBelow ? '' : 'sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px]'}`}
-            // Square until there is a clip, then the clip's own shape — so a
-            // 16:9 video is not letterboxed into a square while the character
-            // grid beside it is not.
-            style={{ background: bg, aspectRatio: sizedToClip ? (clipAspect as number) : 1 }}
-          >
-            {mode === 'custom' && compare ? (
-              <CompareSlider
-                labelLeft="source"
-                labelRight="ascii"
-                left={sourceNode}
-                right={
-                  <div className="grid h-full w-full place-items-center" style={{ background: bg }}>
-                    {artNode}
-                  </div>
-                }
+          {/* The stage and the strip that belongs to it, as one column. This
+              is what keeps the actions under the clip in both layouts — the
+              control panel takes the remaining space, to the right or below,
+              and never comes between them. */}
+          <div className={`flex min-w-0 flex-col ${railBelow ? '' : 'sm:flex-1'}`}>
+            <div
+              ref={stageRef}
+              // Padded in the demo, flush in the playground. The fit is measured
+              // from this element's *content* box, so padding here is what gives
+              // the jellyfish air: at zoom 1 it was sized to the stage exactly and
+              // sat edge to edge, reading as a crop rather than a subject. The
+              // playground stays flush because its stage already takes the clip's
+              // own aspect — insetting there would letterbox a video that fits.
+              className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] ${
+                isPlayground ? '' : 'p-6 sm:p-8'
+              } ${railBelow ? '' : 'sm:rounded-tr-none'}`}
+              // Square until there is a clip, then the clip's own shape — so a
+              // 16:9 video is not letterboxed into a square while the character
+              // grid beside it is not.
+              style={{ background: bg, aspectRatio: sizedToClip ? (clipAspect as number) : 1 }}
+            >
+              {mode === 'custom' && showSource ? (
+                <CompareSlider
+                  labelLeft="source"
+                  labelRight="ascii"
+                  left={sourceNode}
+                  right={
+                    <div
+                      className="grid h-full w-full place-items-center"
+                      style={{ background: bg }}
+                    >
+                      {artNode}
+                    </div>
+                  }
+                />
+              ) : (
+                artNode
+              )}
+            </div>
+
+            {isPlayground && mode === 'custom' && (
+              <ClipActions
+                theme={resolvedTheme}
+                roundBottomLeft={!railBelow}
+                showSource={showSource}
+                onShowSource={setShowSource}
+                onChoose={() => fileRef.current?.click()}
+                onClear={reset}
               />
-            ) : (
-              artNode
             )}
           </div>
 
