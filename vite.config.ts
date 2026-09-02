@@ -10,7 +10,7 @@ import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
 import Icons from 'unplugin-icons/vite';
 import { defineConfig, type Plugin } from 'vite';
 
-const SITE = 'https://nishantec.github.io';
+const SITE = 'https://www.nishantg.com';
 
 /**
  * Routes derived from the content directory.

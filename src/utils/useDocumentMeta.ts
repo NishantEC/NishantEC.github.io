@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const SITE = 'https://nishantec.github.io';
+const SITE = 'https://www.nishantg.com';
 
 const setMeta = (selector: string, attr: string, value: string) => {
   let tag = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
