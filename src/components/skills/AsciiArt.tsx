@@ -2,14 +2,7 @@ import { type DialValue, useDialKitController } from 'dialkit';
 import 'dialkit/styles.css';
 import { useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import {
-  JELLY_ATLAS,
-  JELLY_SPEED_DEFAULT,
-  JELLY_SPEED_NAMES,
-  JELLY_SPEEDS,
-  type JellySpeed,
-} from '../../data/jelly-atlas';
-import { loadAtlas } from '../../utils/atlas';
+import butterflyClip from '../../assets/skills/butterfly.mp4';
 import { useFrameClock } from '../../utils/useFrameClock';
 import {
   bake,
@@ -32,33 +25,35 @@ import DialPanel from './DialPanel';
 /**
  * A clip played back as ASCII, with the mapping exposed as controls.
  *
- * Two variants, one component. The `demo` plays a pre-baked sprite sheet: 120
- * frames of luminance tiles, decoded once at load into plain arrays of
- * densities. The `playground` starts empty and runs the same pipeline the skill
- * runs — sample, find the subject, bake — over a file the reader chooses.
+ * It opens on a bundled clip and runs the skill's own pipeline over it — sample
+ * by seeking, find the subject by occupancy, bake — then plays the result. Any
+ * file the reader picks goes through exactly the same path, which is the point:
+ * there is no privileged demo that was prepared differently from what you get.
  *
- * The split is not cosmetic. Everything the demo exposes is a *lookup* on a
- * grid that already exists: which characters the densities land on, how hard
- * the curve is, what colour they come out. Those are free, which is why the
- * sliders move the picture rather than reloading it. `density` is the one
- * control that is not a lookup — it decides how many cells the frame is cut
- * into, which is a property of the bake — so it exists only where there is a
- * source to re-bake from, and the demo does not show it at all. It used to,
- * doing nothing, which read as a broken control rather than an absent one.
+ * That is a change. This used to be two panels: a demo playing a pre-baked
+ * sprite sheet, and a playground for your own file. The sheet was smaller to
+ * ship but it could not be compared against its source — the source was not
+ * there — and it could not honour `density`, because the grid was cut before it
+ * reached the page. So the demo had controls the playground had and the
+ * playground had controls the demo could not, over the same picture. One panel
+ * that really bakes has neither problem, and the clip costs less than the sheet
+ * did: 145KB of H.264 against 143KB of PNG.
  */
-
-type Variant = 'demo' | 'playground';
 
 /**
- * Character ramps, ordered from empty to solid.
+ * The two playback rates offered, as labels so they can be a `Select`.
  *
- * Two rules, and both were checked rather than assumed. Every glyph in a ramp
- * must have the same advance width in the rendered monospace stack, or the grid
- * stops being a grid — braille (` ⠁⠉⠋⠛⠟⠿⢿⣿`) measured 120.41 against 136.72 for
- * the space and is not here for that reason. And coverage has to increase
- * monotonically, which is why `quadrant` starts at `▖` rather than pairing it
- * with `▗`: both fill exactly one quarter, so one of them is a step that isn't.
+ * Both divide 60Hz exactly — 15 is four refreshes per frame, 30 is two — so
+ * neither judders. See `useFrameClock` for why that matters more than the
+ * number itself: a rate that does not divide the display's is held for an
+ * uneven number of refreshes and stutters by construction, whatever else is
+ * correct.
  */
+const SPEEDS = { '15 fps': 15, '30 fps': 30 } as const;
+type Speed = keyof typeof SPEEDS;
+const SPEED_NAMES = Object.keys(SPEEDS) as Speed[];
+const SPEED_DEFAULT: Speed = '30 fps';
+
 const RAMPS = {
   standard: ' .:-=+*#%@',
   /** Paul Bourke's 70-level ramp — the most tonal resolution ASCII can carry. */
@@ -132,13 +127,15 @@ const useResolvedTheme = () =>
  */
 const NO_PROGRESS = () => {};
 
+/** Only ever shown to `decode`, which wants a `File`; never displayed. */
+const BUNDLED_NAME = 'butterfly.mp4';
+
 const RAMPS_LIST = Object.keys(RAMPS) as RampName[];
 const PALETTE_LIST = [...(Object.keys(PALETTES) as (keyof typeof PALETTES)[]), 'custom' as const];
 
-const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
+const AsciiArt = () => {
   const reduceMotion = useReducedMotion();
   const resolvedTheme = useResolvedTheme();
-  const isPlayground = variant === 'playground';
 
   /**
    * Every control is DialKit's, declared once as a config object rather than as
@@ -153,8 +150,8 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
    * needs a visible stop whatever the preference is — which is what the
    * `animation` toggle is for.
    */
-  const panelId = isPlayground ? 'ascii-bake' : 'ascii-demo';
-  const panelTitle = isPlayground ? 'Bake' : 'ASCII';
+  const panelId = 'ascii-bake';
+  const panelTitle = 'ASCII';
 
   const dial = useDialKitController(
     panelTitle,
@@ -170,16 +167,14 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       invert: false as boolean,
       speed: {
         type: 'select' as const,
-        options: [...JELLY_SPEED_NAMES],
-        default: JELLY_SPEED_DEFAULT,
+        options: [...SPEED_NAMES],
+        default: SPEED_DEFAULT,
       },
       playback: true as boolean,
-      /* Only where it can do something. See the note at the top of the file.
-         What to *show* and what to replace the clip with live in `ClipActions`
-         under the stage instead — they act on the clip, not on the render. */
-      ...(variant === 'playground'
-        ? { density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' } }
-        : {}),
+      /* Live now that every clip is really baked. It decides how many cells a
+         frame is cut into, which is a bake parameter — on the old pre-baked
+         sheet it could not do anything, and was shown anyway. */
+      density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
     },
     // Explicit, because `DialPanel` addresses the panel by id and a derived one
     // would silently change if the display name ever did.
@@ -188,11 +183,11 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
 
   const v = dial.values;
   const ramp = v.ramp as RampName;
-  const speed = v.speed as JellySpeed;
+  const speed = v.speed as Speed;
   const { contrast, zoom, invert, gradient, ink, ink2 } = v;
   const bg = v.background;
   const playing = v.playback;
-  const density = (v.density ?? 'normal') as DensityName;
+  const density = v.density as DensityName;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: applies the preference once; adding `dial` would re-fire it and override the reader turning playback back on.
   useEffect(() => {
@@ -225,18 +220,16 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const frameRef = useRef(0);
 
   /**
-   * The demo opens on `atlas` and stays there. The playground opens on `empty`
-   * — no clip at all — works while it bakes, then lands on `custom`.
+   * `working` while a clip is being baked, `ready` once it plays. It starts
+   * working, because the bundled clip is baked on mount like any other.
    *
-   * There used to be an `approve` step, with the whole pipeline drawn stage by
-   * stage: the frames as they were sampled, the occupancy histograms, the grid
-   * filling in. It explained the algorithm well and got in the way of the thing
-   * the reader came for, which is their own clip rendered as characters. The
-   * explanation lives in the prose now; this just runs.
+   * There is no empty state any more and no `approve` step. `empty` existed for
+   * a panel that opened with nothing; this one always has a clip. Approve
+   * existed while the panel drew the pipeline stage by stage and you were
+   * confirming a crop you had watched being chosen — with the stages gone it
+   * was a button asking you to accept something you had not been shown.
    */
-  const [mode, setMode] = useState<'atlas' | 'empty' | 'working' | 'custom'>(
-    isPlayground ? 'empty' : 'atlas',
-  );
+  const [mode, setMode] = useState<'working' | 'ready'>('working');
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -295,26 +288,22 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     setArt(lines.join('\n'));
   }, [ramp, contrast, invert]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: mount only — `draw` changes with every control, and reloading the sheet on each one would be absurd. Playback lives in its own effect below.
+  /**
+   * The clip the page opens with, baked on mount through the same pipeline a
+   * chosen file goes through. Fetched rather than imported as data because it
+   * is a real video the compare slider plays back beside the characters — a
+   * pre-baked sheet would be smaller but has no source to compare against.
+   */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount only. `runPipeline` closes over state that changes constantly and re-running it would re-decode the clip on every keystroke.
   useEffect(() => {
-    // The playground has nothing to load: it is waiting on a file, and pulling
-    // the 120-frame sheet down to show a clip it will never play would be a
-    // download the reader did not ask for.
-    if (isPlayground) return;
-
     let cancelled = false;
-
-    loadAtlas(JELLY_ATLAS).then((atlas) => {
-      if (!atlas.frames) return;
-      if (cancelled) return;
-      clipRef.current = { grids: atlas.frames, cols: atlas.cols, rows: atlas.rows };
-      // The atlas is cropped to its subject, so it is narrower than COLS and the
-      // fit has to work from what it actually reports.
-      setGrid({ cols: atlas.cols, rows: atlas.rows });
-      setReady(true);
-      draw();
-    });
-
+    fetch(butterflyClip)
+      .then((r) => r.blob())
+      .then((blob) => {
+        if (cancelled) return;
+        runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' }));
+      })
+      .catch(() => setError('The bundled clip could not be loaded.'));
     return () => {
       cancelled = true;
     };
@@ -322,7 +311,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
 
   // Playback, separate from loading so pausing doesn't re-decode the sheet and
   // resuming continues from the frame it stopped on.
-  useFrameClock(JELLY_SPEEDS[speed], ready && playing, () => {
+  useFrameClock(SPEEDS[speed], ready && playing, () => {
     const clip = clipRef.current;
     if (!clip) return;
     frameRef.current = (frameRef.current + 1) % clip.grids.length;
@@ -408,7 +397,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       // from them, and re-seeking the clip to get them back would cost seconds.
       // ~22MB for 96 frames at the sampling resolution, which is the price of
       // making density a live control instead of a re-upload.
-      setMode('custom');
+      setMode('ready');
       // The frame clock is gated on `ready`, which the demo gets from the atlas
       // load. The playground never runs that, so this is what starts it.
       setReady(true);
@@ -416,7 +405,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       draw();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That file could not be processed.');
-      setMode('empty');
+      setMode('working');
     }
   };
 
@@ -435,7 +424,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   drawRef.current = draw;
 
   useEffect(() => {
-    if (mode !== 'custom' || !sampled || !crop) return;
+    if (mode !== 'ready' || !sampled || !crop) return;
     const result = bake(sampled, crop, { ...DEFAULT_SETTINGS, cols: DENSITIES[density] }, () => {});
     clipRef.current = { grids: result.grids, cols: result.cols, rows: result.rows };
     frameRef.current = 0;
@@ -445,29 +434,18 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
 
   /** Drops the current clip. The demo goes back to the sheet; the playground
       goes back to waiting, because there is nothing else for it to show. */
+  /**
+   * Back to the clip the page ships with. Re-fetched rather than held onto:
+   * the response is in the HTTP cache by now, and keeping the decoded `File`
+   * alive for a button most readers never press is 145KB that never frees.
+   */
   const reset = () => {
-    release();
-    setSampled(null);
-    setCrop(null);
-    setError(null);
-
-    if (isPlayground) {
-      clipRef.current = null;
-      frameRef.current = 0;
-      setReady(false);
-      setArt('');
-      setMode('empty');
-      return;
-    }
-
-    setMode('atlas');
-    loadAtlas(JELLY_ATLAS).then((atlas) => {
-      if (!atlas.frames) return;
-      clipRef.current = { grids: atlas.frames, cols: atlas.cols, rows: atlas.rows };
-      frameRef.current = 0;
-      setGrid({ cols: atlas.cols, rows: atlas.rows });
-      draw();
-    });
+    fetch(butterflyClip)
+      .then((r) => r.blob())
+      .then((blob) =>
+        runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' })),
+      )
+      .catch(() => setError('The bundled clip could not be loaded.'));
   };
 
   /**
@@ -490,8 +468,8 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
    * chosen for it.
    */
   const clipAspect = crop && crop.w > 0 && crop.h > 0 ? crop.w / crop.h : null;
-  const sizedToClip = mode === 'custom' && clipAspect !== null;
-  const railBelow = isPlayground && sizedToClip && (clipAspect as number) > 1.2;
+  const sizedToClip = mode === 'ready' && clipAspect !== null;
+  const railBelow = sizedToClip && (clipAspect as number) > 1.2;
 
   const cellPx = fontPx * zoom;
   const artW = grid.cols * cellPx * cellRatio;
@@ -543,11 +521,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const artNode = (
     <pre
       role="img"
-      aria-label={
-        mode === 'custom'
-          ? 'Animated ASCII rendering of the uploaded clip'
-          : 'Animated ASCII rendering of a jellyfish, drawn from the selected character ramp'
-      }
+      aria-label="Animated ASCII rendering of the clip, drawn from the selected character ramp"
       className="font-mono leading-[1.02] tracking-normal"
       style={
         gradient
@@ -597,7 +571,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
    * not do anything yet, around a square that was almost entirely empty. The
    * work is a progress bar; it should look like one.
    */
-  if (mode === 'empty' || mode === 'working') {
+  if (mode === 'working') {
     const working = mode === 'working';
     return (
       <div className="my-6 flex w-full flex-col gap-3">
@@ -677,21 +651,18 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
           <div className={`flex min-w-0 flex-col ${railBelow ? '' : 'sm:flex-1'}`}>
             <div
               ref={stageRef}
-              // Padded in the demo, flush in the playground. The fit is measured
-              // from this element's *content* box, so padding here is what gives
-              // the jellyfish air: at zoom 1 it was sized to the stage exactly and
-              // sat edge to edge, reading as a crop rather than a subject. The
-              // playground stays flush because its stage already takes the clip's
-              // own aspect — insetting there would letterbox a video that fits.
+              // Flush, with no inset. The stage takes the clip's own aspect, so
+              // there is nothing to letterbox and padding would only shrink the
+              // picture inside a box already cut to fit it.
               className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] ${
-                isPlayground ? '' : 'p-6 sm:p-8'
-              } ${railBelow ? '' : 'sm:rounded-tr-none'}`}
+                railBelow ? '' : 'sm:rounded-tr-none'
+              }`}
               // Square until there is a clip, then the clip's own shape — so a
               // 16:9 video is not letterboxed into a square while the character
               // grid beside it is not.
               style={{ background: bg, aspectRatio: sizedToClip ? (clipAspect as number) : 1 }}
             >
-              {mode === 'custom' && showSource ? (
+              {showSource ? (
                 <CompareSlider
                   labelLeft="source"
                   labelRight="ascii"
@@ -710,7 +681,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
               )}
             </div>
 
-            {isPlayground && mode === 'custom' && (
+            {mode === 'ready' && (
               <ClipActions
                 theme={resolvedTheme}
                 roundBottomLeft={!railBelow}
@@ -751,9 +722,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             something. The empty and working states return their own band above
             and never reach this row. */}
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {`${grid.cols}×${grid.rows} · ${(
-            (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]
-          ).toFixed(1)}s loop`}
+          {`${grid.cols}×${grid.rows} · ${(FRAME_COUNT / SPEEDS[speed]).toFixed(1)}s loop`}
         </p>
 
         {fileInput}

@@ -6,40 +6,33 @@ date: '2026-08-28'
 demo: ascii
 ---
 
-An agent skill. Point it at a clip and it bakes the frames into a sprite sheet
-of brightnesses, small enough to ship, which a page can then read out as
-characters. Everything below runs on its output.
+An agent skill. Point it at a clip and it bakes the frames into a grid of
+brightnesses, small enough to ship, which a page can then read out as
+characters.
 
 <Install />
 
 ## the demo
 
-Each frame is a grid of brightnesses, and turning one into text is picking a
-character per cell. The **ramp** is that lookup, ordered from empty to solid;
-**contrast** is the curve applied before it.
+Below is a clip run through it, live. Replace it with one of your own and
+nothing about the path changes — same sampling, same crop, same bake.
 
 <Demo />
 
-Nothing here is a picture of the output. Every control is a lookup on numbers
-that already exist, which is why moving one rebuilds the frame instantly.
+Each frame is a grid of brightnesses, and turning one into text is picking a
+character per cell. The **ramp** is that lookup, ordered from empty to solid;
+**contrast** is the curve applied before it. Those are free — every control but
+one is a lookup on numbers that already exist, which is why moving them rebuilds
+the frame instantly.
 
-**Density** is the exception, and it is missing on purpose. It decides how many
-cells a frame is cut into — a property of the bake, not the reading — and this
-sheet was cut at 84 columns before it ever reached the page.
-
-## the playground
-
-The same bake, on a clip of yours, with density in play.
-
-<Playground />
+**Density** is the one that isn't. It decides how many cells a frame is cut
+into, which is a property of the bake, so changing it runs the bake again.
 
 Nothing is uploaded. The file becomes an object URL, a `<video>` element decodes
 it, and every frame is read out of a canvas — there is no server in this, which
-is also why your machine does the work.
-
-Drag the divider to compare. One clock drives both sides: the ASCII advances a
-frame and then seeks the video to match, because a compare slider showing two
-different instants is worse than none.
+is also why your machine does the work. Drag the divider to compare: one clock
+drives both sides, because a compare slider showing two different instants is
+worse than none.
 
 ## how it works
 

@@ -96,8 +96,7 @@ const ProjectView = ({ slug }: { slug: string }) => {
 const ASCII_PARTS = {
   h2: SectionLabel,
   Install: SkillInstall,
-  Demo: () => <AsciiArt />,
-  Playground: () => <AsciiArt variant="playground" />,
+  Demo: AsciiArt,
 } as unknown as Record<string, ComponentType>;
 
 const SkillView = ({ slug }: { slug: string }) => {
