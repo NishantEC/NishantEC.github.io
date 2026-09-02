@@ -332,3 +332,59 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+ * DialKit, wearing this site's scrollbar.
+ *
+ * Its panel ships an 8px always-on bar coloured from its own tokens, which
+ * reads as a second design system inside the card. These are the same rules the
+ * app's own scrollers use, scoped to its inner element — nothing added, just
+ * the existing bar retuned.
+ * ------------------------------------------------------------------------ */
+.dialkit-panel-inner {
+  scrollbar-width: thin;
+  scrollbar-color: --alpha(var(--fg) / 20%) transparent;
+}
+
+.dialkit-panel-inner::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dialkit-panel-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dialkit-panel-inner::-webkit-scrollbar-thumb {
+  background: --alpha(var(--fg) / 20%);
+  border-radius: 999px;
+}
+
+/* Only while the pointer is over it, so a panel at rest is just the controls. */
+.dialkit-panel-inner:not(:hover)::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+/* The panel's own header — its name, the version picker and the copy-config
+ * button — is a tool's chrome. These controls are the piece, and the card
+ * already sits under a heading that names it, so the row is repetition. */
+.dialkit-panel-header {
+  display: none;
+}
+
+/* Its own background has to follow the card's corners, now that the parent no
+ * longer clips — the clip was eating the select menus, which render inside the
+ * panel rather than portalling to the body. */
+.dialkit-panel-inner {
+  border-radius: 0 0 10px 10px;
+}
+
+@media (width >= 40rem) {
+  .dialkit-panel-inner {
+    border-radius: 0 10px 10px 0;
+  }
+}
+
+/* Room under the last control. Without it the final row sits hard against the
+ * card's edge, which reads as the list being cut off rather than ended. */
+.dialkit-folder-root > .dialkit-folder-content {
+  padding-bottom: 0.75rem;
+}
