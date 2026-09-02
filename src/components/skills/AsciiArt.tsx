@@ -576,16 +576,21 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     return (
       <div className="my-6 flex w-full flex-col gap-3">
         <div className="rounded-2xl border border-border bg-fg/2 p-1.5">
-          <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center">
+          <div
+            className={`flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center ${
+              working ? 'shimmer' : ''
+            }`}
+          >
             {working ? (
               /* No frame counter. It read "frame 84 of 96" for every clip,
                  because 96 is a fixed sample count and not a property of the
                  file — which invites exactly the question of why it is always
                  96. A bar says the same thing without making a claim about the
-                 clip. `aria-live` so the wait is announced, not only drawn. */
+                 clip. `aria-live` so the wait is announced, not only drawn, and
+                 the shimmer on the card is decoration over the top of both. */
               <>
                 <p aria-live="polite" className="font-mono text-muted text-xs">
-                  baking
+                  cooking
                 </p>
                 <div className="h-0.5 w-full max-w-[16rem] overflow-hidden rounded-full bg-fg/10">
                   <motion.div

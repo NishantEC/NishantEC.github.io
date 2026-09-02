@@ -416,3 +416,55 @@
     border-radius: 0 0 10px 10px;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Shimmer — the "something is happening" surface
+ *
+ * A highlight sweeping across the card while the bake runs. It carries no
+ * information; the bar underneath does that. What it adds is liveness: a
+ * determinate bar that only advances every few hundred milliseconds looks
+ * stalled between updates, and the sweep says the tab is still working during
+ * the gaps. Which is the same reason it must not be the only signal — see the
+ * reduced-motion rule below.
+ *
+ * Drawn on a pseudo-element rather than the element's own background so it
+ * composites over whatever is already there, and so the host keeps its border
+ * and radius without the gradient bleeding past them.
+ * ------------------------------------------------------------------------ */
+@keyframes shimmer-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Angled, so the edge crossing the card is a diagonal rather than a wall. */
+  background: linear-gradient(
+    100deg,
+    transparent 25%,
+    --alpha(var(--fg) / 7%) 50%,
+    transparent 75%
+  );
+  animation: shimmer-sweep 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* The sweep is decoration on a wait that is already stated by the label and the
+ * bar, so it simply goes. Nothing is lost that a reader needed. */
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after {
+    animation: none;
+    display: none;
+  }
+}
