@@ -1,13 +1,70 @@
 ---
 title: Video ASCII
 slug: video-to-ascii
-blurb: A clip played back as ASCII, with the mapping left open. The frames are baked; which characters they land on, how hard the curve is and what colour they come out is all decided in the browser, per frame.
+blurb: A clip played back as ASCII, with the mapping left open — and the agent skill that bakes it, which you can install and point at your own footage.
 date: '2026-08-28'
 demo: ascii
 ---
 
-Each frame is a grid of brightnesses. Turning one into text is just picking a
-character per cell — the ramp is that lookup, ordered from empty to solid, and
-contrast is the curve applied before the lookup.
+A clip played back as characters, with the mapping left open. It was baked by an
+agent skill, and the skill is the part you can take.
 
-Nothing here is a picture of the output. Move a control and the frame is rebuilt.
+<Install />
+
+## the demo
+
+Each frame is a grid of brightnesses. Turning one into text is picking a
+character per cell — the **ramp** is that lookup, ordered from empty to solid,
+and **contrast** is the curve applied before it.
+
+<Demo />
+
+Nothing here is a picture of the output. Move a control and the frame is rebuilt
+from the grid, which is why every one of them is instant: they are all lookups
+on numbers that already exist.
+
+There is one control this panel does not have. **Density** decides how many
+cells a frame is cut into, which is a property of the bake rather than the
+reading — and this sheet was cut at 84 columns long before it reached the page.
+There is nothing finer left in it to resolve, so the control is absent instead
+of present and inert.
+
+## the playground
+
+Give it a source and the bake is yours to run. Same controls, plus the one the
+demo cannot honour.
+
+<Playground />
+
+The file never leaves the tab. It becomes an object URL, gets decoded by a
+`<video>` element, and every frame after that is read out of a canvas in your
+own browser — there is no server in this, which is also why it is your machine
+that does the work.
+
+Drag the divider to compare. Both sides are driven by one clock: the ASCII
+advances a frame and then seeks the video to match, rather than letting two
+timers run and hoping they agree. A compare slider showing two different
+instants is worse than no compare slider.
+
+## how it works
+
+Frames come out by **seeking**, never by playing — a clip played back in real
+time gives you whatever frames the decoder felt like handing over, and seeking
+to fixed offsets gives you the same 96 every run.
+
+The subject is found by **occupancy**, not by a union of per-frame boxes. Union
+boxes grow to fit the whole journey, so anything that moves ends up framed by
+where it has been. Counting how many frames each column and row is actually lit
+in, and cutting where that falls off, frames the thing instead.
+
+Cells are averaged and normalised against **one global peak** across the whole
+clip. Per-frame normalisation makes a dark frame as bright as a light one, and
+the flicker that produces reads as a rendering fault.
+
+Then a human approves the crop and the grid before anything is baked, because
+every one of those decisions is a judgement call that looks fine in aggregate
+and wrong on a specific clip.
+
+The skill ships its measurements too — including the frame rate that judders on
+every frame by construction, and the re-centring that made motion three times
+less stable than leaving it alone.

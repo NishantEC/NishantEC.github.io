@@ -1,4 +1,4 @@
-import { DialRoot, useDialKitController } from 'dialkit';
+import { type DialValue, useDialKitController } from 'dialkit';
 import 'dialkit/styles.css';
 import { useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
@@ -27,21 +27,28 @@ import {
   sample,
 } from '../../utils/videoToAscii';
 import CompareSlider from './CompareSlider';
+import DialPanel from './DialPanel';
 import Pipeline from './Pipeline';
 
 /**
- * A short clip played back as ASCII, with the mapping exposed as controls.
+ * A clip played back as ASCII, with the mapping exposed as controls.
  *
- * The frames are pre-baked: a sprite sheet of luminance tiles, decoded once at
- * load into plain arrays of densities. Everything after that — which characters
- * the densities land on, how hard the curve is, what colour they come out —
- * happens per frame in the browser, which is why the sliders move the picture
- * rather than reloading it.
+ * Two variants, one component. The `demo` plays a pre-baked sprite sheet: 120
+ * frames of luminance tiles, decoded once at load into plain arrays of
+ * densities. The `playground` starts empty and runs the same pipeline the skill
+ * runs — sample, find the subject, bake — over a file the reader chooses.
  *
- * An earlier version took uploads, a URL and the camera, and sampled them
- * through a canvas. That is in `archive/ascii-sources/` with notes on bringing
- * it back; the controls are the point of this one.
+ * The split is not cosmetic. Everything the demo exposes is a *lookup* on a
+ * grid that already exists: which characters the densities land on, how hard
+ * the curve is, what colour they come out. Those are free, which is why the
+ * sliders move the picture rather than reloading it. `density` is the one
+ * control that is not a lookup — it decides how many cells the frame is cut
+ * into, which is a property of the bake — so it exists only where there is a
+ * source to re-bake from, and the demo does not show it at all. It used to,
+ * doing nothing, which read as a broken control rather than an absent one.
  */
+
+type Variant = 'demo' | 'playground';
 
 const RAMPS = {
   standard: ' .:-=+*#%@',
@@ -105,9 +112,10 @@ const useResolvedTheme = () =>
 const RAMPS_LIST = Object.keys(RAMPS) as RampName[];
 const PALETTE_LIST = [...(Object.keys(PALETTES) as (keyof typeof PALETTES)[]), 'custom' as const];
 
-const AsciiArt = () => {
+const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const reduceMotion = useReducedMotion();
   const resolvedTheme = useResolvedTheme();
+  const isPlayground = variant === 'playground';
 
   /**
    * Every control is DialKit's, declared once as a config object rather than as
@@ -122,24 +130,36 @@ const AsciiArt = () => {
    * needs a visible stop whatever the preference is — which is what the
    * `animation` toggle is for.
    */
-  const dial = useDialKitController('ASCII', {
-    ramp: { type: 'select' as const, options: [...RAMPS_LIST], default: 'standard' },
-    palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'mono' },
-    ink: { type: 'color' as const, default: PALETTES.mono.ink },
-    ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
-    background: { type: 'color' as const, default: PALETTES.mono.bg },
-    gradient: false as boolean,
-    contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
-    zoom: [1, 0.5, 2.5, 0.05] as [number, number, number, number],
-    invert: false as boolean,
-    speed: {
-      type: 'select' as const,
-      options: [...JELLY_SPEED_NAMES],
-      default: JELLY_SPEED_DEFAULT,
+  const panelId = isPlayground ? 'ascii-bake' : 'ascii-demo';
+  const panelTitle = isPlayground ? 'Bake' : 'ASCII';
+
+  const dial = useDialKitController(
+    panelTitle,
+    {
+      ramp: { type: 'select' as const, options: [...RAMPS_LIST], default: 'standard' },
+      palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'mono' },
+      ink: { type: 'color' as const, default: PALETTES.mono.ink },
+      ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
+      background: { type: 'color' as const, default: PALETTES.mono.bg },
+      gradient: false as boolean,
+      contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
+      zoom: [1, 0.5, 2.5, 0.05] as [number, number, number, number],
+      invert: false as boolean,
+      speed: {
+        type: 'select' as const,
+        options: [...JELLY_SPEED_NAMES],
+        default: JELLY_SPEED_DEFAULT,
+      },
+      playback: true as boolean,
+      /* Only where it can do something. See the note at the top of the file. */
+      ...(variant === 'playground'
+        ? { density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' } }
+        : {}),
     },
-    playback: true as boolean,
-    density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
-  });
+    // Explicit, because `DialPanel` addresses the panel by id and a derived one
+    // would silently change if the display name ever did.
+    { id: panelId },
+  );
 
   const v = dial.values;
   const ramp = v.ramp as RampName;
@@ -147,7 +167,7 @@ const AsciiArt = () => {
   const { contrast, zoom, invert, gradient, ink, ink2 } = v;
   const bg = v.background;
   const playing = v.playback;
-  const density = v.density as DensityName;
+  const density = (v.density ?? 'normal') as DensityName;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: applies the preference once; adding `dial` would re-fire it and override the reader turning playback back on.
   useEffect(() => {
@@ -179,8 +199,15 @@ const AsciiArt = () => {
   const clipRef = useRef<{ grids: Float32Array[]; cols: number; rows: number } | null>(null);
   const frameRef = useRef(0);
 
-  /** `atlas` until someone uploads; then their clip, through the stages. */
-  const [mode, setMode] = useState<'atlas' | 'working' | 'approve' | 'custom'>('atlas');
+  /**
+   * The demo opens on `atlas` and stays there. The playground opens on `empty`
+   * — no clip at all — and walks `working` → `approve` → `custom` once given
+   * one. `empty` is a real state rather than a null clip so the stage can say
+   * what it wants instead of showing a blank square.
+   */
+  const [mode, setMode] = useState<'atlas' | 'empty' | 'working' | 'approve' | 'custom'>(
+    isPlayground ? 'empty' : 'atlas',
+  );
   const [stage, setStage] = useState(0);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [previewFrame, setPreviewFrame] = useState<string | null>(null);
@@ -248,6 +275,11 @@ const AsciiArt = () => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: mount only — `draw` changes with every control, and reloading the sheet on each one would be absurd. Playback lives in its own effect below.
   useEffect(() => {
+    // The playground has nothing to load: it is waiting on a file, and pulling
+    // the 120-frame sheet down to show a clip it will never play would be a
+    // download the reader did not ask for.
+    if (isPlayground) return;
+
     let cancelled = false;
 
     loadAtlas(JELLY_ATLAS).then((atlas) => {
@@ -390,28 +422,54 @@ const AsciiArt = () => {
     // ~22MB for 96 frames at the sampling resolution, which is the price of
     // making density a live control instead of a re-upload.
     setMode('custom');
+    // The frame clock is gated on `ready`, which the demo gets from the atlas
+    // load. The playground never runs that, so approving is what starts it.
+    setReady(true);
     videoRef.current?.play().catch(() => {});
     draw();
   };
 
   /**
-   * Re-bakes at a new density. Only for uploads — the jellyfish is a baked
-   * sheet whose grid was fixed when it was made, so there is nothing finer to
-   * resolve to.
+   * Re-bakes at a new density. Only ever runs in the playground, because it is
+   * the only place with the sampled frames to re-cut.
+   *
+   * `draw` is read through a ref rather than listed as a dependency. It is a
+   * `useCallback` over ramp, contrast and invert, so depending on it re-ran
+   * this effect on every tick of the contrast slider — re-baking all 96 frames
+   * per pointer move to produce a grid identical to the one already on screen.
+   * The redraw below is only so the new grid appears without waiting for the
+   * next animation frame; it is not what the effect is keyed on.
    */
+  const drawRef = useRef(draw);
+  drawRef.current = draw;
+
   useEffect(() => {
     if (mode !== 'custom' || !sampled || !crop) return;
     const result = bake(sampled, crop, { ...DEFAULT_SETTINGS, cols: DENSITIES[density] }, () => {});
     clipRef.current = { grids: result.grids, cols: result.cols, rows: result.rows };
     frameRef.current = 0;
     setGrid({ cols: result.cols, rows: result.rows });
-    draw();
-  }, [density, mode, sampled, crop, draw]);
+    drawRef.current();
+  }, [density, mode, sampled, crop]);
 
-  const backToJellyfish = () => {
+  /** Drops the current clip. The demo goes back to the sheet; the playground
+      goes back to waiting, because there is nothing else for it to show. */
+  const reset = () => {
     release();
     setBaked(null);
     setSampled(null);
+    setCrop(null);
+    setError(null);
+
+    if (isPlayground) {
+      clipRef.current = null;
+      frameRef.current = 0;
+      setReady(false);
+      setArt('');
+      setMode('empty');
+      return;
+    }
+
     setMode('atlas');
     loadAtlas(JELLY_ATLAS).then((atlas) => {
       if (!atlas.frames) return;
@@ -475,7 +533,26 @@ const AsciiArt = () => {
             }`}
             style={{ background: bg }}
           >
-            {mode === 'working' || mode === 'approve' ? (
+            {mode === 'empty' ? (
+              /* Not a dropzone with a dotted border — the file input is one
+                 button below, and a second target here would be two ways to do
+                 the same thing. This says what the panel is for and gets out of
+                 the way. */
+              <div className="flex flex-col items-center gap-3 px-6 text-center">
+                <p className="font-mono text-muted text-xs">[ no clip ]</p>
+                <p className="max-w-[26ch] text-muted text-xs leading-relaxed">
+                  Choose a video and the skill&rsquo;s pipeline runs here, in this tab. Nothing is
+                  uploaded anywhere.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="rounded-lg bg-fg px-3 py-1.5 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
+                >
+                  Choose a video
+                </button>
+              </div>
+            ) : mode === 'working' || mode === 'approve' ? (
               <div className="h-full w-full overflow-y-auto p-3">
                 <Pipeline
                   current={stage}
@@ -529,7 +606,12 @@ const AsciiArt = () => {
               as a dev tool; inline in the card it reads as part of the piece.
               `productionEnabled` because these controls ship. */}
           <div className="min-w-0 rounded-b-[10px] border-border/60 sm:w-[240px] sm:shrink-0 sm:rounded-r-[10px] sm:rounded-bl-none sm:border-l">
-            <DialRoot mode="inline" theme={resolvedTheme} productionEnabled defaultOpen />
+            <DialPanel
+              id={panelId}
+              title={panelTitle}
+              values={v as Record<string, DialValue>}
+              theme={resolvedTheme}
+            />
           </div>
         </div>
       </div>
@@ -537,13 +619,19 @@ const AsciiArt = () => {
       {/* Outside the ring: the ring frames the output, not the controls for
           getting one. */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <button type="button" onClick={() => fileRef.current?.click()} className={BTN}>
-          upload a video
-        </button>
+        {/* The demo has no upload button. Bringing your own clip is what the
+            playground below is, and offering it twice made one panel that was
+            two things — which is how `density` ended up on a panel that could
+            never honour it. */}
+        {isPlayground && mode !== 'empty' && (
+          <button type="button" onClick={() => fileRef.current?.click()} className={BTN}>
+            choose another
+          </button>
+        )}
 
-        {mode !== 'atlas' && (
-          <button type="button" onClick={backToJellyfish} className={BTN}>
-            jellyfish
+        {isPlayground && mode === 'custom' && (
+          <button type="button" onClick={reset} className={BTN}>
+            clear
           </button>
         )}
 
@@ -569,10 +657,11 @@ const AsciiArt = () => {
         )}
 
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {grid.cols}×{grid.rows} ·{' '}
-          {mode === 'custom'
-            ? `${(FRAME_COUNT / JELLY_SPEEDS[speed]).toFixed(1)}s loop`
-            : `${(JELLY_ATLAS.count / JELLY_SPEEDS[speed]).toFixed(1)}s loop`}
+          {mode === 'empty'
+            ? 'decoded in your browser'
+            : `${grid.cols}×${grid.rows} · ${(
+                (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]
+              ).toFixed(1)}s loop`}
         </p>
 
         {/* Nothing is uploaded anywhere: the file becomes an object URL and is

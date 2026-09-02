@@ -70,9 +70,27 @@ const components: Record<string, ComponentType<{ children?: ReactNode }>> = {
  * have frontmatter and no prose, and without this its empty wrapper still
  * collects a flex gap from the layout around it.
  */
-const MdxBody = ({ Content }: { Content: ComponentType<{ components?: typeof components }> }) => (
+const MdxBody = ({
+  Content,
+  extra,
+}: {
+  Content: ComponentType<{ components?: Record<string, ComponentType> }>;
+  /**
+   * Components an entry may place itself, by name, in its own MDX.
+   *
+   * Most entries are prose with a demo bolted above them, which the layout can
+   * position. One is not: the ASCII entry interleaves an install block, two
+   * live panels and the writing between them, and only the writing knows the
+   * order. Passing the panels in as MDX components puts that order in the
+   * content file, where changing it is an edit rather than a refactor.
+   *
+   * Keys override the element map above when they collide, so an entry can also
+   * restyle its own headings without every case study inheriting it.
+   */
+  extra?: Record<string, ComponentType>;
+}) => (
   <div className="text-[15px] empty:hidden">
-    <Content components={components} />
+    <Content components={{ ...components, ...extra } as Record<string, ComponentType>} />
   </div>
 );
 

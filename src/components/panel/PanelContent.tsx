@@ -1,4 +1,5 @@
 import { motion } from 'motion/react';
+import type { ComponentType } from 'react';
 import GithubIcon from '~icons/simple-icons/github';
 import { findProject, findStash } from '../../content/collections';
 import type { ProjectStatus } from '../../content/schema';
@@ -7,6 +8,8 @@ import ProjectThumb from '../projects/ProjectThumb';
 import Prose from '../reading/Prose';
 import AsciiArt from '../stash/AsciiArt';
 import BionicDemo from '../stash/BionicDemo';
+import SectionLabel from '../stash/SectionLabel';
+import SkillInstall from '../stash/SkillInstall';
 
 import type { PanelTab } from './PanelProvider';
 
@@ -82,9 +85,30 @@ const ProjectView = ({ slug }: { slug: string }) => {
   );
 };
 
+/**
+ * What the ASCII entry may place in its own MDX.
+ *
+ * Declared once outside the component so the identities are stable — a fresh
+ * object each render would give MDX new component types every time and remount
+ * both panels, throwing away a decoded sprite sheet and whatever clip the
+ * reader had loaded into the playground.
+ */
+const ASCII_PARTS = {
+  h2: SectionLabel,
+  Install: SkillInstall,
+  Demo: () => <AsciiArt />,
+  Playground: () => <AsciiArt variant="playground" />,
+} as unknown as Record<string, ComponentType>;
+
 const StashView = ({ slug }: { slug: string }) => {
   const entry = findStash(slug);
   if (!entry) return null;
+
+  // Most entries are a demo with prose under it, and the layout can put the
+  // demo up top without the content file having an opinion. The ASCII entry
+  // runs install, demo, playground and writing in a deliberate order, so it
+  // places its own parts and gets no slot here — see `MdxBody`'s `extra`.
+  const composed = entry.demo === 'ascii';
 
   return (
     /* The demo comes first. A stash entry is something to play with, not
@@ -96,8 +120,7 @@ const StashView = ({ slug }: { slug: string }) => {
           bought a third alignment. */}
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
         {entry.demo === 'bionic' && <BionicDemo />}
-        {entry.demo === 'ascii' && <AsciiArt />}
-        <MdxBody Content={entry.Content} />
+        <MdxBody Content={entry.Content} extra={composed ? ASCII_PARTS : undefined} />
       </div>
     </div>
   );
