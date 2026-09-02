@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import ArrowLeftIcon from '~icons/heroicons/arrow-left';
 import SidebarIcon from '~icons/heroicons/bars-3-bottom-left';
-import { EASE } from '../../App';
+import { EASE } from '../../utils/motion';
 import FusedTabs from './FusedTabs';
 import PanelContent from './PanelContent';
 import { usePanel } from './usePanel';

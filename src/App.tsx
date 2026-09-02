@@ -16,14 +16,7 @@ import BlurGradient from './components/ui/BlurGradient';
 import SectionSpine from './components/ui/SectionSpine';
 import { projects, stash } from './content/collections';
 import NotFound from './pages/NotFound';
-
-/**
- * Same curve the fused tabs use. Deliberately not a spring: bounce on a
- * container edge reads as cheap, and everything here is one continuous move
- * rather than an object being thrown.
- */
-export const EASE = [0.22, 1, 0.36, 1] as const;
-export const SPLIT_DURATION = 0.44;
+import { EASE, SPLIT_DURATION } from './utils/motion';
 
 const Page = ({ isSplit, duration }: { isSplit: boolean; duration: number }) => {
   // Numbering follows what actually renders, asked of the collections rather

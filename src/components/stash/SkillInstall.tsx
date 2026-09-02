@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import CheckIcon from '~icons/heroicons/check';
 import CopyIcon from '~icons/heroicons/square-2-stack';
-import { EASE } from '../../App';
+import { EASE } from '../../utils/motion';
 
 /**
  * The install block: a command you can take.
