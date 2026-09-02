@@ -105,10 +105,10 @@ const CompareSlider = ({
         ↔
       </div>
 
-      <span className="pointer-events-none absolute bottom-2 left-2 rounded-md bg-bg/70 px-1.5 py-0.5 text-[10px] text-muted">
+      <span className="pointer-events-none absolute bottom-2 left-2 rounded-md bg-bg/85 px-1.5 py-0.5 text-[10px] text-muted">
         {labelLeft}
       </span>
-      <span className="pointer-events-none absolute right-2 bottom-2 rounded-md bg-bg/70 px-1.5 py-0.5 text-[10px] text-muted">
+      <span className="pointer-events-none absolute right-2 bottom-2 rounded-md bg-bg/85 px-1.5 py-0.5 text-[10px] text-muted">
         {labelRight}
       </span>
     </div>

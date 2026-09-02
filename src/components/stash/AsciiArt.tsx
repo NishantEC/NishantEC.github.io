@@ -668,6 +668,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             }`}
           >
             <DialPanel
+              layout={railBelow ? 'grid' : 'rail'}
               id={panelId}
               title={panelTitle}
               values={v as Record<string, DialValue>}

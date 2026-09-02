@@ -388,3 +388,31 @@
 .dialkit-folder-root > .dialkit-folder-content {
   padding-bottom: 0.75rem;
 }
+
+/* ---- controls under the clip rather than beside it -----------------------
+ *
+ * When the source is landscape the rail moves below it and gets the whole
+ * content column. DialKit stacks its rows in a flex column, which is right at
+ * 240px and wrong at 640: twelve full-width rows, each a label at one edge and
+ * a value at the other with a hand-span of nothing between them.
+ *
+ * `auto-fit` rather than a fixed count, because the column is the panel's
+ * width and the panel's width is the reader's window. At 200px minimum this
+ * lands on three columns in the reading column and folds back to one on a
+ * phone, without a breakpoint deciding it.
+ * ------------------------------------------------------------------------ */
+[data-dial-layout='grid'] .dialkit-folder-inner {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-content: start;
+  gap: 6px;
+}
+
+/* The rail is under the stage now, so it rounds along the bottom at every
+ * width — the rule above this one turns the right-hand corners on at 40rem,
+ * which is only correct when it sits beside. */
+@media (width >= 40rem) {
+  [data-dial-layout='grid'] .dialkit-panel-inner {
+    border-radius: 0 0 10px 10px;
+  }
+}
