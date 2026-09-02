@@ -55,8 +55,21 @@ const launchBrowser = async () => {
     import('puppeteer-core'),
   ]);
 
+  // The packaged build ships a software GL stack that this container has no use
+  // for, and starting it is a common way for the process to die before the first
+  // CDP call lands.
+  chromium.setGraphicsMode = false;
+
   return core.launch({
-    args: chromium.args,
+    args: [
+      ...chromium.args,
+      // Shared memory here is a few megabytes; Chromium's default renderer
+      // allocation exceeds it and the tab is killed the moment one is opened,
+      // which surfaces as a ProtocolError on `newPage`.
+      '--disable-dev-shm-usage',
+      '--no-zygote',
+      '--single-process',
+    ],
     executablePath: await chromium.executablePath(),
     headless: true,
   });
