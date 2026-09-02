@@ -45,7 +45,12 @@ const MIME: Record<string, string> = {
  * serverless build, and a machine without it still builds.
  */
 const launchBrowser = async () => {
-  if (!process.env.VERCEL) {
+  // Both conditions matter. `VERCEL` alone is wrong: the CLI sets it when you
+  // run `vercel build` on your own machine, where the packaged Linux binary is
+  // not executable and the build dies with ENOEXEC. The platform check is what
+  // distinguishes "deploying to Vercel" from "actually running in their
+  // container".
+  if (!process.env.VERCEL || process.platform !== 'linux') {
     const puppeteer = (await import('puppeteer')).default;
     return puppeteer.launch({ args: ['--no-sandbox'] });
   }
