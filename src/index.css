@@ -468,3 +468,51 @@
     display: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Steam, for the cooking glyph
+ *
+ * Each wisp rises, fades and restarts, offset from the others so the three
+ * never move together — synchronised steam reads as a blinking icon rather than
+ * something rising off a surface.
+ * ------------------------------------------------------------------------ */
+@keyframes steam-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.steam path {
+  animation: steam-rise 2.4s ease-in-out infinite;
+}
+
+/* Qualified by `.steam path` rather than written as `.steam-2` alone. The
+ * shorthand above resets `animation-delay` to 0, and at (0,1,1) it also
+ * out-specifies a bare class at (0,1,0) — so the plainer selector lost and all
+ * three wisps rose together, which is the one thing this must not do. */
+.steam path.steam-1 {
+  animation-delay: 0s;
+}
+.steam path.steam-2 {
+  animation-delay: 0.8s;
+}
+.steam path.steam-3 {
+  animation-delay: 1.6s;
+}
+
+/* The wisps are the only thing here that moves; held still they are just three
+ * marks over a pot, which still reads. */
+@media (prefers-reduced-motion: reduce) {
+  .steam path {
+    animation: none;
+    opacity: 0.55;
+  }
+}

@@ -1,6 +1,6 @@
 import { type DialValue, useDialKitController } from 'dialkit';
 import 'dialkit/styles.css';
-import { motion, useReducedMotion } from 'motion/react';
+import { useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   JELLY_ATLAS,
@@ -21,11 +21,11 @@ import {
   decode,
   FRAME_COUNT,
   findSubject,
-  type Progress,
   type Sampled,
   sample,
 } from '../../utils/videoToAscii';
 import CompareSlider from './CompareSlider';
+import CookingGlyph from './CookingGlyph';
 import DialPanel from './DialPanel';
 
 /**
@@ -48,11 +48,29 @@ import DialPanel from './DialPanel';
 
 type Variant = 'demo' | 'playground';
 
+/**
+ * Character ramps, ordered from empty to solid.
+ *
+ * Two rules, and both were checked rather than assumed. Every glyph in a ramp
+ * must have the same advance width in the rendered monospace stack, or the grid
+ * stops being a grid — braille (` ⠁⠉⠋⠛⠟⠿⢿⣿`) measured 120.41 against 136.72 for
+ * the space and is not here for that reason. And coverage has to increase
+ * monotonically, which is why `quadrant` starts at `▖` rather than pairing it
+ * with `▗`: both fill exactly one quarter, so one of them is a step that isn't.
+ */
 const RAMPS = {
   standard: ' .:-=+*#%@',
-  blocks: ' ░▒▓█',
-  minimal: ' .:*#',
+  /** Paul Bourke's 70-level ramp — the most tonal resolution ASCII can carry. */
+  dense: ' .\'`^",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$',
   line: ' .,:;i1tfLCG08@',
+  minimal: ' .:*#',
+  blocks: ' ░▒▓█',
+  shades: ' ·░▒▓█',
+  /** Directional rather than even — the subject picks up a grain. */
+  quadrant: ' ▖▄▟█',
+  stipple: ' .·•●',
+  /** Two levels and a space. Everything becomes a threshold. */
+  binary: ' 01',
 } as const;
 
 type RampName = keyof typeof RAMPS;
@@ -103,6 +121,15 @@ const useResolvedTheme = () =>
     () => (document.documentElement.classList.contains('dark') ? 'dark' : 'light'),
     () => 'dark' as const,
   );
+
+/**
+ * The pipeline reports per frame and nothing listens any more — the wait is a
+ * glyph, not a measurement. Worth stating rather than passing an inline arrow:
+ * this used to be `setProgress`, which meant ~96 renders during sampling to
+ * update a bar, and dropping it took the re-render with it. The callback stays
+ * because it is the skill's own reporting surface, not the site's to remove.
+ */
+const NO_PROGRESS = () => {};
 
 const RAMPS_LIST = Object.keys(RAMPS) as RampName[];
 const PALETTE_LIST = [...(Object.keys(PALETTES) as (keyof typeof PALETTES)[]), 'custom' as const];
@@ -224,7 +251,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const [mode, setMode] = useState<'atlas' | 'empty' | 'working' | 'custom'>(
     isPlayground ? 'empty' : 'atlas',
   );
-  const [progress, setProgress] = useState<Progress | null>(null);
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -361,7 +387,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     setError(null);
     setCrop(null);
     setMode('working');
-    setProgress(null);
 
     try {
       const { video, url } = await decode(file);
@@ -369,19 +394,19 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       objectUrlRef.current = url;
       videoRef.current = video;
 
-      const shot = await sample(video, setProgress, signal);
+      const shot = await sample(video, NO_PROGRESS, signal);
       if (signal.cancelled || shot.frames.length === 0) return;
       setSampled(shot);
 
       // Yield between the blocking passes so the progress line can repaint;
       // both `findSubject` and `bake` hold the thread for their whole run.
       await new Promise((r) => requestAnimationFrame(() => r(null)));
-      const box = findSubject(shot, DEFAULT_SETTINGS, setProgress);
+      const box = findSubject(shot, DEFAULT_SETTINGS, NO_PROGRESS);
       if (signal.cancelled) return;
       setCrop(box);
 
       await new Promise((r) => requestAnimationFrame(() => r(null)));
-      const result = bake(shot, box, DEFAULT_SETTINGS, setProgress);
+      const result = bake(shot, box, DEFAULT_SETTINGS, NO_PROGRESS);
       if (signal.cancelled) return;
 
       // Straight onto the screen. There was an approve step here, which made
@@ -595,24 +620,18 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             }`}
           >
             {working ? (
-              /* No frame counter. It read "frame 84 of 96" for every clip,
-                 because 96 is a fixed sample count and not a property of the
-                 file — which invites exactly the question of why it is always
-                 96. A bar says the same thing without making a claim about the
-                 clip. `aria-live` so the wait is announced, not only drawn, and
-                 the shimmer on the card is decoration over the top of both. */
+              /* No counter and no bar. The counter read "frame 84 of 96" for
+                 every clip, because 96 is a fixed sample count and not a
+                 property of the file. The bar was honest but jumped in four
+                 steps — decode, sample, find the subject, bake — so it looked
+                 stuck for most of its life. Neither was telling the truth
+                 usefully; this just says the tab is busy. `aria-live` so the
+                 wait is announced and not only drawn. */
               <>
+                <CookingGlyph />
                 <p aria-live="polite" className="font-mono text-muted text-xs">
                   cooking
                 </p>
-                <div className="h-0.5 w-full max-w-[16rem] overflow-hidden rounded-full bg-fg/10">
-                  <motion.div
-                    className="h-full rounded-full bg-accent"
-                    initial={false}
-                    animate={{ width: `${(progress?.ratio ?? 0) * 100}%` }}
-                    transition={{ duration: 0.12 }}
-                  />
-                </div>
               </>
             ) : (
               <>
