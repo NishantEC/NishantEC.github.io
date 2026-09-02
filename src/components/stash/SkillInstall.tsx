@@ -102,7 +102,7 @@ const SkillInstall = ({ command = 'npx skills add NishantEC/skills' }: { command
   };
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
+    <div className="my-6 flex items-center gap-3 rounded-xl border border-border px-4 py-3">
       {/* `select-all` so a reader without clipboard permission — or one who
           simply doesn't trust a copy button — can take it in one gesture. */}
       <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap font-mono text-sm">

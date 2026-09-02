@@ -568,7 +568,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
    */
   if (mode === 'empty') {
     return (
-      <div className="flex w-full flex-col gap-3">
+      <div className="my-6 flex w-full flex-col gap-3">
         <div className="rounded-2xl border border-border bg-fg/2 p-1.5">
           <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center">
             <p className="max-w-[38ch] text-muted text-xs leading-relaxed">
@@ -594,7 +594,12 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     // and matching the prose means filling that rather than picking a number
     // beside it. A second cap here is how the card ended up narrower than the
     // paragraphs under it.
-    <div className="flex w-full flex-col gap-3">
+    // `mb-6` rather than nothing: every other block in `MdxBody`'s element map
+    // owns its own bottom margin, and without one the panel had 0px under it —
+    // making a 500px interactive card the *tightest* join on the page, with the
+    // grid readout jammed against the next sentence. 24px also puts it a step
+    // above a paragraph's own 16px, so the gap says "different kind of thing".
+    <div className="my-6 flex w-full flex-col gap-3">
       {/* One ring, and the art is all that is inside it now. The radii stay
           concentric — the inner 10px plus the 6px of padding equals the outer
           16px — so the two curves remain parallel. The controls moved to
