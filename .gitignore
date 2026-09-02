@@ -39,3 +39,7 @@ package-lock.json
 # `npx skills add`, the same way node_modules is restored from a lockfile.
 .agents/
 .claude/
+
+# Vercel CLI link state
+.vercel
+.env*
