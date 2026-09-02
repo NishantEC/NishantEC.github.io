@@ -45,7 +45,14 @@ const SIDE: Segment[] = [
     reveal:
       'the-resume-thing turns your actual GitHub and Linear activity into résumé bullets, each one linked back to the commit it came from.',
   },
-  ', which sources every claim it makes.',
+  ', which sources every claim it makes. The tooling I build alongside agents gets published as ',
+  {
+    label: 'skills',
+    href: 'https://github.com/NishantEC/skills',
+    reveal:
+      'Agent skills, installable in one command. The first turns real footage into an animated ASCII asset and ships the measurements that shaped it.',
+  },
+  ' anyone can install.',
 ];
 
 const Hero = () => {
@@ -66,11 +73,11 @@ const Hero = () => {
           </div>
         </div>
 
+        {/* The compressed sidebar says what he does, not who for. The employer
+            is one scroll away in the experience section, and naming it here
+            made the whole panel read as a job title rather than an index. */}
         <p className="text-sm leading-[22px] text-muted">
-          <Prose>
-            Building AI-facing product interfaces at{' '}
-            <strong className="text-fg">Healthifyme</strong>, and developer tools on the side.
-          </Prose>
+          <Prose>Building stuff — product interfaces, and developer tools on the side.</Prose>
         </p>
 
         <div className="flex items-center gap-3">

@@ -3,7 +3,7 @@ import ticketeLogo from '../assets/logo-tickete.png';
 
 export const profile = {
   name: 'Nishant Gupta',
-  role: 'Frontend Engineer',
+  role: 'Software Engineer',
   location: 'Bangalore, India',
   status: 'Open to interesting work',
   email: 'guptanishant1307@gmail.com',
@@ -29,8 +29,9 @@ export type Job = {
 export const experience: Job[] = [
   {
     company: 'Healthifyme',
-    // TODO(nishant): confirm when the title changed — 2025 is a placeholder.
-    // Resume (2024) says Frontend Developer; GitHub bio now says Software Engineer.
+    // The promotion date is still a guess: 2024 material says Frontend
+    // Developer, the GitHub bio says Software Engineer, and nothing records
+    // when it changed. A LinkedIn export would settle it.
     title: 'Software Engineer',
     period: '2025 - Present',
     location: 'Bangalore',
@@ -54,17 +55,20 @@ export const experience: Job[] = [
   },
   {
     company: 'Tickete',
-    title: 'Frontend Engineer',
+    title: 'Software Engineer',
     period: '2023 - 2024',
     location: 'Bangalore',
     logo: ticketeLogo,
     bullets: [
-      { text: 'Built modular, customisable UI components that cut development time by 30%.' },
       {
-        text: 'Tripled SEO and accessibility across 200+ product pages, lifting organic traffic by 50%.',
+        text: 'Built the shared component library the booking product was assembled from, so a new page was composition rather than a rewrite.',
+        tooltip: 'Roughly a third off the time it took to stand up a new surface.',
       },
       {
-        text: 'Implemented a multi-variant booking system that raised sales 15% and repeat visits 20%.',
+        text: 'Took 200+ product pages from failing SEO and accessibility audits to passing, which is where most of the organic traffic came from.',
+      },
+      {
+        text: 'Shipped multi-variant booking — the same product sold as several ticket types, priced and scheduled independently.',
       },
     ],
     stack: ['React', 'TypeScript', 'SCSS', 'RestAPI'],

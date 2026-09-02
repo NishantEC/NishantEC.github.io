@@ -104,7 +104,7 @@ const Contacts = () => {
                 Follow
               </a>
             </div>
-            <span className="text-sm text-muted">Frontend engineer, building developer tools</span>
+            <span className="text-sm text-muted">Software engineer, building developer tools</span>
           </div>
         </>
       ),

@@ -7,7 +7,7 @@ import { type PanelTab, tabPath } from './PanelProvider';
 import { usePanel } from './usePanel';
 
 const DEFAULT_DESCRIPTION =
-  'Frontend engineer in Bangalore building AI-facing product interfaces at Healthifyme, and developer tools on the side.';
+  'Software engineer in Bangalore. Building product interfaces, and developer tools on the side.';
 
 /** Each open item gets its own description, so shared links unfurl usefully. */
 const descriptionFor = (tab: PanelTab) => {
