@@ -528,9 +528,11 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
         <div className="flex flex-col rounded-[10px] border border-border/60 sm:flex-row">
           <div
             ref={stageRef}
-            className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px] ${
-              mode === 'working' || mode === 'approve' ? 'items-start' : 'aspect-square'
-            }`}
+            // Square in every mode. It used to grow to fit the stacked pipeline,
+            // so the panel changed height twice during a run — once when the
+            // stages appeared and once when they were replaced by the art. The
+            // stages are tabs now and fit inside the square.
+            className="grid aspect-square w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px]"
             style={{ background: bg }}
           >
             {mode === 'empty' ? (
@@ -553,7 +555,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
                 </button>
               </div>
             ) : mode === 'working' || mode === 'approve' ? (
-              <div className="h-full w-full overflow-y-auto p-3">
+              <div className="h-full w-full p-3">
                 <Pipeline
                   current={stage}
                   progress={progress}
@@ -656,8 +658,12 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
           </button>
         )}
 
+        {/* Only says a size once there is a clip the size belongs to. While the
+            pipeline runs, `grid` still holds the fallback the fit calculation
+            starts from, and printing that beside a working panel read as a
+            measurement of the file being processed. */}
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {mode === 'empty'
+          {mode === 'empty' || mode === 'working' || mode === 'approve'
             ? 'decoded in your browser'
             : `${grid.cols}×${grid.rows} · ${(
                 (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]

@@ -24,12 +24,30 @@ import { EASE } from '../../utils/motion';
  * next resolves in its place, which reads as the same mark changing state
  * rather than two icons briefly overlapping. `mode="wait"` is what makes that
  * sequential; without it both are mounted at once and the blur just muddies.
+ *
+ * The blur is smaller than it was and lasts longer. At 5px over 160ms there was
+ * nothing to see: the icon was a smear for two frames and then it was a tick,
+ * which reads as a hard swap. 3px is still legible as the same mark going soft,
+ * and the duration is what lets you watch it happen.
+ *
+ * Out is quicker than in, and they move opposite ways: the old mark sinks and
+ * softens, the new one rises and sharpens into place. Symmetrical timing made
+ * the pause in the middle — `mode="wait"` holds an empty button between the two
+ * — long enough to notice as a gap.
  */
+const ENTER = { duration: 0.34, ease: EASE } as const;
+/**
+ * Eased *in*, unlike everything else here. `EASE` is front-loaded — almost all
+ * of its change lands in the first fifth — which on the way out means the old
+ * icon is gone by the second frame and the rest of the exit is an empty button.
+ * This holds it a moment, then lets it go.
+ */
+const LEAVE = { duration: 0.18, ease: [0.4, 0, 1, 1] } as const;
+
 const ICON_MOTION = {
-  initial: { opacity: 0, filter: 'blur(5px)', scale: 0.7 },
-  animate: { opacity: 1, filter: 'blur(0px)', scale: 1 },
-  exit: { opacity: 0, filter: 'blur(5px)', scale: 0.7 },
-  transition: { duration: 0.16, ease: EASE },
+  initial: { opacity: 0, filter: 'blur(3px)', scale: 0.86, y: 5 },
+  animate: { opacity: 1, filter: 'blur(0px)', scale: 1, y: 0, transition: ENTER },
+  exit: { opacity: 0, filter: 'blur(3px)', scale: 0.86, y: -5, transition: LEAVE },
 } as const;
 
 /**
