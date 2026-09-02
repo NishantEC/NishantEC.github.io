@@ -1,7 +1,7 @@
 import { cloneElement, Fragment, isValidElement, type ReactNode } from 'react';
 import { useReading } from './useReading';
 
-/** How much of each word is thickened. Matches the stash demo's default. */
+/** How much of each word is thickened. Matches the archived bionic-reading draft. */
 const RATIO = 0.5;
 
 /**

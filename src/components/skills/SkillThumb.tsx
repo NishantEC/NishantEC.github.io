@@ -1,7 +1,7 @@
-import type { StashMeta } from '../../content/schema';
+import type { SkillMeta } from '../../content/schema';
 
 /** Static preview of each playground, used on the cards. */
-const StashThumb = ({ demo }: { demo: StashMeta['demo'] }) => {
+const SkillThumb = ({ demo }: { demo: SkillMeta['demo'] }) => {
   if (demo === 'bionic') {
     return (
       <div className="flex h-full items-center justify-center px-5 text-center text-sm leading-5">
@@ -31,4 +31,4 @@ const StashThumb = ({ demo }: { demo: StashMeta['demo'] }) => {
   return null;
 };
 
-export default StashThumb;
+export default SkillThumb;

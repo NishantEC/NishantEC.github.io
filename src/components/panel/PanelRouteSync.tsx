@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { projects, stash } from '../../content/collections';
+import { projects, skills } from '../../content/collections';
 import { profile } from '../../data/profile';
 import { useDocumentMeta } from '../../utils/useDocumentMeta';
-import { type PanelTab, tabPath } from './PanelProvider';
+import { KIND_BY_SEGMENT, type PanelTab, tabPath } from './PanelProvider';
 import { usePanel } from './usePanel';
 
 const DEFAULT_DESCRIPTION =
@@ -14,7 +14,7 @@ const descriptionFor = (tab: PanelTab) => {
   if (tab.kind === 'project') {
     return projects.find((p) => p.slug === tab.slug)?.tagline ?? DEFAULT_DESCRIPTION;
   }
-  return stash.find((v) => v.slug === tab.slug)?.blurb ?? DEFAULT_DESCRIPTION;
+  return skills.find((v) => v.slug === tab.slug)?.blurb ?? DEFAULT_DESCRIPTION;
 };
 
 /**
@@ -24,7 +24,10 @@ const descriptionFor = (tab: PanelTab) => {
  * document — a second copy of this rule would drift from `isKnownPath`.
  */
 export const tabFromPath = (pathname: string): PanelTab | null => {
-  const [, kind, slug] = pathname.split('/');
+  const [, segment, slug] = pathname.split('/');
+  // The segment is the section's name in the URL; the kind is what a tab calls
+  // itself. See `SEGMENT` in PanelProvider for why they are not assumed equal.
+  const kind = KIND_BY_SEGMENT[segment];
 
   if (kind === 'project') {
     const project = projects.find((p) => p.slug === slug);
@@ -33,10 +36,10 @@ export const tabFromPath = (pathname: string): PanelTab | null => {
       : null;
   }
 
-  if (kind === 'stash') {
-    const entry = stash.find((v) => v.slug === slug);
+  if (kind === 'skill') {
+    const entry = skills.find((v) => v.slug === slug);
     return entry
-      ? { id: `stash:${entry.slug}`, kind: 'stash', slug: entry.slug, title: entry.title }
+      ? { id: `skill:${entry.slug}`, kind: 'skill', slug: entry.slug, title: entry.title }
       : null;
   }
 

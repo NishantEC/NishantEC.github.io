@@ -51,7 +51,7 @@ export type PostMeta = {
   draft?: boolean;
 };
 
-export type StashMeta = {
+export type SkillMeta = {
   title: string;
   slug: string;
   blurb: string;

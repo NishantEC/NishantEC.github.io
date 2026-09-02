@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 /**
- * A section marker for stash entries: a muted slash, the name, and a hairline
+ * A section marker for skill pages: a muted slash, the name, and a hairline
  * running out to the right edge.
  *
  * Case-study headings are display italic and want to be read as titles. These

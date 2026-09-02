@@ -66,7 +66,7 @@ const components: Record<string, ComponentType<{ children?: ReactNode }>> = {
 };
 
 /**
- * `empty:hidden` matters for entries that are only a demo — a stash item can
+ * `empty:hidden` matters for entries that are only a demo — a skill can
  * have frontmatter and no prose, and without this its empty wrapper still
  * collects a flex gap from the layout around it.
  */

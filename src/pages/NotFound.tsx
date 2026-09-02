@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router';
 
-import { projects, stash } from '../content/collections';
+import { projects, skills } from '../content/collections';
 
 /**
  * Levenshtein distance, iterative with a single row. The candidate set is a
@@ -27,7 +27,7 @@ const distance = (a: string, b: string) => {
 
 const ROUTES = [
   ...projects.map((p) => ({ path: `/project/${p.slug}`, label: p.title, kind: 'project' })),
-  ...stash.map((s) => ({ path: `/stash/${s.slug}`, label: s.title, kind: 'stash' })),
+  ...skills.map((s) => ({ path: `/skills/${s.slug}`, label: s.title, kind: 'skill' })),
 ];
 
 /**

@@ -9,12 +9,12 @@ import { usePanelShortcuts } from './components/panel/usePanelShortcuts';
 import Experience from './components/sections/Experience';
 import Hero from './components/sections/Hero';
 import OpenSource from './components/sections/OpenSource';
+import Skills from './components/sections/Skills';
 import Stack from './components/sections/Stack';
-import Stash from './components/sections/Stash';
 import StandaloneItem from './components/standalone/StandaloneItem';
 import BlurGradient from './components/ui/BlurGradient';
 import SectionSpine from './components/ui/SectionSpine';
-import { projects, stash } from './content/collections';
+import { projects, skills } from './content/collections';
 import NotFound from './pages/NotFound';
 import { EASE, SPLIT_DURATION } from './utils/motion';
 
@@ -28,7 +28,7 @@ const Page = ({ isSplit, duration }: { isSplit: boolean; duration: number }) => 
   // read-only detail that nothing in the pane links to, so at that width they
   // cost space without earning it.
   const present = [
-    ...(stash.length > 0 ? ['stash'] : []),
+    ...(skills.length > 0 ? ['skills'] : []),
     ...(projects.length > 0 ? ['projects'] : []),
   ];
 
@@ -68,12 +68,12 @@ const Page = ({ isSplit, duration }: { isSplit: boolean; duration: number }) => 
           they share one spine, which is why they need a wrapper there. */}
       {isSplit ? (
         <SectionSpine>
-          <Stash index={indexOf('stash')} />
+          <Skills index={indexOf('skills')} />
           <OpenSource index={indexOf('projects')} />
         </SectionSpine>
       ) : (
         <>
-          <Stash index={indexOf('stash')} />
+          <Skills index={indexOf('skills')} />
           <OpenSource index={indexOf('projects')} />
           <Stack index={indexOf('stack')} />
         </>
@@ -91,7 +91,7 @@ const ItemRoute = ({
   kind,
   ...page
 }: {
-  kind: 'project' | 'stash';
+  kind: 'project' | 'skill';
   isSplit: boolean;
   duration: number;
 }) => {
@@ -100,7 +100,7 @@ const ItemRoute = ({
   const exists =
     kind === 'project'
       ? projects.some((project) => project.slug === slug)
-      : stash.some((item) => item.slug === slug);
+      : skills.some((item) => item.slug === slug);
 
   return exists ? <Page {...page} /> : <NotFound />;
 };
@@ -189,8 +189,8 @@ function App() {
               element={<ItemRoute kind="project" isSplit={isSplit} duration={duration} />}
             />
             <Route
-              path="/stash/:slug"
-              element={<ItemRoute kind="stash" isSplit={isSplit} duration={duration} />}
+              path="/skills/:slug"
+              element={<ItemRoute kind="skill" isSplit={isSplit} duration={duration} />}
             />
             <Route path="*" element={<NotFound />} />
           </Routes>

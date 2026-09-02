@@ -63,9 +63,9 @@ const Menu = () => {
             onSelect: () => scrollToSection('experience'),
           },
           {
-            name: 'Stash',
+            name: 'Skills',
             icon: <ArchiveIcon />,
-            onSelect: () => scrollToSection('stash'),
+            onSelect: () => scrollToSection('skills'),
           },
           { name: 'Open source', icon: <StarIcon />, onSelect: () => scrollToSection('projects') },
           { name: 'Stack', icon: <CodeBracketIcon />, onSelect: () => scrollToSection('stack') },

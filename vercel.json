@@ -17,5 +17,12 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/stash/:slug",
+      "destination": "/skills/:slug",
+      "permanent": true
+    }
   ]
 }

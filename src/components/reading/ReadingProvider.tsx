@@ -14,12 +14,12 @@ export const ReadingContext = createContext<ReadingContextValue>({
 });
 
 /**
- * The stash entry demos half-bolding on a sample paragraph. This applies it to
+ * The archived bionic-reading draft demos half-bolding on a sample paragraph. This applies it to
  * the site's own writing, which is a better argument for the idea than a demo
  * is — and makes the toggle a real accessibility control rather than a toy.
  *
  * Off by default: it's a preference, and imposing it on a first-time reader
- * would be exactly the mistake the stash entry is sceptical about.
+ * would be exactly the mistake that draft is sceptical about.
  */
 export const ReadingProvider = ({ children }: { children: ReactNode }) => {
   const [bionic, setBionicState] = useState(() => localStorage.getItem(STORAGE_KEY) === 'bionic');

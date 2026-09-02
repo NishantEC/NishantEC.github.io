@@ -1,4 +1,4 @@
-import type { Entry, NoteMeta, PostMeta, ProjectMeta, StashMeta } from './schema';
+import type { Entry, NoteMeta, PostMeta, ProjectMeta, SkillMeta } from './schema';
 
 /**
  * Loads every MDX file at build time.
@@ -30,7 +30,7 @@ export const posts = load<PostMeta>(import.meta.glob('./posts/*.mdx', { eager: t
   (a, b) => b.date.localeCompare(a.date),
 );
 
-export const stash = load<StashMeta>(import.meta.glob('./stash/*.mdx', { eager: true })).sort(
+export const skills = load<SkillMeta>(import.meta.glob('./skills/*.mdx', { eager: true })).sort(
   (a, b) => b.date.localeCompare(a.date),
 );
 
@@ -38,13 +38,13 @@ export const notes = load<NoteMeta>(import.meta.glob('./notes/*.mdx', { eager: t
 
 export const findProject = (slug: string) => projects.find((p) => p.slug === slug);
 export const findPost = (slug: string) => posts.find((p) => p.slug === slug);
-export const findStash = (slug: string) => stash.find((s) => s.slug === slug);
+export const findSkill = (slug: string) => skills.find((s) => s.slug === slug);
 
 /** Every route the content produces — the sitemap and prerender both read this. */
 export const contentRoutes = () => [
   '/',
   '/writing',
   ...projects.map((p) => `/project/${p.slug}`),
-  ...stash.map((s) => `/stash/${s.slug}`),
+  ...skills.map((s) => `/skills/${s.slug}`),
   ...posts.map((p) => `/writing/${p.slug}`),
 ];

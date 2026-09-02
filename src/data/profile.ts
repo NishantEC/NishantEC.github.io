@@ -86,7 +86,7 @@ export const experience: Job[] = [
 ];
 
 /**
- * Projects and stash entries used to live here as literals. They're now MDX
+ * Projects and skills entries used to live here as literals. They're now MDX
  * files under `src/content`, loaded through `content/collections.ts`, so a
  * project carries its own case study rather than a single tagline. Identity and
  * work history stay here: they aren't documents, and nothing renders them as

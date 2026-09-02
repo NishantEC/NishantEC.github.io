@@ -27,7 +27,7 @@ export const printConsoleGreeting = () => {
 
 You found the console. Two things worth knowing:
 
-  ⌘K          search every project, stash entry and setting
+  ⌘K          search every project, skill and setting
   1…9 / w     switch and close panel tabs
 
 Source: ${profile.socials.github}/NishantEC.github.io

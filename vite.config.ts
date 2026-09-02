@@ -40,7 +40,7 @@ const slugsIn = (dir: string) => {
 const ROUTES = [
   '/',
   ...slugsIn('projects').map((slug) => `/project/${slug}`),
-  ...slugsIn('stash').map((slug) => `/stash/${slug}`),
+  ...slugsIn('skills').map((slug) => `/skills/${slug}`),
 ];
 
 /**

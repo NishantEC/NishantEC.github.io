@@ -1,9 +1,9 @@
 import { createContext, type ReactNode, useCallback, useMemo, useState } from 'react';
 
 export type PanelTab = {
-  /** Stable key — `project:herm`, `stash:bionic-reading`. */
+  /** Stable key — `project:herm`, `skill:video-to-ascii`. */
   id: string;
-  kind: 'project' | 'stash';
+  kind: 'project' | 'skill';
   slug: string;
   title: string;
 };
@@ -32,8 +32,23 @@ const SIDEBAR_DEFAULT = 32;
 const SIDEBAR_KEY = 'sidebar-width';
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
 
+/**
+ * The URL segment each kind lives under.
+ *
+ * Stated rather than interpolated from `tab.kind`. The kind is the singular
+ * noun for one entry and the segment is the section it belongs to, and those
+ * are only the same string by coincidence — they were, while the section was
+ * called "stash", and interpolating the kind silently produced `/skill/...`
+ * the moment it wasn't. Both directions read from here, so they cannot drift.
+ */
+const SEGMENT = { project: 'project', skill: 'skills' } as const;
+
+export const KIND_BY_SEGMENT = Object.fromEntries(
+  Object.entries(SEGMENT).map(([kind, segment]) => [segment, kind]),
+) as Record<string, PanelTab['kind'] | undefined>;
+
 /** The URL for a tab. The active tab lives on a route; the rest are only in state. */
-export const tabPath = (tab: PanelTab) => `/${tab.kind}/${tab.slug}`;
+export const tabPath = (tab: PanelTab) => `/${SEGMENT[tab.kind]}/${tab.slug}`;
 
 export const PanelContext = createContext<PanelContextValue>({
   tabs: [],

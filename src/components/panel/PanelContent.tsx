@@ -1,15 +1,15 @@
 import { motion } from 'motion/react';
 import type { ComponentType } from 'react';
 import GithubIcon from '~icons/simple-icons/github';
-import { findProject, findStash } from '../../content/collections';
+import { findProject, findSkill } from '../../content/collections';
 import type { ProjectStatus } from '../../content/schema';
 import MdxBody from '../content/MdxBody';
 import ProjectThumb from '../projects/ProjectThumb';
 import Prose from '../reading/Prose';
-import AsciiArt from '../stash/AsciiArt';
-import BionicDemo from '../stash/BionicDemo';
-import SectionLabel from '../stash/SectionLabel';
-import SkillInstall from '../stash/SkillInstall';
+import AsciiArt from '../skills/AsciiArt';
+import BionicDemo from '../skills/BionicDemo';
+import SectionLabel from '../skills/SectionLabel';
+import SkillInstall from '../skills/SkillInstall';
 
 import type { PanelTab } from './PanelProvider';
 
@@ -100,8 +100,8 @@ const ASCII_PARTS = {
   Playground: () => <AsciiArt variant="playground" />,
 } as unknown as Record<string, ComponentType>;
 
-const StashView = ({ slug }: { slug: string }) => {
-  const entry = findStash(slug);
+const SkillView = ({ slug }: { slug: string }) => {
+  const entry = findSkill(slug);
   if (!entry) return null;
 
   // Most entries are a demo with prose under it, and the layout can put the
@@ -111,7 +111,7 @@ const StashView = ({ slug }: { slug: string }) => {
   const composed = entry.demo === 'ascii';
 
   return (
-    /* The demo comes first. A stash entry is something to play with, not
+    /* The demo comes first. A skill page is something to play with, not
        something to read — prose above it just pushes the point below the fold. */
     <div className="flex w-full flex-col gap-6">
       {/* Everything shares the reading column so the heading, the demo and the
@@ -127,6 +127,6 @@ const StashView = ({ slug }: { slug: string }) => {
 };
 
 const PanelContent = ({ tab }: { tab: PanelTab }) =>
-  tab.kind === 'project' ? <ProjectView slug={tab.slug} /> : <StashView slug={tab.slug} />;
+  tab.kind === 'project' ? <ProjectView slug={tab.slug} /> : <SkillView slug={tab.slug} />;
 
 export default PanelContent;

@@ -6,7 +6,7 @@ const SAMPLE =
 
 const WORDS = SAMPLE.split(' ');
 
-/** Live playground for bionic reading — self-contained to this stash item. */
+/** Live playground for bionic reading — self-contained to that archived draft. */
 const BionicDemo = () => {
   const [ratio, setRatio] = useState(0.5);
   const [on, setOn] = useState(true);

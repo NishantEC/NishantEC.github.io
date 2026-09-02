@@ -106,7 +106,7 @@ const FusedTabs = ({ tabs, activeId, onSelect, onClose }: Props) => {
 
       {tabs.map((tab) => {
         const isActive = tab.id === activeId;
-        const Icon = tab.kind === 'stash' ? ArchiveIcon : StarIcon;
+        const Icon = tab.kind === 'skill' ? ArchiveIcon : StarIcon;
         const labelOpen = isLabelVisible(tab.id);
 
         return (

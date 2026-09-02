@@ -9,7 +9,7 @@ import MoonIcon from '~icons/heroicons/moon';
 import StarIcon from '~icons/heroicons/star';
 import SunIcon from '~icons/heroicons/sun';
 import XMarkIcon from '~icons/heroicons/x-mark';
-import { projects, stash } from '../../content/collections';
+import { projects, skills } from '../../content/collections';
 import { profile } from '../../data/profile';
 import { usePanel } from '../panel/usePanel';
 import { useReading } from '../reading/useReading';
@@ -68,16 +68,16 @@ const CommandPalette = () => {
           }),
       })),
 
-      ...stash.map((item) => ({
-        id: `stash:${item.slug}`,
+      ...skills.map((item) => ({
+        id: `skill:${item.slug}`,
         label: item.title,
-        group: 'Stash',
+        group: 'Skills',
         icon: <ArchiveIcon />,
         keywords: `${item.blurb} ${item.slug}`,
         run: () =>
           open({
-            id: `stash:${item.slug}`,
-            kind: 'stash' as const,
+            id: `skill:${item.slug}`,
+            kind: 'skill' as const,
             slug: item.slug,
             title: item.title,
           }),

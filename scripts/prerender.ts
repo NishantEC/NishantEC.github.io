@@ -113,7 +113,7 @@ export const prerender = async (dist: string, routes: string[]) => {
       // opened while crawling one route persist into the next, `PanelProvider`
       // restores the last one, and route-sync navigates away from the URL being
       // captured — which silently wrote hale's title and canonical into the
-      // stash page.
+      // skills page.
       const context = await browser.createBrowserContext();
       const page = await context.newPage();
 
