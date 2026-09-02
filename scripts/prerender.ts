@@ -33,6 +33,35 @@ const MIME: Record<string, string> = {
   '.woff2': 'font/woff2',
 };
 
+/**
+ * A browser to render with, from whichever source the environment can provide.
+ *
+ * Locally that is plain `puppeteer`, which ships its own Chromium. Vercel's
+ * build container does not have Chrome and refuses a 170MB download, so there
+ * it is `puppeteer-core` driving `@sparticuz/chromium` — a build of Chromium
+ * packaged for exactly that environment.
+ *
+ * The import is dynamic and inside the branch so the local path never loads the
+ * serverless build, and a machine without it still builds.
+ */
+const launchBrowser = async () => {
+  if (!process.env.VERCEL) {
+    const puppeteer = (await import('puppeteer')).default;
+    return puppeteer.launch({ args: ['--no-sandbox'] });
+  }
+
+  const [{ default: chromium }, { default: core }] = await Promise.all([
+    import('@sparticuz/chromium'),
+    import('puppeteer-core'),
+  ]);
+
+  return core.launch({
+    args: chromium.args,
+    executablePath: await chromium.executablePath(),
+    headless: true,
+  });
+};
+
 /** Static file server over `dist`, with the SPA fallback the real host provides. */
 const serve = (root: string) =>
   createServer(async (req, res) => {
@@ -52,14 +81,11 @@ const serve = (root: string) =>
   });
 
 export const prerender = async (dist: string, routes: string[]) => {
-  // Imported lazily so `vite.config.ts` stays cheap to load for `vite dev`.
-  const { default: puppeteer } = await import('puppeteer');
-
   const server = serve(dist);
   await new Promise<void>((done) => server.listen(0, '127.0.0.1', done));
   const { port } = server.address() as { port: number };
 
-  const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+  const browser = await launchBrowser();
   let written = 0;
 
   try {
