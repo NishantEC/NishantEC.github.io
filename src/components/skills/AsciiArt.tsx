@@ -84,9 +84,6 @@ const PALETTES = {
   blueprint: { ink: '#93c5fd', ink2: '#1d4ed8', bg: '#050b16' },
 } as const;
 
-const BTN =
-  'shrink-0 rounded-lg border border-border px-2.5 py-1.5 text-muted text-xs outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-accent/60';
-
 /**
  * The theme DialKit should wear, resolved rather than preferred.
  *
@@ -149,14 +146,30 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
         default: JELLY_SPEED_DEFAULT,
       },
       playback: true as boolean,
-      /* Only where it can do something. See the note at the top of the file. */
+      /* Only where they can do something. Density is explained at the top of
+         the file; the rest need a clip, and the demo has one that cannot be
+         swapped, cleared or compared against a source it does not have. */
       ...(variant === 'playground'
-        ? { density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' } }
+        ? {
+            density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
+            compare: true as boolean,
+            choose: { type: 'action' as const, label: 'Choose another' },
+            clear: { type: 'action' as const, label: 'Clear' },
+          }
         : {}),
     },
-    // Explicit, because `DialPanel` addresses the panel by id and a derived one
-    // would silently change if the display name ever did.
-    { id: panelId },
+    {
+      // Explicit, because `DialPanel` addresses the panel by id and a derived
+      // one would silently change if the display name ever did.
+      id: panelId,
+      // These were three buttons in a row under the card, which put the controls
+      // for a clip in two places — everything that shapes it inside the panel,
+      // everything that replaces it outside. They are rows in the panel now.
+      onAction: (action) => {
+        if (action === 'choose') fileRef.current?.click();
+        if (action === 'clear') reset();
+      },
+    },
   );
 
   const v = dial.values;
@@ -166,6 +179,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const bg = v.background;
   const playing = v.playback;
   const density = (v.density ?? 'normal') as DensityName;
+  const compare = v.compare !== false;
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: applies the preference once; adding `dial` would re-fire it and override the reader turning playback back on.
   useEffect(() => {
@@ -214,7 +228,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [compare, setCompare] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -707,33 +720,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       {/* Outside the ring: the ring frames the output, not the controls for
           getting one. */}
       <div className="flex flex-wrap items-center gap-1.5">
-        {/* The demo has no upload button. Bringing your own clip is what the
-            playground below is, and offering it twice made one panel that was
-            two things — which is how `density` ended up on a panel that could
-            never honour it. */}
-        {isPlayground && (
-          <button type="button" onClick={() => fileRef.current?.click()} className={BTN}>
-            choose another
-          </button>
-        )}
-
-        {isPlayground && mode === 'custom' && (
-          <button type="button" onClick={reset} className={BTN}>
-            clear
-          </button>
-        )}
-
-        {mode === 'custom' && (
-          <button
-            type="button"
-            onClick={() => setCompare((c) => !c)}
-            aria-pressed={compare}
-            className={BTN}
-          >
-            {compare ? 'hide source' : 'compare with source'}
-          </button>
-        )}
-
         {/* By here there is always a clip, so the size always belongs to
             something. The empty and working states return their own band above
             and never reach this row. */}
