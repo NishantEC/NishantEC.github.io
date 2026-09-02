@@ -29,14 +29,13 @@ export type Job = {
 export const experience: Job[] = [
   {
     company: 'Healthifyme',
-    // The promotion date is still a guess: 2024 material says Frontend
-    // Developer, the GitHub bio says Software Engineer, and nothing records
-    // when it changed. A LinkedIn export would settle it.
     title: 'Software Engineer',
-    period: '2025 - Present',
+    // One span, not two. The `previously` rail exists to show a title changing
+    // partway through a stint; with one title throughout it printed the same
+    // words twice under themselves.
+    period: '2024 - Present',
     location: 'Bangalore',
     logo: healthifymeLogo,
-    previously: [{ period: '2024 - 2025', title: 'Frontend Developer' }],
     bullets: [
       {
         text: 'Built the interface for RIA, an AI health coach, including the full onboarding flow for new users.',
@@ -75,7 +74,7 @@ export const experience: Job[] = [
   },
   {
     company: 'BleedingEdge Technologies',
-    title: 'Frontend Developer',
+    title: 'Software Engineer',
     period: '2023',
     location: 'Mumbai',
     bullets: [

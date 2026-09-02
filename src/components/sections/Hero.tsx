@@ -95,7 +95,7 @@ const Hero = () => {
       <div className="flex flex-col gap-4 leading-[26px] text-muted">
         <p>
           <Prose>
-            👋 Hey! I'm a <strong className="text-fg">frontend engineer</strong> with 3+ years of
+            👋 Hey! I'm a <strong className="text-fg">software engineer</strong> with 3+ years of
             experience, building AI-facing product interfaces and developer tooling. Based in{' '}
             <strong className="text-fg">Bangalore, India 🇮🇳</strong>.
           </Prose>
