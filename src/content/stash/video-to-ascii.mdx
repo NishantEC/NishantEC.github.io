@@ -32,7 +32,8 @@ of present and inert.
 ## the playground
 
 Give it a source and the bake is yours to run. Same controls, plus the one the
-demo cannot honour.
+demo cannot honour. One button, then the result — the stages are described
+below rather than performed.
 
 <Playground />
 
@@ -61,9 +62,9 @@ Cells are averaged and normalised against **one global peak** across the whole
 clip. Per-frame normalisation makes a dark frame as bright as a light one, and
 the flicker that produces reads as a rendering fault.
 
-Then a human approves the crop and the grid before anything is baked, because
-every one of those decisions is a judgement call that looks fine in aggregate
-and wrong on a specific clip.
+Every one of those is a judgement call that looks fine in aggregate and wrong on
+a specific clip, which is why the skill stops and asks before it writes a sheet.
+The playground above does not — it has one clip and you can see the answer.
 
 The skill ships its measurements too — including the frame rate that judders on
 every frame by construction, and the re-centring that made motion three times

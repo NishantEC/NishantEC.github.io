@@ -1,6 +1,6 @@
 import { type DialValue, useDialKitController } from 'dialkit';
 import 'dialkit/styles.css';
-import { useReducedMotion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import {
   JELLY_ATLAS,
@@ -12,7 +12,6 @@ import {
 import { loadAtlas } from '../../utils/atlas';
 import { useFrameClock } from '../../utils/useFrameClock';
 import {
-  type Baked,
   bake,
   type Crop,
   DEFAULT_SETTINGS,
@@ -28,7 +27,6 @@ import {
 } from '../../utils/videoToAscii';
 import CompareSlider from './CompareSlider';
 import DialPanel from './DialPanel';
-import Pipeline from './Pipeline';
 
 /**
  * A clip played back as ASCII, with the mapping exposed as controls.
@@ -201,24 +199,21 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
 
   /**
    * The demo opens on `atlas` and stays there. The playground opens on `empty`
-   * — no clip at all — and walks `working` → `approve` → `custom` once given
-   * one. `empty` is a real state rather than a null clip so the stage can say
-   * what it wants instead of showing a blank square.
+   * — no clip at all — works while it bakes, then lands on `custom`.
+   *
+   * There used to be an `approve` step, with the whole pipeline drawn stage by
+   * stage: the frames as they were sampled, the occupancy histograms, the grid
+   * filling in. It explained the algorithm well and got in the way of the thing
+   * the reader came for, which is their own clip rendered as characters. The
+   * explanation lives in the prose now; this just runs.
    */
-  const [mode, setMode] = useState<'atlas' | 'empty' | 'working' | 'approve' | 'custom'>(
+  const [mode, setMode] = useState<'atlas' | 'empty' | 'working' | 'custom'>(
     isPlayground ? 'empty' : 'atlas',
   );
-  const [stage, setStage] = useState(0);
   const [progress, setProgress] = useState<Progress | null>(null);
-  const [previewFrame, setPreviewFrame] = useState<string | null>(null);
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
-  const [baked, setBaked] = useState<Baked | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** Accumulated so the strip and the grid persist past the tick that made them. */
-  const [thumbs, setThumbs] = useState<string[]>([]);
-  const [gridRows, setGridRows] = useState<string[]>([]);
-  const [hits, setHits] = useState<{ col?: Float32Array; row?: Float32Array }>({});
   const [compare, setCompare] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -351,26 +346,9 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     cancelRef.current = signal;
 
     setError(null);
-    setBaked(null);
     setCrop(null);
-    setPreviewFrame(null);
     setMode('working');
-    setStage(0);
     setProgress(null);
-    setThumbs([]);
-    setGridRows([]);
-    setHits({});
-
-    // `onProgress` fires per frame; the drawable state has to outlive the tick
-    // that produced it, so it is lifted out of the transient progress object.
-    const onProgress = (next: Progress) => {
-      setProgress(next);
-      if (next.thumb) setThumbs((prev) => [...prev, next.thumb as string]);
-      if (next.gridRows) setGridRows(next.gridRows);
-      // Held past the stage that produced them: the histograms *are* the crop
-      // search, so they should stay legible once it has finished, not blink out.
-      if (next.colHits) setHits({ col: next.colHits, row: next.rowHits });
-    };
 
     try {
       const { video, url } = await decode(file);
@@ -378,55 +356,42 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       objectUrlRef.current = url;
       videoRef.current = video;
 
-      setStage(1);
-      const shot = await sample(video, onProgress, signal);
+      const shot = await sample(video, setProgress, signal);
       if (signal.cancelled || shot.frames.length === 0) return;
       setSampled(shot);
 
-      // A real frame to draw the crop box over, so the search is legible.
-      const preview = document.createElement('canvas');
-      preview.width = shot.width;
-      preview.height = shot.height;
-      preview.getContext('2d')?.putImageData(shot.frames[Math.floor(shot.frames.length / 2)], 0, 0);
-      setPreviewFrame(preview.toDataURL('image/png'));
-
-      setStage(2);
-      // Yield so the crop frame paints before the search blocks the thread.
+      // Yield between the blocking passes so the progress line can repaint;
+      // both `findSubject` and `bake` hold the thread for their whole run.
       await new Promise((r) => requestAnimationFrame(() => r(null)));
-      const box = findSubject(shot, DEFAULT_SETTINGS, onProgress);
+      const box = findSubject(shot, DEFAULT_SETTINGS, setProgress);
       if (signal.cancelled) return;
       setCrop(box);
 
-      setStage(3);
       await new Promise((r) => requestAnimationFrame(() => r(null)));
-      const result = bake(shot, box, DEFAULT_SETTINGS, onProgress);
+      const result = bake(shot, box, DEFAULT_SETTINGS, setProgress);
       if (signal.cancelled) return;
 
-      setBaked(result);
-      setStage(4);
-      setMode('approve');
+      // Straight onto the screen. There was an approve step here, which made
+      // sense while the panel was showing its working — you were confirming a
+      // crop you had watched being chosen. With the stages gone it was a button
+      // asking you to accept something you had not been shown.
+      clipRef.current = { grids: result.grids, cols: result.cols, rows: result.rows };
+      frameRef.current = 0;
+      setGrid({ cols: result.cols, rows: result.rows });
+      // The sampled frames are kept rather than freed: changing density re-bakes
+      // from them, and re-seeking the clip to get them back would cost seconds.
+      // ~22MB for 96 frames at the sampling resolution, which is the price of
+      // making density a live control instead of a re-upload.
+      setMode('custom');
+      // The frame clock is gated on `ready`, which the demo gets from the atlas
+      // load. The playground never runs that, so this is what starts it.
+      setReady(true);
+      videoRef.current?.play().catch(() => {});
+      draw();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That file could not be processed.');
-      setMode('working');
+      setMode('empty');
     }
-  };
-
-  /** Commits the baked clip to the renderer. Nothing downstream changes. */
-  const approve = () => {
-    if (!baked) return;
-    clipRef.current = { grids: baked.grids, cols: baked.cols, rows: baked.rows };
-    frameRef.current = 0;
-    setGrid({ cols: baked.cols, rows: baked.rows });
-    // The sampled frames are kept rather than freed: changing density re-bakes
-    // from them, and re-seeking the clip to get them back would cost seconds.
-    // ~22MB for 96 frames at the sampling resolution, which is the price of
-    // making density a live control instead of a re-upload.
-    setMode('custom');
-    // The frame clock is gated on `ready`, which the demo gets from the atlas
-    // load. The playground never runs that, so approving is what starts it.
-    setReady(true);
-    videoRef.current?.play().catch(() => {});
-    draw();
   };
 
   /**
@@ -456,7 +421,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
       goes back to waiting, because there is nothing else for it to show. */
   const reset = () => {
     release();
-    setBaked(null);
     setSampled(null);
     setCrop(null);
     setError(null);
@@ -543,9 +507,9 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
               <div className="flex flex-col items-center gap-3 px-6 text-center">
                 <p className="font-mono text-muted text-xs">[ no clip ]</p>
                 <p className="max-w-[26ch] text-muted text-xs leading-relaxed">
-                  Choose a video and the skill&rsquo;s pipeline runs here, in this tab. Nothing is
-                  uploaded anywhere.
+                  Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
                 </p>
+                {error && <p className="max-w-[26ch] text-accent text-xs">{error}</p>}
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
@@ -554,20 +518,24 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
                   Choose a video
                 </button>
               </div>
-            ) : mode === 'working' || mode === 'approve' ? (
-              <div className="h-full w-full p-3">
-                <Pipeline
-                  current={stage}
-                  progress={progress}
-                  frame={previewFrame}
-                  crop={crop}
-                  width={sampled?.width ?? 1}
-                  height={sampled?.height ?? 1}
-                  error={error}
-                  thumbs={thumbs}
-                  gridRows={gridRows}
-                  hits={hits}
-                />
+            ) : mode === 'working' ? (
+              /* One line and a bar. The stages used to draw themselves here —
+                 sampled frames, occupancy histograms, the grid filling in —
+                 which explained the algorithm at the cost of standing between
+                 the reader and their own clip. `aria-live` so the wait is
+                 announced rather than only drawn. */
+              <div className="flex w-full max-w-[20rem] flex-col gap-2 px-6">
+                <p aria-live="polite" className="text-center font-mono text-muted text-xs">
+                  {progress?.detail ?? 'reading the file'}
+                </p>
+                <div className="h-0.5 w-full overflow-hidden rounded-full bg-fg/10">
+                  <motion.div
+                    className="h-full rounded-full bg-accent"
+                    initial={false}
+                    animate={{ width: `${(progress?.ratio ?? 0) * 100}%` }}
+                    transition={{ duration: 0.12 }}
+                  />
+                </div>
               </div>
             ) : mode === 'custom' && compare ? (
               <CompareSlider
@@ -637,16 +605,6 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
           </button>
         )}
 
-        {mode === 'approve' && (
-          <button
-            type="button"
-            onClick={approve}
-            className="rounded-lg bg-fg px-3 py-1.5 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
-          >
-            Approve {baked?.cols}×{baked?.rows}
-          </button>
-        )}
-
         {mode === 'custom' && (
           <button
             type="button"
@@ -659,11 +617,11 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
         )}
 
         {/* Only says a size once there is a clip the size belongs to. While the
-            pipeline runs, `grid` still holds the fallback the fit calculation
-            starts from, and printing that beside a working panel read as a
-            measurement of the file being processed. */}
+            bake runs, `grid` still holds the fallback the fit calculation starts
+            from, and printing that beside a working panel read as a measurement
+            of the file being processed. */}
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {mode === 'empty' || mode === 'working' || mode === 'approve'
+          {mode === 'empty' || mode === 'working'
             ? 'decoded in your browser'
             : `${grid.cols}×${grid.rows} · ${(
                 (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]
