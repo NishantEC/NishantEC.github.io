@@ -53,9 +53,11 @@ const CompareSlider = ({
       */
       className="relative isolate h-full w-full touch-none select-none overflow-hidden rounded-[10px] border border-border/60"
     >
-      <div className="absolute inset-0 grid place-items-center [&>*]:max-h-full [&>*]:max-w-full">
-        {left}
-      </div>
+      {/* No `max-w/max-h` clamp on the child: the source is now handed an
+          explicit box the same size as the character grid, and clamping it here
+          would shrink one layer and not the other — which is the drift this
+          component exists to avoid. */}
+      <div className="absolute inset-0 grid place-items-center">{left}</div>
 
       {/* Clipped, not resized. Both layers keep their full geometry. */}
       <div

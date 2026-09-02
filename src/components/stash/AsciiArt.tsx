@@ -444,6 +444,76 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     });
   };
 
+  /**
+   * The box the character grid actually occupies, in CSS pixels.
+   *
+   * `fontPx` is the fit at zoom 1 and the `<pre>` renders at `fontPx * zoom`,
+   * so this is what both layers of the compare have to agree on. It is computed
+   * here rather than measured because the source layer needs it before the
+   * ASCII has laid out.
+   */
+  /**
+   * Which way round the panel sits, taken from the clip rather than fixed.
+   *
+   * A 240px rail beside a 16:9 clip squeezes the video into a strip; the same
+   * rail beside a portrait or square one is the better shape, because the
+   * stage is tall and there is width going spare. So landscape puts the
+   * controls underneath and lets the clip have the full column.
+   *
+   * Only in the playground. The demo's sheet never changes, and its layout was
+   * chosen for it.
+   */
+  const clipAspect = crop && crop.w > 0 && crop.h > 0 ? crop.w / crop.h : null;
+  const sizedToClip = mode === 'custom' && clipAspect !== null;
+  const railBelow = isPlayground && sizedToClip && (clipAspect as number) > 1.2;
+
+  const cellPx = fontPx * zoom;
+  const artW = grid.cols * cellPx * cellRatio;
+  const artH = grid.rows * cellPx * 1.02;
+
+  /**
+   * The source, framed to match the ASCII exactly.
+   *
+   * Two things were wrong with showing the raw `<video>` beside it. The bake
+   * crops to the subject, so the ASCII is a crop of the clip while the video
+   * was the whole frame — the divider compared a detail against a wide shot.
+   * And `zoom` only ever scaled the `<pre>`, so moving it slid one side of the
+   * comparison out from under the other.
+   *
+   * So the video is scaled until the crop region measures the same as the
+   * character grid, then offset so that region sits at the origin, inside a
+   * window of exactly the grid's size. Both layers are then the same rectangle
+   * showing the same part of the same frame, and `zoom` moves them together.
+   */
+  const sourceNode =
+    crop && sampled ? (
+      <div className="relative overflow-hidden" style={{ width: `${artW}px`, height: `${artH}px` }}>
+        {/*
+          This element *is* the one the frame clock seeks. Rendering a second
+          video and syncing the offscreen one left two clocks running: the
+          divider then compared different instants, which is the one thing a
+          compare slider must not do.
+        */}
+        <video
+          ref={(el) => {
+            if (el) videoRef.current = el;
+          }}
+          src={objectUrlRef.current ?? undefined}
+          muted
+          playsInline
+          loop
+          autoPlay
+          className="absolute max-w-none"
+          style={{
+            width: `${(sampled.width / crop.w) * artW}px`,
+            height: `${(sampled.height / crop.h) * artH}px`,
+            left: `${-(crop.x / crop.w) * artW}px`,
+            top: `${-(crop.y / crop.h) * artH}px`,
+          }}
+        />
+      </div>
+    ) : null;
+
   const artNode = (
     <pre
       role="img"
@@ -472,6 +542,53 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
     </pre>
   );
 
+  /* Nothing is uploaded anywhere: the file becomes an object URL and is decoded
+     by the tab that opened it. Declared once and used by both returns below. */
+  const fileInput = (
+    <input
+      ref={fileRef}
+      type="file"
+      accept="video/*"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) runPipeline(file);
+        e.target.value = '';
+      }}
+      className="hidden"
+    />
+  );
+
+  /**
+   * Before there is a clip, the playground is a band rather than a panel.
+   *
+   * It used to be the full square with an empty stage and a control rail beside
+   * it — a set of controls for a thing that does not exist, taking the height of
+   * the finished piece to say so. There is exactly one thing to do here, so the
+   * card is the size of that one thing.
+   */
+  if (mode === 'empty') {
+    return (
+      <div className="flex w-full flex-col gap-3">
+        <div className="rounded-2xl border border-border bg-fg/2 p-1.5">
+          <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center">
+            <p className="max-w-[38ch] text-muted text-xs leading-relaxed">
+              Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
+            </p>
+            {error && <p className="max-w-[38ch] text-accent text-xs">{error}</p>}
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
+            >
+              Choose a video
+            </button>
+          </div>
+        </div>
+        {fileInput}
+      </div>
+    );
+  }
+
   return (
     // No width of its own: the parent in `PanelContent` is already `max-w-2xl`,
     // and matching the prose means filling that rather than picking a number
@@ -489,36 +606,22 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             tidy way to round DialKit's square edges, but its select menus
             render inside the panel rather than portalling out, so the clip ate
             the dropdown. Each side rounds its own corners instead. */}
-        <div className="flex flex-col rounded-[10px] border border-border/60 sm:flex-row">
+        <div
+          className={`flex rounded-[10px] border border-border/60 ${
+            railBelow ? 'flex-col' : 'flex-col sm:flex-row'
+          }`}
+        >
           <div
             ref={stageRef}
-            // Square in every mode. It used to grow to fit the stacked pipeline,
-            // so the panel changed height twice during a run — once when the
-            // stages appeared and once when they were replaced by the art. The
-            // stages are tabs now and fit inside the square.
-            className="grid aspect-square w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px]"
-            style={{ background: bg }}
+            className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] ${
+              railBelow ? '' : 'sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px]'
+            }`}
+            // Square until there is a clip, then the clip's own shape — so a
+            // 16:9 video is not letterboxed into a square while the character
+            // grid beside it is not.
+            style={{ background: bg, aspectRatio: sizedToClip ? (clipAspect as number) : 1 }}
           >
-            {mode === 'empty' ? (
-              /* Not a dropzone with a dotted border — the file input is one
-                 button below, and a second target here would be two ways to do
-                 the same thing. This says what the panel is for and gets out of
-                 the way. */
-              <div className="flex flex-col items-center gap-3 px-6 text-center">
-                <p className="font-mono text-muted text-xs">[ no clip ]</p>
-                <p className="max-w-[26ch] text-muted text-xs leading-relaxed">
-                  Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
-                </p>
-                {error && <p className="max-w-[26ch] text-accent text-xs">{error}</p>}
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="rounded-lg bg-fg px-3 py-1.5 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
-                >
-                  Choose a video
-                </button>
-              </div>
-            ) : mode === 'working' ? (
+            {mode === 'working' ? (
               /* One line and a bar. The stages used to draw themselves here —
                  sampled frames, occupancy histograms, the grid filling in —
                  which explained the algorithm at the cost of standing between
@@ -541,25 +644,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
               <CompareSlider
                 labelLeft="source"
                 labelRight="ascii"
-                left={
-                  /*
-                  This element *is* the one the frame clock seeks. Rendering a
-                  second video and syncing the offscreen one left two clocks
-                  running: the divider then compared different instants, which
-                  is the one thing a compare slider must not do.
-                */
-                  <video
-                    ref={(el) => {
-                      if (el) videoRef.current = el;
-                    }}
-                    src={objectUrlRef.current ?? undefined}
-                    muted
-                    playsInline
-                    loop
-                    autoPlay
-                    className="max-h-full max-w-full object-contain"
-                  />
-                }
+                left={sourceNode}
                 right={
                   <div className="grid h-full w-full place-items-center" style={{ background: bg }}>
                     {artNode}
@@ -575,7 +660,13 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
               its default, but a panel that hovers over the whole viewport reads
               as a dev tool; inline in the card it reads as part of the piece.
               `productionEnabled` because these controls ship. */}
-          <div className="min-w-0 rounded-b-[10px] border-border/60 sm:w-[240px] sm:shrink-0 sm:rounded-r-[10px] sm:rounded-bl-none sm:border-l">
+          <div
+            className={`min-w-0 rounded-b-[10px] border-border/60 ${
+              railBelow
+                ? 'w-full border-t'
+                : 'sm:w-[240px] sm:shrink-0 sm:rounded-r-[10px] sm:rounded-bl-none sm:border-l'
+            }`}
+          >
             <DialPanel
               id={panelId}
               title={panelTitle}
@@ -593,7 +684,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             playground below is, and offering it twice made one panel that was
             two things — which is how `density` ended up on a panel that could
             never honour it. */}
-        {isPlayground && mode !== 'empty' && (
+        {isPlayground && (
           <button type="button" onClick={() => fileRef.current?.click()} className={BTN}>
             choose another
           </button>
@@ -621,26 +712,14 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             from, and printing that beside a working panel read as a measurement
             of the file being processed. */}
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {mode === 'empty' || mode === 'working'
+          {mode === 'working'
             ? 'decoded in your browser'
             : `${grid.cols}×${grid.rows} · ${(
                 (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]
               ).toFixed(1)}s loop`}
         </p>
 
-        {/* Nothing is uploaded anywhere: the file becomes an object URL and is
-            decoded by the tab that opened it. */}
-        <input
-          ref={fileRef}
-          type="file"
-          accept="video/*"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) runPipeline(file);
-            e.target.value = '';
-          }}
-          className="hidden"
-        />
+        {fileInput}
       </div>
     </div>
   );
