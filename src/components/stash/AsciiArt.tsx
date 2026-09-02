@@ -613,9 +613,15 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
         >
           <div
             ref={stageRef}
+            // Padded in the demo, flush in the playground. The fit is measured
+            // from this element's *content* box, so padding here is what gives
+            // the jellyfish air: at zoom 1 it was sized to the stage exactly and
+            // sat edge to edge, reading as a crop rather than a subject. The
+            // playground stays flush because its stage already takes the clip's
+            // own aspect — insetting there would letterbox a video that fits.
             className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] ${
-              railBelow ? '' : 'sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px]'
-            }`}
+              isPlayground ? '' : 'p-6 sm:p-8'
+            } ${railBelow ? '' : 'sm:flex-1 sm:rounded-tr-none sm:rounded-l-[10px]'}`}
             // Square until there is a clip, then the clip's own shape — so a
             // 16:9 video is not letterboxed into a square while the character
             // grid beside it is not.
