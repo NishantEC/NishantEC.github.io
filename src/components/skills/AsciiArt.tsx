@@ -565,23 +565,52 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
    * it — a set of controls for a thing that does not exist, taking the height of
    * the finished piece to say so. There is exactly one thing to do here, so the
    * card is the size of that one thing.
+   *
+   * The bake keeps the same band. Growing to the full panel and showing the
+   * rail the moment a file is picked put a dozen controls on screen that could
+   * not do anything yet, around a square that was almost entirely empty. The
+   * work is a progress bar; it should look like one.
    */
-  if (mode === 'empty') {
+  if (mode === 'empty' || mode === 'working') {
+    const working = mode === 'working';
     return (
       <div className="my-6 flex w-full flex-col gap-3">
         <div className="rounded-2xl border border-border bg-fg/2 p-1.5">
           <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center">
-            <p className="max-w-[38ch] text-muted text-xs leading-relaxed">
-              Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
-            </p>
-            {error && <p className="max-w-[38ch] text-accent text-xs">{error}</p>}
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
-            >
-              Choose a video
-            </button>
+            {working ? (
+              /* No frame counter. It read "frame 84 of 96" for every clip,
+                 because 96 is a fixed sample count and not a property of the
+                 file — which invites exactly the question of why it is always
+                 96. A bar says the same thing without making a claim about the
+                 clip. `aria-live` so the wait is announced, not only drawn. */
+              <>
+                <p aria-live="polite" className="font-mono text-muted text-xs">
+                  baking
+                </p>
+                <div className="h-0.5 w-full max-w-[16rem] overflow-hidden rounded-full bg-fg/10">
+                  <motion.div
+                    className="h-full rounded-full bg-accent"
+                    initial={false}
+                    animate={{ width: `${(progress?.ratio ?? 0) * 100}%` }}
+                    transition={{ duration: 0.12 }}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="max-w-[38ch] text-muted text-xs leading-relaxed">
+                  Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
+                </p>
+                {error && <p className="max-w-[38ch] text-accent text-xs">{error}</p>}
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
+                >
+                  Choose a video
+                </button>
+              </>
+            )}
           </div>
         </div>
         {fileInput}
@@ -632,26 +661,7 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
             // grid beside it is not.
             style={{ background: bg, aspectRatio: sizedToClip ? (clipAspect as number) : 1 }}
           >
-            {mode === 'working' ? (
-              /* One line and a bar. The stages used to draw themselves here —
-                 sampled frames, occupancy histograms, the grid filling in —
-                 which explained the algorithm at the cost of standing between
-                 the reader and their own clip. `aria-live` so the wait is
-                 announced rather than only drawn. */
-              <div className="flex w-full max-w-[20rem] flex-col gap-2 px-6">
-                <p aria-live="polite" className="text-center font-mono text-muted text-xs">
-                  {progress?.detail ?? 'reading the file'}
-                </p>
-                <div className="h-0.5 w-full overflow-hidden rounded-full bg-fg/10">
-                  <motion.div
-                    className="h-full rounded-full bg-accent"
-                    initial={false}
-                    animate={{ width: `${(progress?.ratio ?? 0) * 100}%` }}
-                    transition={{ duration: 0.12 }}
-                  />
-                </div>
-              </div>
-            ) : mode === 'custom' && compare ? (
+            {mode === 'custom' && compare ? (
               <CompareSlider
                 labelLeft="source"
                 labelRight="ascii"
@@ -719,16 +729,13 @@ const AsciiArt = ({ variant = 'demo' }: { variant?: Variant }) => {
           </button>
         )}
 
-        {/* Only says a size once there is a clip the size belongs to. While the
-            bake runs, `grid` still holds the fallback the fit calculation starts
-            from, and printing that beside a working panel read as a measurement
-            of the file being processed. */}
+        {/* By here there is always a clip, so the size always belongs to
+            something. The empty and working states return their own band above
+            and never reach this row. */}
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {mode === 'working'
-            ? 'decoded in your browser'
-            : `${grid.cols}×${grid.rows} · ${(
-                (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]
-              ).toFixed(1)}s loop`}
+          {`${grid.cols}×${grid.rows} · ${(
+            (mode === 'custom' ? FRAME_COUNT : JELLY_ATLAS.count) / JELLY_SPEEDS[speed]
+          ).toFixed(1)}s loop`}
         </p>
 
         {fileInput}
