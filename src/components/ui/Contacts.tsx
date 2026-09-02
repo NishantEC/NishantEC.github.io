@@ -1,28 +1,52 @@
-import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import GithubIcon from '~icons/logos/github-icon';
-import LinkedinIcon from '~icons/logos/linkedin-icon';
-import XIcon from '~icons/logos/x';
-import avatar from '../../assets/me.jpeg';
+import { motion, useReducedMotion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import GithubIcon from '~icons/simple-icons/github';
+import LinkedinIcon from '~icons/simple-icons/linkedin';
+import XIcon from '~icons/simple-icons/x';
 import { profile } from '../../data/profile';
 import { type Contributions, fetchContributions } from '../../utils/github-contributions';
-import GithubGraph from './GithubGraph';
 
 const EASE = [0.33, 1, 0.68, 1] as const;
 
 /**
- * Social links with a preview card that morphs — position, width and height all
- * tween — as the pointer moves between icons, rather than popping in and out.
+ * The five levels the contributions API returns, at the size a seven-day strip
+ * needs inside a tooltip. There was a full-year calendar component here once;
+ * it went with the hover card it was built for.
+ */
+const HEAT = [
+  'bg-fg/10',
+  'bg-green-600/25 dark:bg-green-400/25',
+  'bg-green-600/45 dark:bg-green-400/45',
+  'bg-green-600/70 dark:bg-green-400/70',
+  'bg-green-600/95 dark:bg-green-400/95',
+];
+
+type Key = 'github' | 'linkedin' | 'x';
+type Box = { left: number; width: number };
+
+/** 'https://x.com/NishCodes' -> '@NishCodes' */
+const handleOf = (url: string) => `@${url.split('/').filter(Boolean).pop()}`;
+
+/**
+ * Three links cast as one plate rather than three separate icons: a single
+ * squircled rail (sized the way `Button`'s `lg` houses `icon`-sized squircles)
+ * with a joint that slides underneath whichever tile has the pointer or focus.
+ * It's the fused tab strip's own trick — an indicator tweened to a measured
+ * `offsetLeft`/`offsetWidth`, same easing — aimed at a hover state instead of
+ * a selection.
+ *
+ * Nothing here changes size or position: the tiles are static grid cells, and
+ * the only thing that moves is a decorative, absolutely-positioned backdrop.
+ * Identity surfaces in place, in the site's existing tooltip idiom, so there
+ * is nothing to reflow and nothing that pops.
  */
 const Contacts = () => {
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const [box, setBox] = useState({ left: 0, width: 0, height: 0 });
-  const [instant, setInstant] = useState(true);
+  const reduceMotion = useReducedMotion();
   const [contributions, setContributions] = useState<Contributions>([]);
   const [total, setTotal] = useState(0);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<Key | null>(null);
+  const [box, setBox] = useState<Box | null>(null);
+  const tileRefs = useRef(new Map<Key, HTMLAnchorElement>());
 
   useEffect(() => {
     fetchContributions('NishantEC').then(({ days, total: t }) => {
@@ -31,164 +55,118 @@ const Contacts = () => {
     });
   }, []);
 
-  const cards = [
-    {
-      label: 'GitHub',
-      href: profile.socials.github,
-      Icon: GithubIcon,
-      content: (
-        <div className="flex flex-col gap-3 p-3">
-          <div className="flex items-center gap-3">
-            <img className="size-10 rounded-full object-cover" src={avatar} alt="" />
-            <div className="flex flex-col">
-              NishantEC
-              <p className="text-sm text-muted">
-                {total > 0 ? `${total} contributions in the last year` : 'GitHub'}
-              </p>
-            </div>
-          </div>
-          <GithubGraph contributions={contributions} />
-        </div>
-      ),
-    },
-    {
-      label: 'LinkedIn',
-      href: profile.socials.linkedin,
-      Icon: LinkedinIcon,
-      content: (
-        <>
-          <div className="h-16 w-2xs bg-linear-to-br from-[#0A66C2] to-[#0A66C2]/30" />
-          <div className="absolute left-3 translate-y-[-50%] rounded-full bg-surface p-0.5">
-            <img className="size-14 rounded-full object-cover" src={avatar} alt="" />
-          </div>
-          <div className="flex flex-col gap-1 p-3 pt-8">
-            <span>{profile.name}</span>
-            <div className="mt-1 flex items-end justify-between gap-3">
-              <p className="text-sm text-muted">
-                {profile.role}
-                <br />
-                {profile.location}
-              </p>
-              <a
-                className="h-fit rounded-full bg-[#0A66C2] px-3 py-1 text-sm text-bg transition-[filter] hover:brightness-120 dark:bg-[#71B7FB]"
-                href={profile.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Connect
-              </a>
-            </div>
-          </div>
-        </>
-      ),
-    },
-    {
-      label: 'X',
-      href: profile.socials.x,
-      Icon: XIcon,
-      content: (
-        <>
-          <div className="h-20 w-2xs bg-linear-to-br from-stone-700 to-stone-900" />
-          <div className="absolute left-3 translate-y-[-50%] rounded-full bg-surface p-0.5">
-            <img className="size-14 rounded-full object-cover" src={avatar} alt="" />
-          </div>
-          <div className="flex flex-col p-3">
-            <div className="flex justify-between">
-              <span className="mt-6">@NishCodes</span>
-              <a
-                className="h-fit rounded-full bg-fg px-3 py-1 text-sm text-bg transition-colors hover:bg-fg/90"
-                href={profile.socials.x}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Follow
-              </a>
-            </div>
-            <span className="text-sm text-muted">Software engineer, building developer tools</span>
-          </div>
-        </>
-      ),
-    },
-  ];
+  // Only the box updates on entry — leaving fades the joint out in place
+  // rather than snapping it back to nothing, so re-entering a neighbour reads
+  // as one continuous slide instead of a fresh pop each time.
+  const moveTo = useCallback((key: Key | null) => {
+    setActive(key);
+    if (!key) return;
+    const node = tileRefs.current.get(key);
+    if (!node) return;
+    // `offsetLeft` is measured from the rail's border box, but this indicator
+    // is absolutely positioned with no `left`, so it already starts at its
+    // static position — inside the padding. Translating by the raw offset
+    // counts that padding twice and parks the joint a few pixels right of the
+    // tile. Read the padding rather than hardcoding it, so changing `p-1` on
+    // the rail cannot silently reintroduce the drift.
+    const rail = node.parentElement;
+    const pad = rail ? Number.parseFloat(getComputedStyle(rail).paddingLeft) || 0 : 0;
+    setBox({ left: node.offsetLeft - pad, width: node.offsetWidth });
+  }, []);
 
-  // Re-measure whenever the visible card changes so the shell can tween to fit it.
-  useLayoutEffect(() => {
-    if (!open || !contentRef.current) return;
-    setBox((b) => ({
-      ...b,
-      width: contentRef.current?.offsetWidth ?? 0,
-      height: contentRef.current?.offsetHeight ?? 0,
-    }));
-  }, [open]);
-
-  const onEnter = (i: number) => (event: React.PointerEvent<HTMLAnchorElement>) => {
-    // Touch would leave the card stranded with no way to dismiss it.
+  const onEnter = (key: Key) => (event: React.PointerEvent<HTMLAnchorElement>) => {
+    // Touch has no hover to leave — the joint would just stay stranded lit.
     if (event.pointerType !== 'mouse') return;
-
-    const node = event.currentTarget;
-    setInstant(!open);
-    setDirection(i > index ? 1 : -1);
-    setIndex(i);
-    setOpen(true);
-    setBox((b) => ({ ...b, left: node.offsetLeft + node.offsetWidth / 2 }));
+    moveTo(key);
   };
 
+  const onRailLeave = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse') return;
+    moveTo(null);
+  };
+
+  const links: { key: Key; href: string; label: string; hint: string; Icon: typeof GithubIcon }[] =
+    [
+      {
+        key: 'github',
+        href: profile.socials.github,
+        label: 'GitHub',
+        hint:
+          total > 0
+            ? `${total.toLocaleString()} contributions this year`
+            : handleOf(profile.socials.github),
+        Icon: GithubIcon,
+      },
+      {
+        key: 'linkedin',
+        href: profile.socials.linkedin,
+        label: 'LinkedIn',
+        hint: `${profile.role} · ${profile.location}`,
+        Icon: LinkedinIcon,
+      },
+      {
+        key: 'x',
+        href: profile.socials.x,
+        label: 'X',
+        hint: handleOf(profile.socials.x),
+        Icon: XIcon,
+      },
+    ];
+
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: mouseleave only dismisses a hover preview; each link is a real anchor and works without it
-    <div className="relative flex" onMouseLeave={() => setOpen(false)}>
-      {cards.map(({ label, href, Icon }, i) => (
+    <nav
+      aria-label="Elsewhere"
+      className="squircle-sm relative flex items-center gap-0.5 border border-border bg-surface p-1"
+      onPointerLeave={onRailLeave}
+    >
+      {box && (
+        <motion.div
+          aria-hidden="true"
+          className="squircle-xs pointer-events-none absolute top-1 bottom-1 bg-fg/6"
+          initial={false}
+          animate={{ x: box.left, width: box.width, opacity: active ? 1 : 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.25, ease: EASE }}
+        />
+      )}
+
+      {links.map(({ key, href, label, hint, Icon }) => (
         <a
-          key={label}
-          className="z-10 p-2 text-muted transition-colors hover:text-fg [&_*]:fill-current"
+          key={key}
+          ref={(el) => {
+            if (el) tileRefs.current.set(key, el);
+            else tileRefs.current.delete(key);
+          }}
           href={href}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label={label}
-          onPointerEnter={onEnter(i)}
+          aria-label={`${label} — ${hint}`}
+          onPointerEnter={onEnter(key)}
+          onFocus={() => moveTo(key)}
+          onBlur={() => moveTo(null)}
+          className={`tooltip-trigger squircle-xs relative z-10 grid size-9 shrink-0 place-items-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/60 sm:size-8 ${
+            active === key ? 'text-fg' : 'text-muted'
+          }`}
         >
-          <Icon className="size-6 [&_path]:fill-current" />
+          <Icon aria-hidden="true" className="size-4.5 [&_path]:fill-current" />
+
+          <div
+            role="tooltip"
+            className="tooltip squircle-xs pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-20 w-max max-w-[11rem] -translate-x-1/2 bg-stone-900 px-2.5 py-1.5 text-center text-xs text-stone-100 shadow-xl/30 motion-reduce:transition-none dark:bg-stone-950"
+          >
+            <p className="font-medium text-[13px]">{label}</p>
+            <p className="text-stone-400">{hint}</p>
+
+            {key === 'github' && contributions.length > 0 && (
+              <div aria-hidden="true" className="mt-1.5 flex justify-center gap-[2px]">
+                {contributions.slice(-7).map((day) => (
+                  <span key={day.date} className={`size-1.5 rounded-[1px] ${HEAT[day.level]}`} />
+                ))}
+              </div>
+            )}
+          </div>
         </a>
       ))}
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="squircle-sm absolute bottom-[calc(100%+0.5rem)] flex translate-x-[-50%] items-end overflow-hidden bg-surface shadow-2xl ring ring-border"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              left: box.left,
-              width: box.width || 'auto',
-              height: box.height || 'auto',
-            }}
-            exit={{ opacity: 0 }}
-            transition={{
-              opacity: { duration: 0.15 },
-              left: { duration: instant ? 0 : 0.3, ease: EASE },
-              width: { duration: instant ? 0 : 0.3, ease: EASE },
-              height: { duration: instant ? 0 : 0.3, ease: EASE },
-            }}
-          >
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.div
-                key={index}
-                ref={contentRef}
-                className="absolute"
-                initial={{ x: 200 * direction, opacity: 0, filter: 'blur(2px)' }}
-                animate={{ x: 0, opacity: 1, filter: 'blur(0px)' }}
-                exit={{ x: -200 * direction, opacity: 0, filter: 'blur(2px)' }}
-                transition={{ duration: 0.3, ease: EASE }}
-              >
-                {cards[index].content}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bridges the gap so moving the pointer up into the card doesn't close it. */}
-      <div className="absolute inset-0 -top-2" />
-    </div>
+    </nav>
   );
 };
 
