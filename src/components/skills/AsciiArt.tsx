@@ -280,7 +280,7 @@ const AsciiArt = () => {
     useMemo(
       () => ({
         ramp: { type: 'select' as const, options: [...RAMP_OPTIONS], default: 'standard' },
-        density: { type: 'select' as const, options: [...DENSITY_OPTIONS], default: 'normal' },
+        density: { type: 'select' as const, options: [...DENSITY_OPTIONS], default: 'fine' },
         contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
         invert: false as boolean,
       }),
@@ -293,15 +293,19 @@ const AsciiArt = () => {
     'Colour',
     useMemo(
       () => ({
-        palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'theme' },
+        /* `paper`, not `theme`. The trade is deliberate: `theme` follows the
+           site's light/dark toggle, and `paper` does not — but it is the look
+           that was chosen, and a piece that reads as ink on paper says what the
+           skill makes more clearly than one that dissolves into the page. */
+        palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'paper' },
         /* `inkStart`/`inkEnd`, not `ink`/`ink2`. DialKit derives a control's
            label from its key by splitting on capitals, so `ink2` rendered as
            the non-word "Ink2" beside "Ink" — and `ColorConfig` has no `label`
            field to override it with. These are what the comment on `PALETTES`
            has always called them anyway. */
-        inkStart: { type: 'color' as const, default: PALETTES.mono.ink },
-        inkEnd: { type: 'color' as const, default: PALETTES.mono.ink2 },
-        background: { type: 'color' as const, default: PALETTES.mono.bg },
+        inkStart: { type: 'color' as const, default: PALETTES.paper.ink },
+        inkEnd: { type: 'color' as const, default: PALETTES.paper.ink2 },
+        background: { type: 'color' as const, default: PALETTES.paper.bg },
       }),
       [],
     ),
@@ -346,24 +350,53 @@ const AsciiArt = () => {
   }, [reduceMotion]);
 
   /**
-   * A named palette writes its colours in; editing one by hand afterwards is
-   * what makes the palette read `custom`.
+   * A named palette writes its colours in; editing one by hand switches the
+   * palette to `custom`.
    *
-   * `theme` is the exception, and the reason `resolvedTheme` is a dependency:
-   * its colours are the page's own, so they have to be re-read when the site's
-   * light/dark toggle changes them. Guarded on the colours differing rather
-   * than on the palette changing, because `colour` is a new object every render
-   * and an unguarded write here loops.
+   * Both halves live here because they are the same comparison read two ways.
+   * The colours not matching the palette means one of two things — the palette
+   * just changed and the colours have not caught up, or the colours were
+   * edited and the palette has not. `appliedKey` is what tells them apart: it
+   * records the palette this effect last wrote out.
+   *
+   * Without that distinction only the first case was handled, so editing a
+   * swatch was undone in the same render — the OS picker opened, you chose a
+   * colour, and the palette wrote its own straight back over it. The comment
+   * here claimed the `custom` behaviour for weeks; nothing implemented it.
+   *
+   * The key carries `resolvedTheme` as well, because the `theme` palette reads
+   * the page's own custom properties and has to be rewritten when the site's
+   * light/dark toggle changes them — a new value for the same palette name.
    */
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `resolvedTheme` is not read here, it is the signal. `themePalette()` reads the document's custom properties, which change when the site's light/dark class does, and nothing else in this effect can observe that.
+  const paletteKey = `${palette}:${resolvedTheme}`;
+  const appliedKey = useRef<string | null>(null);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `resolvedTheme` is not read directly — it is folded into `paletteKey`, which is the dependency. `themePalette()` reads document custom properties that change with the site's light/dark class, and nothing else here can observe that.
   useEffect(() => {
-    if (palette === 'custom') return;
+    if (palette === 'custom') {
+      appliedKey.current = paletteKey;
+      return;
+    }
+
     const preset =
       palette === 'theme' ? themePalette() : PALETTES[palette as keyof typeof PALETTES];
     if (!preset) return;
-    if (preset.ink === ink && preset.ink2 === ink2 && preset.bg === bg) return;
-    colour.setValues({ inkStart: preset.ink, inkEnd: preset.ink2, background: preset.bg });
-  }, [palette, resolvedTheme, colour, ink, ink2, bg]);
+
+    const matches = preset.ink === ink && preset.ink2 === ink2 && preset.bg === bg;
+
+    // The palette changed. Its colours win.
+    if (appliedKey.current !== paletteKey) {
+      appliedKey.current = paletteKey;
+      if (!matches) {
+        colour.setValues({ inkStart: preset.ink, inkEnd: preset.ink2, background: preset.bg });
+      }
+      return;
+    }
+
+    // Same palette, different colours: someone edited a swatch. Their choice
+    // wins, and the palette stops claiming to be one of the named ones.
+    if (!matches) colour.setValues({ palette: 'custom' });
+  }, [paletteKey, palette, colour, ink, ink2, bg]);
 
   const [art, setArt] = useState<string[]>([]);
   const [fontPx, setFontPx] = useState(7);
