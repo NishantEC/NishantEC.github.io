@@ -88,9 +88,15 @@ const COLS = 84;
 /**
  * Starting points, not the whole choice — every colour here is also editable
  * directly, and touching one switches the palette to `custom`. `ink` is where
- * the ramp starts and `ink2` where it ends — literally, now: the faintest
- * characters are drawn in one and the densest in the other, with `BANDS` steps
- * between. Setting the two the same is how you get a flat colour.
+ * the ramp starts and `ink2` where it ends — literally: the faintest characters
+ * are drawn in one and the densest in the other, with `BANDS` steps between.
+ * Setting the two the same is how you get a flat colour.
+ *
+ * Which way round matters, and these were the wrong way round at first. `ink`
+ * is the sparse speckle — a stray `.` or `:` — and `ink2` is the subject's own
+ * mass. Giving the speckle the high-contrast colour made weight and colour
+ * cancel: blueprint's densest band measured 2.94:1 while its faintest sat at
+ * 14.5:1, so the loudest thing on screen was noise. Reversed, they compound.
  */
 const PALETTES = {
   /**
@@ -99,12 +105,12 @@ const PALETTES = {
    * with the light/dark toggle instead of sitting in its own permanent night.
    */
   theme: null,
-  mono: { ink: '#f1f1f0', ink2: '#8a8a88', bg: '#0d0d0f' },
-  paper: { ink: '#15151a', ink2: '#6b6b78', bg: '#f4f4f3' },
-  phosphor: { ink: '#5eead4', ink2: '#0f766e', bg: '#04100d' },
-  amber: { ink: '#fbbf24', ink2: '#b45309', bg: '#140d02' },
-  ultra: { ink: '#c4b5fd', ink2: '#7c3aed', bg: '#0f0b1a' },
-  blueprint: { ink: '#93c5fd', ink2: '#1d4ed8', bg: '#050b16' },
+  mono: { ink: '#8a8a88', ink2: '#f1f1f0', bg: '#0d0d0f' },
+  paper: { ink: '#6b6b78', ink2: '#15151a', bg: '#f4f4f3' },
+  phosphor: { ink: '#0f766e', ink2: '#5eead4', bg: '#04100d' },
+  amber: { ink: '#b45309', ink2: '#fbbf24', bg: '#140d02' },
+  ultra: { ink: '#7c3aed', ink2: '#c4b5fd', bg: '#0f0b1a' },
+  blueprint: { ink: '#1d4ed8', ink2: '#93c5fd', bg: '#050b16' },
 } as const;
 
 /**
@@ -142,8 +148,8 @@ const themePalette = () => {
     return raw ? toHex(raw) : fallback;
   };
   return {
-    ink: read('--fg', '#f1f1f0'),
-    ink2: read('--muted', '#8a8a88'),
+    ink: read('--muted', '#8a8a88'),
+    ink2: read('--fg', '#f1f1f0'),
     bg: read('--bg', '#0d0d0f'),
   };
 };
@@ -803,7 +809,7 @@ const AsciiArt = () => {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent/60"
+                  className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   Choose a video
                 </button>

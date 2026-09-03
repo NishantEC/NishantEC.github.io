@@ -53,7 +53,7 @@ export const Slider = ({
 
   return (
     <div
-      className={`group relative flex ${ROW} items-center rounded-lg bg-fg/4 hover:bg-fg/6 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent/60`}
+      className={`group relative flex ${ROW} items-center rounded-lg bg-fg/4 hover:bg-fg/6 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent`}
     >
       {/* The value as a filled proportion of the row — at this width it reads as
           a bar, which is the point of the shape. Its right edge is the handle:
@@ -111,7 +111,7 @@ export const Select = <T extends string>({
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value as T)}
-        className="cursor-pointer rounded-md bg-fg/8 px-2 py-1 font-mono text-xs text-fg outline-none hover:bg-fg/12 focus-visible:ring-2 focus-visible:ring-accent/60"
+        className="cursor-pointer rounded-md bg-fg/8 px-2 py-1 font-mono text-xs text-fg outline-none hover:bg-fg/12 focus-visible:ring-2 focus-visible:ring-accent"
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -176,7 +176,7 @@ export const Swatch = ({
       {values.map((swatch, index) => (
         <span
           key={swatch.title}
-          className="relative block size-6 rounded-md has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent/60 has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-bg"
+          className="relative block size-6 rounded-md has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-bg"
         >
           <span
             aria-hidden="true"

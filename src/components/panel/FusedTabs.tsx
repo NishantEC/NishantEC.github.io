@@ -138,7 +138,7 @@ const FusedTabs = ({ tabs, activeId, onSelect, onClose }: Props) => {
                 aria-label={tab.title}
                 title={labelOpen ? undefined : tab.title}
                 onClick={() => !isActive && onSelect(tab.id)}
-                className="flex items-center rounded-sm text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+                className="flex items-center rounded-sm text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-accent"
               >
                 <Icon className="size-4.5 shrink-0" />
                 <motion.span
@@ -162,7 +162,7 @@ const FusedTabs = ({ tabs, activeId, onSelect, onClose }: Props) => {
                   type="button"
                   aria-label={`Close ${tab.title}`}
                   onClick={() => onClose(tab.id)}
-                  className={`grid size-5 shrink-0 place-items-center rounded-full text-muted outline-none transition-all hover:bg-fg/12 hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent/60 ${
+                  className={`grid size-5 shrink-0 place-items-center rounded-full text-muted outline-none transition-all hover:bg-fg/12 hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent ${
                     isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                   }`}
                 >

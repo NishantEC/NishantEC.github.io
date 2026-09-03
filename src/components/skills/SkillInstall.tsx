@@ -106,7 +106,7 @@ const SkillInstall = ({ command = 'npx skills add NishantEC/skills' }: { command
       {/* `select-all` so a reader without clipboard permission — or one who
           simply doesn't trust a copy button — can take it in one gesture. */}
       <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap font-mono text-sm">
-        <span className="text-accent">npx</span>{' '}
+        <span className="text-muted">npx</span>{' '}
         <span className="text-fg">{command.replace(/^npx\s+/, '')}</span>
       </code>
 
@@ -116,7 +116,7 @@ const SkillInstall = ({ command = 'npx skills add NishantEC/skills' }: { command
         // The label carries the result, not just the action, because the icon
         // swap is invisible to a screen reader.
         aria-label={copied ? 'Copied install command' : 'Copy install command'}
-        className="grid size-7 shrink-0 place-items-center rounded-md text-muted outline-none transition-colors hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent/60"
+        className="grid size-7 shrink-0 place-items-center rounded-md text-muted outline-none transition-[color,background-color,transform] hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.span

@@ -114,7 +114,7 @@ const SplitPane = ({ duration }: { duration: number }) => {
             onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
             aria-expanded={!isSidebarCollapsed}
             aria-label={isSidebarCollapsed ? 'Show profile sidebar' : 'Hide profile sidebar'}
-            className="mb-1 ml-2 grid size-9 shrink-0 place-items-center rounded-lg text-muted outline-none transition-colors hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent/60 max-lg:hidden"
+            className="mb-1 ml-2 grid size-9 shrink-0 place-items-center rounded-lg text-muted outline-none transition-colors hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent max-lg:hidden"
           >
             <SidebarIcon className="size-4.5" />
           </button>

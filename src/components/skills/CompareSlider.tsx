@@ -80,7 +80,13 @@ const CompareSlider = ({
 
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 w-px bg-fg/60"
+        /* A hairline of `--fg` with a hairline of `--bg` around it. The stage
+            behind this is whatever colour the palette says, so a single tone
+            measured 1.01:1 against a light-theme paper stage and 1.14:1 against
+            five of the others — invisible, on the only cue the interaction
+            has. The two tokens are opposites by construction, so whichever one
+            disappears, the other is still there. */
+        className="pointer-events-none absolute inset-y-0 w-px bg-fg/60 shadow-[0_0_0_1px_var(--bg)]"
         style={{ left: `${at}%` }}
       />
 
@@ -111,7 +117,7 @@ const CompareSlider = ({
           all. `peer-focus-visible` is why the input above carries `peer`. */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute top-1/2 z-20 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-fg/30 bg-bg/90 text-fg text-xs transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-accent/60 ${
+        className={`pointer-events-none absolute top-1/2 z-20 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-fg/30 bg-bg/90 text-fg text-xs transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-accent ${
           dragging ? 'border-accent' : ''
         }`}
         style={{ left: `${at}%` }}

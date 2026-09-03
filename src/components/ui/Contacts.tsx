@@ -143,7 +143,7 @@ const Contacts = () => {
           onPointerEnter={onEnter(key)}
           onFocus={() => moveTo(key)}
           onBlur={() => moveTo(null)}
-          className={`tooltip-trigger squircle-xs relative z-10 grid size-9 shrink-0 place-items-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent/60 sm:size-8 ${
+          className={`tooltip-trigger squircle-xs relative z-10 grid size-9 shrink-0 place-items-center outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent sm:size-8 ${
             active === key ? 'text-fg' : 'text-muted'
           }`}
         >
