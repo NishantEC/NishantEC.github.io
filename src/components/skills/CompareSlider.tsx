@@ -56,14 +56,24 @@ const CompareSlider = ({
       {/* No `max-w/max-h` clamp on the child: the source is now handed an
           explicit box the same size as the character grid, and clamping it here
           would shrink one layer and not the other — which is the drift this
-          component exists to avoid. */}
-      <div className="absolute inset-0 grid place-items-center">{left}</div>
+          component exists to avoid.
 
-      {/* Clipped, not resized. Both layers keep their full geometry. */}
+          `aria-hidden` belongs here, on the source. It is the input, and it is
+          also a decorative `<video>` with no caption or track. */}
+      <div aria-hidden="true" className="absolute inset-0 grid place-items-center">
+        {left}
+      </div>
+
+      {/* Clipped, not resized. Both layers keep their full geometry.
+
+          Emphatically *not* `aria-hidden`. This layer holds the ASCII, which
+          carries its own `role="img"` and label and is the entire subject of
+          the page — and because the compare view is the default, hiding it here
+          removed that subject from the accessibility tree on arrival. Clipping
+          is a visual reveal, not a reason to withhold the picture. */}
       <div
         className="absolute inset-0 grid place-items-center"
         style={{ clipPath: `inset(0 0 0 ${at}%)` }}
-        aria-hidden="true"
       >
         {right}
       </div>
@@ -88,16 +98,20 @@ const CompareSlider = ({
         value={at}
         onChange={(e) => setAt(Number(e.target.value))}
         aria-label={`Reveal ${labelRight} over ${labelLeft}`}
-        className="absolute inset-0 z-10 h-full w-full cursor-ew-resize opacity-0"
+        className="peer absolute inset-0 z-10 h-full w-full cursor-ew-resize opacity-0"
         onPointerDown={(e) => {
           setDragging(true);
           moveTo(e.clientX);
         }}
       />
 
+      {/* The handle wears the input's focus ring. The input itself is
+          `opacity: 0`, so the UA outline is painted onto something invisible —
+          this is the second tab stop on the page and had no visible focus at
+          all. `peer-focus-visible` is why the input above carries `peer`. */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute top-1/2 z-20 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-fg/30 bg-bg/90 text-fg text-xs transition-colors ${
+        className={`pointer-events-none absolute top-1/2 z-20 grid size-7 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-fg/30 bg-bg/90 text-fg text-xs transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-accent/60 ${
           dragging ? 'border-accent' : ''
         }`}
         style={{ left: `${at}%` }}

@@ -391,7 +391,10 @@
   .dial-panels[data-columns='true'] {
     flex-direction: row;
     align-items: flex-start;
-    gap: 6px;
+    /* Wider than the 4px between rows inside a group. At 6px the two were close
+       enough that, with the headings hidden, the three columns read as one
+       eleven-row list — the separation has to be the thing doing the grouping. */
+    gap: 16px;
   }
 
   .dial-panels[data-columns='true'] > * {

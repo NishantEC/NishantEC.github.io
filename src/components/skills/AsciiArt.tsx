@@ -577,7 +577,11 @@ const AsciiArt = () => {
       // The frame clock is gated on `ready`, which the demo gets from the atlas
       // load. The playground never runs that, so this is what starts it.
       setReady(true);
-      videoRef.current?.play().catch(() => {});
+      // Only if playback is actually on. Under `prefers-reduced-motion` the
+      // mount effect has already set it off, and playing here anyway left the
+      // source running behind a frozen grid with the toggle reading Off — a
+      // pause control lying about what is on screen.
+      if (playing) videoRef.current?.play().catch(() => {});
       draw();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That file could not be processed.');
@@ -676,13 +680,18 @@ const AsciiArt = () => {
         */}
         <video
           ref={(el) => {
-            if (el) videoRef.current = el;
+            if (!el) return;
+            videoRef.current = el;
+            // The `[playing]` effect below cannot start this: it runs before
+            // the element exists. `autoPlay` used to cover that and could not
+            // be told no.
+            if (playing) el.play().catch(() => {});
+            else el.pause();
           }}
           src={objectUrlRef.current ?? undefined}
           muted
           playsInline
           loop
-          autoPlay
           className="absolute max-w-none"
           style={{
             width: `${(sampled.width / crop.w) * artW}px`,

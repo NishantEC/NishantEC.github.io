@@ -87,6 +87,12 @@ const DialPanel = ({
 
   return (
     <div
+      // `role="group"` with the title as its label. The heading is hidden in
+      // CSS because the columns carry the grouping visually — but that only
+      // groups anything for someone who can see the columns, and without this
+      // the three panels read as one flat run of eleven controls.
+      role="group"
+      aria-label={title}
       className={`dialkit-root${mono ? ' dial-mono' : ''}`}
       data-mode="inline"
       data-theme={theme}
