@@ -445,8 +445,18 @@
  * measured 391/395 against 383/399. */
 .clip-actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: 1fr;
   gap: 16px;
+}
+
+/* Three fixed columns rather than `auto-fit`, and gated at the same 40rem the
+ * control panels use. `auto-fit` collapses the empty track when the third
+ * control is absent, which stretched the remaining two and broke the alignment
+ * with the columns below — the thing this grid exists to hold. */
+@media (width >= 40rem) {
+  .clip-actions {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Same height as the toggle beside them. DialKit gives a labelled row an

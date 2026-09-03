@@ -428,6 +428,15 @@ const AsciiArt = () => {
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
   /**
+   * True while the clip on screen is the one the page ships with.
+   *
+   * Only used to decide whether "use default" has anything to do — on the
+   * bundled clip it would re-bake the same file and flash the cooking state for
+   * a result identical to what is already there.
+   */
+  const [isBundled, setIsBundled] = useState(true);
+
+  /**
    * Whether the source video is drawn beside the characters.
    *
    * Off to begin with. The page is about what the skill makes, and opening on a
@@ -530,7 +539,7 @@ const AsciiArt = () => {
       .then((r) => r.blob())
       .then((blob) => {
         if (cancelled) return;
-        runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' }));
+        runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' }), true);
       })
       .catch(() => setError('The bundled clip could not be loaded.'));
     return () => {
@@ -585,7 +594,10 @@ const AsciiArt = () => {
 
   useEffect(() => release, [release]);
 
-  const runPipeline = async (file: File) => {
+  /** `bundled` is passed rather than sniffed from the filename: a reader could
+      upload something called butterfly.mp4 and it would not be the same file. */
+  const runPipeline = async (file: File, bundled = false) => {
+    setIsBundled(bundled);
     release();
     const signal = { cancelled: false };
     cancelRef.current = signal;
@@ -676,7 +688,7 @@ const AsciiArt = () => {
     fetch(butterflyClip)
       .then((r) => r.blob())
       .then((blob) =>
-        runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' })),
+        runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' }), true),
       )
       .catch(() => setError('The bundled clip could not be loaded.'));
   };
@@ -949,7 +961,7 @@ const AsciiArt = () => {
                 showSource={showSource}
                 onShowSource={setShowSource}
                 onChoose={() => fileRef.current?.click()}
-                onClear={reset}
+                onClear={isBundled ? undefined : reset}
               />
             )}
           </div>
