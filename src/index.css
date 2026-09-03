@@ -446,6 +446,16 @@
   gap: 4px;
 }
 
+/* Same height as the toggle beside them. DialKit gives a labelled row an
+ * explicit `--dial-row-height` and lets a button size itself from its padding
+ * instead — 36px against 39.5px, which reads as two of the three sitting a
+ * little proud of the first. The padding stays horizontal; the height is what
+ * has to agree. */
+.clip-actions .dialkit-button {
+  height: var(--dial-row-height);
+  padding-block: 0;
+}
+
 /* ---------------------------------------------------------------------------
  * Shimmer — the "something is happening" surface
  *
