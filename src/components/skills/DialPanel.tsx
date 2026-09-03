@@ -6,7 +6,7 @@ import {
   type DialValue,
   Folder,
 } from 'dialkit';
-import { useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 
 /**
  * One DialKit panel, rendered where it belongs.
@@ -35,6 +35,7 @@ const DialPanel = ({
   title,
   theme,
   mono = false,
+  footer,
 }: {
   /** The `id` passed to `useDialKitController`, not its display name. */
   id: string;
@@ -49,6 +50,15 @@ const DialPanel = ({
    * portals a dropdown into its own `.dialkit-root`, which is this element.
    */
   mono?: boolean;
+  /**
+   * Rendered after the panel's own controls, inside the same folder.
+   *
+   * `ControlRenderer` only knows DialKit's nine control types and there is no
+   * custom variant — but `Folder` takes plain `ReactNode` children, and
+   * `ControlRenderer` is already one of them. So anything the library cannot
+   * express goes here as a sibling and inherits the folder's spacing.
+   */
+  footer?: ReactNode;
 }) => {
   const [controls, setControls] = useState<ControlMeta[] | null>(null);
   /**
@@ -100,6 +110,7 @@ const DialPanel = ({
       <div className="dialkit-panel" data-mode="inline">
         <Folder title={title} defaultOpen isRoot inline panelHeightOffset={2}>
           <ControlRenderer panelId={id} controls={controls} values={values} />
+          {footer}
         </Folder>
       </div>
     </div>

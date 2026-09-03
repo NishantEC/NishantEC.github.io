@@ -20,6 +20,7 @@ import {
 import ClipActions from './ClipActions';
 import CompareSlider from './CompareSlider';
 import CookingGlyph from './CookingGlyph';
+import CopyPreset from './CopyPreset';
 import DialPanel from './DialPanel';
 
 /**
@@ -938,7 +939,28 @@ const AsciiArt = () => {
             <div className="dial-panels" data-columns={railBelow}>
               <DialPanel id="ascii-characters" title="Characters" theme={resolvedTheme} mono />
               <DialPanel id="ascii-colour" title="Colour" theme={resolvedTheme} />
-              <DialPanel id="ascii-playback" title="Playback" theme={resolvedTheme} />
+              {/* The preset button fills the slot Playback leaves empty — it
+                  has three controls where the others have four — and it is the
+                  right column for it: the last thing you do here is take the
+                  settings away with you. */}
+              <DialPanel
+                id="ascii-playback"
+                title="Playback"
+                theme={resolvedTheme}
+                footer={
+                  <CopyPreset
+                    preset={{
+                      ramp,
+                      columns: DENSITIES[density],
+                      contrast,
+                      invert,
+                      ink: [ink, ink2],
+                      background: bg,
+                      fps: speed,
+                    }}
+                  />
+                }
+              />
             </div>
           </div>
         </div>

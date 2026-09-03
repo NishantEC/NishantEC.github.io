@@ -439,11 +439,14 @@
   letter-spacing: 0;
 }
 
-/* One gutter for the strip above and the columns below. */
+/* One gutter for the strip above and the columns below — the same 16px, so the
+ * three buttons sit directly over the three columns. At 4px they were a hair
+ * wider than the columns beneath them and every seam missed by a few pixels:
+ * measured 391/395 against 383/399. */
 .clip-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 4px;
+  gap: 16px;
 }
 
 /* Same height as the toggle beside them. DialKit gives a labelled row an
@@ -451,9 +454,19 @@
  * instead — 36px against 39.5px, which reads as two of the three sitting a
  * little proud of the first. The padding stays horizontal; the height is what
  * has to agree. */
-.clip-actions .dialkit-button {
+/* Any `dialkit-button` we place, in the strip or as a panel footer. DialKit
+ * gives a labelled row an explicit `--dial-row-height` and lets a button size
+ * itself from its padding instead — 36px against 39.5px, which reads as one
+ * control sitting proud of the ones beside it. */
+.clip-actions .dialkit-button,
+.dial-panels .dialkit-button {
   height: var(--dial-row-height);
   padding-block: 0;
+  /* DialKit's button is `flex: 1`, which is right in the row it was built for
+     and wrong inside `.dialkit-folder-inner` — that is a flex *column*, so
+     `flex: 1` gave it a zero basis and it collapsed to 20px against the 36px
+     rows above it. */
+  flex: none;
 }
 
 /* The Off/On pair sat 36px tall inside a 36px row — edge to edge, so the
