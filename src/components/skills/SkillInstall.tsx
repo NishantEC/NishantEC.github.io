@@ -14,6 +14,12 @@ import { EASE } from '../../utils/motion';
  * button labelled "Skills" beside a button labelled "This one" would be two
  * routes to the same page.
  *
+ * `--skill video-to-ascii` rather than the bare repo. The repo holds one skill
+ * today, so the two install exactly the same thing — but this page is about one
+ * skill, and the command on it should name that skill rather than the drawer it
+ * lives in. It also stops being right the day a second one lands. The CLI's own
+ * listing says as much: `Use --skill <name> to install specific skills`.
+ *
  * It sits above the demo deliberately. The demo is the thing the skill made,
  * and a reader who scrolls past a nice animation and finds an install command
  * afterwards has already decided the page is a portfolio piece. Leading with
@@ -51,7 +57,11 @@ const ICON_MOTION = {
   exit: { opacity: 0, filter: 'blur(3px)', scale: 0.86, y: -5, transition: LEAVE },
 } as const;
 
-const SkillInstall = ({ command = 'npx skills add NishantEC/skills' }: { command?: string }) => {
+const SkillInstall = ({
+  command = 'npx skills add NishantEC/skills --skill video-to-ascii',
+}: {
+  command?: string;
+}) => {
   const [copied, setCopied] = useState(false);
 
   // Reverts on its own so the button is never stuck reporting a copy that
@@ -70,8 +80,13 @@ const SkillInstall = ({ command = 'npx skills add NishantEC/skills' }: { command
   return (
     <div className="my-6 flex items-center gap-3 rounded-xl border border-border px-4 py-3">
       {/* `select-all` so a reader without clipboard permission — or one who
-          simply doesn't trust a copy button — can take it in one gesture. */}
-      <code className="min-w-0 flex-1 select-all overflow-x-auto whitespace-nowrap font-mono text-sm">
+          simply doesn't trust a copy button — can take it in one gesture.
+
+          It wraps on a narrow screen and doesn't on a wide one. Naming the skill
+          made the command long enough to overflow at 430px, and a command you
+          have to scroll sideways to read is worse than one on two lines — it
+          breaks at a space, between the repo and the flag. */}
+      <code className="min-w-0 flex-1 select-all whitespace-normal font-mono text-sm sm:overflow-x-auto sm:whitespace-nowrap">
         <span className="text-muted">npx</span>{' '}
         <span className="text-fg">{command.replace(/^npx\s+/, '')}</span>
       </code>
