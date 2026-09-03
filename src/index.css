@@ -456,6 +456,16 @@
   padding-block: 0;
 }
 
+/* The Off/On pair sat 36px tall inside a 36px row — edge to edge, so the
+ * segmented control read as heavy as the row containing it and every toggle
+ * looked like a filled block rather than a setting with a value. Trimming the
+ * block padding leaves the row its own margins; the labels and hit target are
+ * unchanged horizontally. */
+.dial-panels .dialkit-segmented-button,
+.clip-actions .dialkit-segmented-button {
+  padding-block: 2px;
+}
+
 /* ---------------------------------------------------------------------------
  * Shimmer — the "something is happening" surface
  *
