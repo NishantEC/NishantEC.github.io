@@ -43,8 +43,15 @@ const ClipActions = ({
 }) => (
   <div className="dialkit-root" data-theme={theme}>
     <div
-      className={`clip-actions border-t p-2 ${roundBottomLeft ? 'sm:rounded-bl-[10px]' : ''}`}
-      style={{ background: 'var(--dial-glass-bg)', borderColor: 'var(--dial-border)' }}
+      /* No background of its own. It used to paint `--dial-glass-bg` (#212121),
+         which was correct while the panels below were also DialKit cards — they
+         are not any more; their own background was stripped so the columns read
+         as one surface, and this strip was left as the only lighter band on the
+         card. The border stays: it is the only thing that needs to separate the
+         clip's own controls from the render's. */
+      className={`clip-actions border-border/60 border-t p-2 ${
+        roundBottomLeft ? 'sm:rounded-bl-[10px]' : ''
+      }`}
     >
       {/* `clip-actions` is the same grid the control panels use — same columns,
           same 6px gutter, one definition in `index.css`. It was a flex row with
