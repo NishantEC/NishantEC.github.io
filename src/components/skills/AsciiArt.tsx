@@ -777,16 +777,44 @@ const AsciiArt = () => {
    * work is a progress bar; it should look like one.
    */
   if (mode === 'working') {
-    const working = mode === 'working';
+    /**
+     * What distinguishes the two cards is the error, not the mode.
+     *
+     * This read `mode === 'working'` — the condition we are already inside — so
+     * it was always true and everything in the `else` was unreachable: the
+     * message, the error line, and the only file input a stuck reader could
+     * reach. A failed decode sets `error` and stays in `working`, so it showed
+     * the pot turning forever with nothing said and no way out.
+     */
+    const failed = error !== null;
     return (
       <div className="my-6 flex w-full flex-col gap-3">
         <div className="rounded-2xl border border-border bg-fg/2 p-1.5">
           <div
             className={`flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center ${
-              working ? 'shimmer' : ''
+              failed ? '' : 'shimmer'
             }`}
           >
-            {working ? (
+            {failed ? (
+              /* `role="alert"` rather than the `aria-live="polite"` the working
+                 state uses: this interrupts, because the reader is waiting on
+                 something that is not coming. */
+              <>
+                <p role="alert" className="max-w-[38ch] text-fg text-xs leading-relaxed">
+                  {error}
+                </p>
+                <p className="max-w-[38ch] text-muted text-xs leading-relaxed">
+                  Most formats a browser can play will work.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
+                >
+                  Choose a video
+                </button>
+              </>
+            ) : (
               /* No counter and no bar. The counter read "frame 84 of 96" for
                  every clip, because 96 is a fixed sample count and not a
                  property of the file. The bar was honest but jumped in four
@@ -799,20 +827,6 @@ const AsciiArt = () => {
                 <p aria-live="polite" className="font-mono text-muted text-xs">
                   cooking
                 </p>
-              </>
-            ) : (
-              <>
-                <p className="max-w-[38ch] text-muted text-xs leading-relaxed">
-                  Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
-                </p>
-                {error && <p className="max-w-[38ch] text-accent text-xs">{error}</p>}
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent"
-                >
-                  Choose a video
-                </button>
               </>
             )}
           </div>
