@@ -39,13 +39,7 @@ const ClipActions = ({
   showSource: boolean;
   onShowSource: (next: boolean) => void;
   onChoose: () => void;
-  /**
-   * Omitted while the bundled clip is showing. There is nothing to go back to
-   * from the thing you would be going back to, and offering it there re-baked
-   * the same file and flashed the cooking state to arrive where you already
-   * were.
-   */
-  onClear?: () => void;
+  onClear: () => void;
 }) => (
   <div className="dialkit-root" data-theme={theme}>
     <div
@@ -76,14 +70,12 @@ const ClipActions = ({
       <button type="button" className="dialkit-button whitespace-nowrap" onClick={onChoose}>
         Upload video
       </button>
-      {/* "Use default", not "Clear". Clear says what it removes; this says what
-          you get, which is the useful half — and there is no empty state to
-          clear to any more. */}
-      {onClear && (
-        <button type="button" className="dialkit-button whitespace-nowrap" onClick={onClear}>
-          Use default
-        </button>
-      )}
+      {/* Clear, and it clears — the bundled clip as readily as your own. It was
+          briefly "Use default", which reloaded the demo instead of removing it;
+          that made it impossible to see the panel with nothing in it. */}
+      <button type="button" className="dialkit-button whitespace-nowrap" onClick={onClear}>
+        Clear
+      </button>
     </div>
   </div>
 );

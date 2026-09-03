@@ -423,7 +423,7 @@ const AsciiArt = () => {
    * confirming a crop you had watched being chosen — with the stages gone it
    * was a button asking you to accept something you had not been shown.
    */
-  const [mode, setMode] = useState<'working' | 'ready'>('working');
+  const [mode, setMode] = useState<'empty' | 'working' | 'ready'>('working');
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -684,13 +684,35 @@ const AsciiArt = () => {
    * the response is in the HTTP cache by now, and keeping the decoded `File`
    * alive for a button most readers never press is 145KB that never frees.
    */
-  const reset = () => {
+  /** Loads the clip the page ships with. */
+  const useDefault = () => {
     fetch(butterflyClip)
       .then((r) => r.blob())
       .then((blob) =>
         runPipeline(new File([blob], BUNDLED_NAME, { type: blob.type || 'video/mp4' }), true),
       )
       .catch(() => setError('The bundled clip could not be loaded.'));
+  };
+
+  /**
+   * Throws the clip away — the bundled one as readily as your own.
+   *
+   * This used to reload the default, which meant clearing did not clear: on the
+   * bundled clip it re-baked the same file to arrive where you already were, and
+   * on your own it swapped one clip for another. Now the panel can genuinely be
+   * empty, and the card that appears offers both ways back.
+   */
+  const clear = () => {
+    release();
+    setSampled(null);
+    setCrop(null);
+    setError(null);
+    clipRef.current = null;
+    frameRef.current = 0;
+    setReady(false);
+    setArt([]);
+    setIsBundled(false);
+    setMode('empty');
   };
 
   /**
@@ -830,6 +852,39 @@ const AsciiArt = () => {
    * not do anything yet, around a square that was almost entirely empty. The
    * work is a progress bar; it should look like one.
    */
+  if (mode === 'empty') {
+    /* Two ways out, ranked. Choosing a file is the point of the panel; the
+       bundled clip is there so clearing is not a one-way door. */
+    return (
+      <div className="my-6 flex w-full flex-col gap-3">
+        <div className="rounded-2xl border border-border bg-fg/2 p-1.5">
+          <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center">
+            <p className="max-w-[42ch] text-muted text-xs leading-relaxed">
+              Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
+              >
+                Choose a video
+              </button>
+              <button
+                type="button"
+                onClick={useDefault}
+                className="rounded-lg border border-border px-3.5 py-2 text-muted text-xs outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
+              >
+                Use the default clip
+              </button>
+            </div>
+          </div>
+        </div>
+        {fileInput}
+      </div>
+    );
+  }
+
   if (mode === 'working') {
     /**
      * What distinguishes the two cards is the error, not the mode.
@@ -961,7 +1016,7 @@ const AsciiArt = () => {
                 showSource={showSource}
                 onShowSource={setShowSource}
                 onChoose={() => fileRef.current?.click()}
-                onClear={isBundled ? undefined : reset}
+                onClear={clear}
               />
             )}
           </div>
