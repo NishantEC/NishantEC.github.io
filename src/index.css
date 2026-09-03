@@ -363,67 +363,76 @@
   background: transparent;
 }
 
-/* The header used to be hidden: it was a tool's chrome — a name, a version
- * picker, a copy-config button — over a single panel the card already named.
- * There are three panels now and the name is the grouping, so it stays. The
- * chrome beside it does not; `DialPanel` never renders the preset toolbar. */
-.dialkit-panel-header {
-  padding-bottom: 2px;
+/* ---- the three control panels ------------------------------------------
+ *
+ * Each group is a *column*, and the columns sit side by side when there is room.
+ * The alternative — every group flowing its rows across a shared auto-fit grid —
+ * is what made this tall: four controls across three columns leaves two cells
+ * empty, and three groups doing that stacked to eight rows plus three headings
+ * where five rows would do.
+ *
+ * The panel's own chrome goes with it. Three stacked cards each carrying a
+ * background, a border, a radius and 10px of padding is three cards' worth of
+ * air inside one card that already has all four. What is left is the heading
+ * and the rows.
+ * ------------------------------------------------------------------------ */
+.dial-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
 }
 
-/* Its own background has to follow the card's corners, now that the parent no
- * longer clips — the clip was eating the select menus, which render inside the
- * panel rather than portalling to the body. */
-.dialkit-panel-inner {
-  border-radius: 0 0 10px 10px;
-}
-
+/* Side by side only when the panels are under the clip *and* there is width for
+ * it. Two gates, because they catch different things: beside a portrait clip
+ * the rail is 240px, and under a landscape clip on a phone the card is 400 —
+ * three columns of 130px either way, which is narrower than a single label. */
 @media (width >= 40rem) {
-  .dialkit-panel-inner {
-    border-radius: 0 10px 10px 0;
+  .dial-panels[data-columns='true'] {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .dial-panels[data-columns='true'] > * {
+    flex: 1;
+    min-width: 0;
   }
 }
 
-/* Room under the last control. Without it the final row sits hard against the
- * card's edge, which reads as the list being cut off rather than ended. */
-.dialkit-folder-root > .dialkit-folder-content {
-  padding-bottom: 0.75rem;
+.dial-panels .dialkit-panel-inner {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-/* ---- controls under the clip rather than beside it -----------------------
- *
- * When the source is landscape the rail moves below it and gets the whole
- * content column. DialKit stacks its rows in a flex column, which is right at
- * 240px and wrong at 640: twelve full-width rows, each a label at one edge and
- * a value at the other with a hand-span of nothing between them.
- *
- * `auto-fit` rather than a fixed count, because the column is the panel's
- * width and the panel's width is the reader's window. At 200px minimum this
- * lands on three columns in the reading column and folds back to one on a
- * phone, without a breakpoint deciding it.
- * ------------------------------------------------------------------------ */
-[data-dial-layout='grid'] .dialkit-folder-inner,
+/* No headings. The columns are the grouping — three of them side by side with a
+ * gutter between says the same thing a row of labels did, and says it without
+ * a heading, a hairline and 30px of vertical space per group. The names live in
+ * the controller calls, where they still name each panel for the store. */
+.dial-panels .dialkit-panel-header {
+  display: none;
+}
+
+/* DialKit ends every folder with 10px of its own, and the container's padding
+ * already closes the card. */
+.dial-panels .dialkit-folder-inner,
+.dial-panels .dialkit-folder-root > .dialkit-folder-content {
+  padding-bottom: 0;
+}
+
+.dial-panels .dialkit-folder-inner {
+  gap: 4px;
+}
+
+/* One gutter for the strip above and the columns below. */
 .clip-actions {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  align-content: start;
-  gap: 6px;
-}
-
-/* The three panels sit side by side when they are under the clip, so the
- * grouping reads as columns rather than as a tall stack of headed lists. */
-[data-dial-layout='grid'] {
-  flex: 1;
-  min-width: 240px;
-}
-
-/* The rail is under the stage now, so it rounds along the bottom at every
- * width — the rule above this one turns the right-hand corners on at 40rem,
- * which is only correct when it sits beside. */
-@media (width >= 40rem) {
-  [data-dial-layout='grid'] .dialkit-panel-inner {
-    border-radius: 0 0 10px 10px;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 4px;
 }
 
 /* ---------------------------------------------------------------------------

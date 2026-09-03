@@ -34,20 +34,11 @@ const DialPanel = ({
   id,
   title,
   theme,
-  layout = 'rail',
 }: {
   /** The `id` passed to `useDialKitController`, not its display name. */
   id: string;
   title: string;
   theme: DialTheme;
-  /**
-   * `grid` when the panel sits under the thing it controls rather than beside
-   * it. DialKit stacks its rows in a flex column, which is right in a 240px
-   * rail and wrong across a full content column — twelve rows the width of the
-   * page, mostly empty. The stylesheet reads this off the root; see the
-   * `[data-dial-layout='grid']` rules in `index.css`.
-   */
-  layout?: 'rail' | 'grid';
 }) => {
   const [controls, setControls] = useState<ControlMeta[] | null>(null);
   /**
@@ -85,7 +76,7 @@ const DialPanel = ({
   if (!controls) return null;
 
   return (
-    <div className="dialkit-root" data-mode="inline" data-theme={theme} data-dial-layout={layout}>
+    <div className="dialkit-root" data-mode="inline" data-theme={theme}>
       <div className="dialkit-panel" data-mode="inline">
         <Folder title={title} defaultOpen isRoot inline panelHeightOffset={2}>
           <ControlRenderer panelId={id} controls={controls} values={values} />

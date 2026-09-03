@@ -563,8 +563,6 @@ const AsciiArt = () => {
   const clipAspect = crop && crop.w > 0 && crop.h > 0 ? crop.w / crop.h : null;
   const sizedToClip = mode === 'ready' && clipAspect !== null;
   const railBelow = sizedToClip && (clipAspect as number) > 1.2;
-  /** Rows across when the panels sit under the clip, stacked when beside it. */
-  const panelLayout = railBelow ? 'grid' : 'rail';
 
   const cellPx = fontPx * zoom;
   const artW = grid.cols * cellPx * cellRatio;
@@ -799,27 +797,15 @@ const AsciiArt = () => {
                 : 'sm:w-[240px] sm:shrink-0 sm:rounded-r-[10px] sm:rounded-bl-none sm:border-l'
             }`}
           >
-            {/* One panel per subject. Their titles are the grouping — see the
-                controllers above for why folders inside a single panel are not
-                an option. */}
-            <DialPanel
-              layout={panelLayout}
-              id="ascii-characters"
-              title="Characters"
-              theme={resolvedTheme}
-            />
-            <DialPanel
-              layout={panelLayout}
-              id="ascii-colour"
-              title="Colour"
-              theme={resolvedTheme}
-            />
-            <DialPanel
-              layout={panelLayout}
-              id="ascii-playback"
-              title="Playback"
-              theme={resolvedTheme}
-            />
+            {/* One panel per subject, each a single column of rows. Side by
+                side when they sit under the clip, stacked when they sit beside
+                it — see the controllers above for why folders inside one panel
+                are not an option. */}
+            <div className="dial-panels" data-columns={railBelow}>
+              <DialPanel id="ascii-characters" title="Characters" theme={resolvedTheme} />
+              <DialPanel id="ascii-colour" title="Colour" theme={resolvedTheme} />
+              <DialPanel id="ascii-playback" title="Playback" theme={resolvedTheme} />
+            </div>
           </div>
         </div>
       </div>
