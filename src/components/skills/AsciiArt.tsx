@@ -88,8 +88,9 @@ const COLS = 84;
 /**
  * Starting points, not the whole choice — every colour here is also editable
  * directly, and touching one switches the palette to `custom`. `ink` is where
- * the ramp starts and `ink2` where it ends, so a preset carries a gradient as
- * well as a flat colour.
+ * the ramp starts and `ink2` where it ends — literally, now: the faintest
+ * characters are drawn in one and the densest in the other, with `BANDS` steps
+ * between. Setting the two the same is how you get a flat colour.
  */
 const PALETTES = {
   /**
@@ -175,6 +176,29 @@ const useResolvedTheme = () =>
  * because it is the skill's own reporting surface, not the site's to remove.
  */
 const NO_PROGRESS = () => {};
+
+/**
+ * How many colour steps the ramp is painted in.
+ *
+ * One layer is rendered per band, so this is a real cost — but only in the pass
+ * that already visits every cell, and 10 is enough that the steps are not
+ * visible as banding. Ramps shorter than this use one band per character, which
+ * is the truest version: the character and its colour change together.
+ */
+const BANDS = 10;
+
+/** sRGB mix of two `#rrggbb` colours. Hex in, hex out — the ramp layers are
+    plain `color` values, so nothing here needs a colour space wider than the
+    one the swatches already store. */
+const mixHex = (a: string, b: string, t: number) => {
+  const parse = (hex: string) => [1, 3, 5].map((i) => Number.parseInt(hex.slice(i, i + 2), 16));
+  const [ar, ag, ab] = parse(a);
+  const [br, bg, bb] = parse(b);
+  const chan = (x = 0, y = 0) => Math.round(x + (y - x) * t);
+  return `#${[chan(ar, br), chan(ag, bg), chan(ab, bb)]
+    .map((n) => n.toString(16).padStart(2, '0'))
+    .join('')}`;
+};
 
 /** Only ever shown to `decode`, which wants a `File`; never displayed. */
 const BUNDLED_NAME = 'butterfly.mp4';
@@ -266,7 +290,6 @@ const AsciiArt = () => {
         ink: { type: 'color' as const, default: PALETTES.mono.ink },
         ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
         background: { type: 'color' as const, default: PALETTES.mono.bg },
-        gradient: false as boolean,
       }),
       [],
     ),
@@ -290,7 +313,7 @@ const AsciiArt = () => {
   const ramp = characters.values.ramp as RampName;
   const density = characters.values.density as DensityName;
   const { contrast, invert } = characters.values;
-  const { gradient, ink, ink2 } = colour.values;
+  const { ink, ink2 } = colour.values;
   const bg = colour.values.background;
   const palette = colour.values.palette;
   const { zoom, playing } = motion.values;
@@ -330,7 +353,7 @@ const AsciiArt = () => {
     colour.setValues({ ink: preset.ink, ink2: preset.ink2, background: preset.bg });
   }, [palette, resolvedTheme, colour, ink, ink2, bg]);
 
-  const [art, setArt] = useState('');
+  const [art, setArt] = useState<string[]>([]);
   const [fontPx, setFontPx] = useState(7);
   const [cellRatio, setCellRatio] = useState(FALLBACK_RATIO);
   const [grid, setGrid] = useState({ cols: COLS, rows: ROWS_HINT });
@@ -393,25 +416,52 @@ const AsciiArt = () => {
     return () => ro.disconnect();
   }, [cellRatio, grid]);
 
+  /**
+   * Builds one string per colour band instead of one string for everything.
+   *
+   * The comment on `PALETTES` has always said `ink` is where the ramp starts and
+   * `ink2` where it ends. The renderer did not do that — it painted a
+   * `linear-gradient(160deg)` across the block, a diagonal wash unrelated to the
+   * characters — because colouring by ramp position "would need a span per cell,
+   * which is thousands of elements rebuilt many times a second". That was the
+   * right thing to avoid and the wrong conclusion to draw from it: it needs one
+   * element per *band*, not per cell. Ten layers, each holding only the
+   * characters at its own density and spaces everywhere else, stacked exactly on
+   * top of one another.
+   *
+   * Cost is one extra write per cell in a loop that already visits every cell,
+   * and ten row-joins instead of one. What it buys is colour that means
+   * something: a character's colour and its weight now move together, so the
+   * image has depth instead of a gradient laid over it at an angle.
+   */
   const draw = useCallback(() => {
-    const atlas = clipRef.current;
-    if (!atlas) return;
+    const clip = clipRef.current;
+    if (!clip) return;
 
-    const frame = atlas.grids[frameRef.current % atlas.grids.length];
+    const frame = clip.grids[frameRef.current % clip.grids.length];
     const chars = RAMPS[ramp];
     const last = chars.length - 1;
+    const bands = Math.min(chars.length, BANDS);
 
-    const lines: string[] = [];
-    for (let y = 0; y < atlas.rows; y++) {
-      let line = '';
-      for (let x = 0; x < atlas.cols; x++) {
-        let t = frame[y * atlas.cols + x];
+    const layers: string[][] = Array.from({ length: bands }, () => []);
+
+    for (let y = 0; y < clip.rows; y++) {
+      // Pre-filled with spaces so only the band that owns a cell writes to it.
+      const row = Array.from({ length: bands }, () => new Array<string>(clip.cols).fill(' '));
+
+      for (let x = 0; x < clip.cols; x++) {
+        let t = frame[y * clip.cols + x];
         if (invert) t = 1 - t;
-        line += chars[Math.min(last, Math.max(0, Math.round(t ** contrast * last)))];
+        const index = Math.min(last, Math.max(0, Math.round((t ?? 0) ** contrast * last)));
+        const band = last === 0 ? 0 : Math.min(bands - 1, Math.round((index / last) * (bands - 1)));
+        const target = row[band];
+        if (target) target[x] = chars[index] ?? ' ';
       }
-      lines.push(line);
+
+      for (let b = 0; b < bands; b++) layers[b]?.push(row[b]?.join('') ?? '');
     }
-    setArt(lines.join('\n'));
+
+    setArt(layers.map((l) => l.join('\n')));
   }, [ramp, contrast, invert]);
 
   /**
@@ -644,28 +694,37 @@ const AsciiArt = () => {
       </div>
     ) : null;
 
+  /**
+   * The layers, stacked exactly on top of one another.
+   *
+   * The first is in normal flow and sets the size; the rest are absolutely
+   * positioned over it. They hold identical whitespace, so every character
+   * lands in the same cell it would have in a single `<pre>` — the stack is
+   * only a way to give each density its own `color`.
+   *
+   * One `role="img"` on the container with one label, and every layer hidden
+   * from the accessibility tree: to a screen reader this is one picture, not
+   * ten sheets of punctuation.
+   */
   const artNode = (
-    <pre
+    <div
       role="img"
       aria-label="Animated ASCII rendering of the clip, drawn from the selected character ramp"
-      className="font-mono leading-[1.02] tracking-normal"
-      style={
-        gradient
-          ? {
-              fontSize: `${fontPx * zoom}px`,
-              // Painted through the glyphs rather than mapped per character:
-              // colouring by ramp position would need a span per cell, which is
-              // thousands of elements rebuilt many times a second.
-              backgroundImage: `linear-gradient(160deg, ${ink}, ${ink2})`,
-              WebkitBackgroundClip: 'text',
-              backgroundClip: 'text',
-              color: 'transparent',
-            }
-          : { fontSize: `${fontPx * zoom}px`, color: ink }
-      }
+      className="relative"
+      style={{ fontSize: `${cellPx}px` }}
     >
-      {art}
-    </pre>
+      {art.map((layer, i) => (
+        <pre
+          // biome-ignore lint/suspicious/noArrayIndexKey: the band *is* the identity — layer i is always the i-th density
+          key={i}
+          aria-hidden="true"
+          className={`font-mono leading-[1.02] tracking-normal ${i === 0 ? '' : 'absolute inset-0'}`}
+          style={{ color: mixHex(ink, ink2, art.length < 2 ? 0 : i / (art.length - 1)) }}
+        >
+          {layer}
+        </pre>
+      ))}
+    </div>
   );
 
   /* Nothing is uploaded anywhere: the file becomes an object URL and is decoded
