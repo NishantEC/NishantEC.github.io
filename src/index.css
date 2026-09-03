@@ -428,6 +428,14 @@
   gap: 4px;
 }
 
+/* Ramps are drawn in the font that will draw them. Both the trigger and the
+ * options, because the trigger shows the selected ramp too. */
+.dial-mono .dialkit-select-value,
+.dial-mono .dialkit-select-option {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0;
+}
+
 /* One gutter for the strip above and the columns below. */
 .clip-actions {
   display: grid;

@@ -34,11 +34,21 @@ const DialPanel = ({
   id,
   title,
   theme,
+  mono = false,
 }: {
   /** The `id` passed to `useDialKitController`, not its display name. */
   id: string;
   title: string;
   theme: DialTheme;
+  /**
+   * Sets this panel's dropdowns in the monospace stack.
+   *
+   * The ramp options *are* character ramps, so they have to be measured in the
+   * font that will draw them — in system-ui they render proportionally and a
+   * ramp stops looking like an even run. Scoped to one panel because DialKit
+   * portals a dropdown into its own `.dialkit-root`, which is this element.
+   */
+  mono?: boolean;
 }) => {
   const [controls, setControls] = useState<ControlMeta[] | null>(null);
   /**
@@ -76,7 +86,11 @@ const DialPanel = ({
   if (!controls) return null;
 
   return (
-    <div className="dialkit-root" data-mode="inline" data-theme={theme}>
+    <div
+      className={`dialkit-root${mono ? ' dial-mono' : ''}`}
+      data-mode="inline"
+      data-theme={theme}
+    >
       <div className="dialkit-panel" data-mode="inline">
         <Folder title={title} defaultOpen isRoot inline panelHeightOffset={2}>
           <ControlRenderer panelId={id} controls={controls} values={values} />

@@ -180,6 +180,39 @@ const NO_PROGRESS = () => {};
 const BUNDLED_NAME = 'butterfly.mp4';
 
 const RAMPS_LIST = Object.keys(RAMPS) as RampName[];
+
+/**
+ * A ramp shown as itself.
+ *
+ * "Standard" and "Line" say nothing about what you are about to get; the
+ * characters do, and they also make the *number* of steps visible — `binary`
+ * has three, `dense` has seventy. Long ramps are sampled evenly rather than
+ * truncated, so a 70-step ramp still reads as a smooth run from empty to solid
+ * instead of as its first fourteen punctuation marks.
+ */
+const LABEL_STEPS = 14;
+const rampLabel = (chars: string) => {
+  if (chars.length <= LABEL_STEPS) return chars;
+  return Array.from(
+    { length: LABEL_STEPS },
+    (_, i) => chars[Math.round((i * (chars.length - 1)) / (LABEL_STEPS - 1))],
+  ).join('');
+};
+
+const RAMP_OPTIONS = RAMPS_LIST.map((name) => ({ value: name, label: rampLabel(RAMPS[name]) }));
+
+/**
+ * A density shown as its column count.
+ *
+ * `coarse` and `finest` are a scale with no units — you cannot tell what you
+ * are asking for or what it costs. The number is the thing being chosen, and it
+ * is also a bake parameter, so seeing it change quietly explains why this one
+ * control takes a moment when the others are instant.
+ */
+const DENSITY_OPTIONS = DENSITY_NAMES.map((name) => ({
+  value: name,
+  label: `${name} · ${DENSITIES[name]}`,
+}));
 const PALETTE_LIST = [...(Object.keys(PALETTES) as (keyof typeof PALETTES)[]), 'custom' as const];
 
 const AsciiArt = () => {
@@ -215,8 +248,8 @@ const AsciiArt = () => {
     'Characters',
     useMemo(
       () => ({
-        ramp: { type: 'select' as const, options: [...RAMPS_LIST], default: 'standard' },
-        density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
+        ramp: { type: 'select' as const, options: [...RAMP_OPTIONS], default: 'standard' },
+        density: { type: 'select' as const, options: [...DENSITY_OPTIONS], default: 'normal' },
         contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
         invert: false as boolean,
       }),
@@ -802,7 +835,7 @@ const AsciiArt = () => {
                 it — see the controllers above for why folders inside one panel
                 are not an option. */}
             <div className="dial-panels" data-columns={railBelow}>
-              <DialPanel id="ascii-characters" title="Characters" theme={resolvedTheme} />
+              <DialPanel id="ascii-characters" title="Characters" theme={resolvedTheme} mono />
               <DialPanel id="ascii-colour" title="Colour" theme={resolvedTheme} />
               <DialPanel id="ascii-playback" title="Playback" theme={resolvedTheme} />
             </div>
