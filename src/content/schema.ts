@@ -57,7 +57,7 @@ export type SkillMeta = {
   blurb: string;
   date: string;
   /** Which interactive playground the entry mounts, if any. */
-  demo?: 'bionic' | 'ascii';
+  demo?: 'ascii';
   draft?: boolean;
 };
 

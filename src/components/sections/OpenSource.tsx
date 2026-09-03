@@ -6,7 +6,6 @@ import { useRepos } from '../../utils/useRepos';
 import { useCompact } from '../panel/useCompact';
 import { usePanel } from '../panel/usePanel';
 import ProjectThumb from '../projects/ProjectThumb';
-import Prose from '../reading/Prose';
 import IndexRow from '../ui/IndexRow';
 import SectionLabel from '../ui/SectionLabel';
 import SidebarSection from '../ui/SidebarSection';
@@ -72,9 +71,7 @@ const OpenSource = ({ index }: { index?: number }) => {
             )}
 
             <h3 className="mb-1">{project.title}</h3>
-            <p className="text-sm text-muted">
-              <Prose>{project.tagline}</Prose>
-            </p>
+            <p className="text-sm text-muted">{project.tagline}</p>
           </button>
         ))}
       </div>

@@ -2,7 +2,6 @@ import avatar from '../../assets/me.jpeg';
 import { profile } from '../../data/profile';
 import RevealParagraph, { type Segment } from '../hero/RevealParagraph';
 import { useCompact } from '../panel/useCompact';
-import Prose from '../reading/Prose';
 import Contacts from '../ui/Contacts';
 import CopyEmailButton from '../ui/CopyEmailButton';
 
@@ -77,7 +76,7 @@ const Hero = () => {
             is one scroll away in the experience section, and naming it here
             made the whole panel read as a job title rather than an index. */}
         <p className="text-sm leading-[22px] text-muted">
-          <Prose>Building stuff — product interfaces, and developer tools on the side.</Prose>
+          Building stuff — product interfaces, and developer tools on the side.
         </p>
 
         <div className="flex items-center gap-3">
@@ -94,11 +93,9 @@ const Hero = () => {
 
       <div className="flex flex-col gap-4 leading-[26px] text-muted">
         <p>
-          <Prose>
-            👋 Hey! I'm a <strong className="text-fg">software engineer</strong> with 3+ years of
-            experience, building AI-facing product interfaces and developer tooling. Based in{' '}
-            <strong className="text-fg">Bangalore, India 🇮🇳</strong>.
-          </Prose>
+          👋 Hey! I'm a <strong className="text-fg">software engineer</strong> with 3+ years of
+          experience, building AI-facing product interfaces and developer tooling. Based in{' '}
+          <strong className="text-fg">Bangalore, India 🇮🇳</strong>.
         </p>
 
         <RevealParagraph segments={WORK} />

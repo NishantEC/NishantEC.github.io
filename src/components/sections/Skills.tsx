@@ -2,7 +2,6 @@ import { skills } from '../../content/collections';
 import { formatMonth } from '../../utils/date';
 import { useCompact } from '../panel/useCompact';
 import { usePanel } from '../panel/usePanel';
-import Prose from '../reading/Prose';
 import SkillThumb from '../skills/SkillThumb';
 import IndexRow from '../ui/IndexRow';
 import SectionLabel from '../ui/SectionLabel';
@@ -60,9 +59,7 @@ const Skills = ({ index }: { index?: number }) => {
             </div>
 
             <h3 className="mb-1">{item.title}</h3>
-            <p className="mb-3 text-sm text-muted">
-              <Prose>{item.blurb}</Prose>
-            </p>
+            <p className="mb-3 text-sm text-muted">{item.blurb}</p>
             <span className="mt-auto text-sm text-muted">{formatMonth(item.date)}</span>
           </button>
         ))}

@@ -12,7 +12,6 @@ import XMarkIcon from '~icons/heroicons/x-mark';
 import { projects, skills } from '../../content/collections';
 import { profile } from '../../data/profile';
 import { usePanel } from '../panel/usePanel';
-import { useReading } from '../reading/useReading';
 import { originOf, type Theme } from '../theme/ThemeProvider';
 import { useTheme } from '../theme/useTheme';
 
@@ -39,7 +38,6 @@ const CommandPalette = () => {
 
   const { open, closeAll, tabs } = usePanel();
   const { theme, setTheme } = useTheme();
-  const { bionic, setBionic } = useReading();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
@@ -115,16 +113,6 @@ const CommandPalette = () => {
         hint: theme === value ? 'current' : undefined,
         run: (origin?: { x: number; y: number }) => setTheme(value as Theme, origin),
       })),
-
-      {
-        id: 'reading-mode',
-        label: bionic ? 'Reading: plain text' : 'Reading: half-bold words',
-        group: 'Theme',
-        icon: <BookOpenIcon />,
-        keywords: 'bionic accessibility dyslexia reading focus',
-        hint: bionic ? 'on' : undefined,
-        run: () => setBionic(!bionic),
-      },
     ];
 
     if (tabs.length > 0) {
@@ -140,7 +128,7 @@ const CommandPalette = () => {
     }
 
     return list;
-  }, [open, closeAll, tabs.length, theme, setTheme, bionic, setBionic]);
+  }, [open, closeAll, tabs.length, theme, setTheme]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();

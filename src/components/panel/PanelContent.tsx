@@ -5,9 +5,7 @@ import { findProject, findSkill } from '../../content/collections';
 import type { ProjectStatus } from '../../content/schema';
 import MdxBody from '../content/MdxBody';
 import ProjectThumb from '../projects/ProjectThumb';
-import Prose from '../reading/Prose';
 import AsciiArt from '../skills/AsciiArt';
-import BionicDemo from '../skills/BionicDemo';
 import SectionLabel from '../skills/SectionLabel';
 import SkillInstall from '../skills/SkillInstall';
 
@@ -41,9 +39,7 @@ const ProjectView = ({ slug }: { slug: string }) => {
         <ProjectThumb name={project.slug} accent={project.accent} />
       </motion.div>
 
-      <p className="leading-[26px] text-muted">
-        <Prose>{project.tagline}</Prose>
-      </p>
+      <p className="leading-[26px] text-muted">{project.tagline}</p>
 
       <dl className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
         <dt className="sr-only">Status</dt>
@@ -118,7 +114,6 @@ const SkillView = ({ slug }: { slug: string }) => {
           the art was large; it is a small square now and the breakout only
           bought a third alignment. */}
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        {entry.demo === 'bionic' && <BionicDemo />}
         <MdxBody Content={entry.Content} extra={composed ? ASCII_PARTS : undefined} />
       </div>
     </div>

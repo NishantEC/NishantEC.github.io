@@ -1,5 +1,4 @@
 import type { ComponentType, ReactNode } from 'react';
-import Prose from '../reading/Prose';
 
 /**
  * Styling for compiled MDX.
@@ -9,19 +8,13 @@ import Prose from '../reading/Prose';
  * whatever the surrounding layout happens to do to a `p`, and keeps the styles
  * next to the thing they style.
  *
- * Paragraphs and list items route through `Prose`, so reading mode applies to
- * written content as well as the hand-built copy.
  */
 const components: Record<string, ComponentType<{ children?: ReactNode }>> = {
   h2: ({ children }) => (
     <h2 className="mt-9 mb-3 font-display text-xl leading-tight italic first:mt-0">{children}</h2>
   ),
   h3: ({ children }) => <h3 className="mt-7 mb-2 font-medium">{children}</h3>,
-  p: ({ children }) => (
-    <p className="mb-4 leading-[1.73] text-muted">
-      <Prose>{children}</Prose>
-    </p>
-  ),
+  p: ({ children }) => <p className="mb-4 leading-[1.73] text-muted">{children}</p>,
   ul: ({ children }) => (
     <ul className="mb-4 flex list-[circle] flex-col gap-1.5 pl-4 leading-[1.73] text-muted">
       {children}
@@ -32,11 +25,7 @@ const components: Record<string, ComponentType<{ children?: ReactNode }>> = {
       {children}
     </ol>
   ),
-  li: ({ children }) => (
-    <li>
-      <Prose>{children}</Prose>
-    </li>
-  ),
+  li: ({ children }) => <li>{children}</li>,
   strong: ({ children }) => <strong className="font-semibold text-fg">{children}</strong>,
   em: ({ children }) => <em className="italic">{children}</em>,
   blockquote: ({ children }) => (

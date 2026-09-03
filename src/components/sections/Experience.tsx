@@ -1,6 +1,5 @@
 import { experience } from '../../data/profile';
 import { useCompact } from '../panel/useCompact';
-import Prose from '../reading/Prose';
 import SectionLabel from '../ui/SectionLabel';
 
 const Experience = ({ index }: { index?: number }) => {
@@ -61,7 +60,7 @@ const Experience = ({ index }: { index?: number }) => {
                       </span>
                     </span>
                   ) : (
-                    <Prose>{bullet.text}</Prose>
+                    bullet.text
                   )}
                 </li>
               ))}
