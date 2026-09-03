@@ -363,11 +363,12 @@
   background: transparent;
 }
 
-/* The panel's own header — its name, the version picker and the copy-config
- * button — is a tool's chrome. These controls are the piece, and the card
- * already sits under a heading that names it, so the row is repetition. */
+/* The header used to be hidden: it was a tool's chrome — a name, a version
+ * picker, a copy-config button — over a single panel the card already named.
+ * There are three panels now and the name is the grouping, so it stays. The
+ * chrome beside it does not; `DialPanel` never renders the preset toolbar. */
 .dialkit-panel-header {
-  display: none;
+  padding-bottom: 2px;
 }
 
 /* Its own background has to follow the card's corners, now that the parent no
@@ -401,11 +402,19 @@
  * lands on three columns in the reading column and folds back to one on a
  * phone, without a breakpoint deciding it.
  * ------------------------------------------------------------------------ */
-[data-dial-layout='grid'] .dialkit-folder-inner {
+[data-dial-layout='grid'] .dialkit-folder-inner,
+.clip-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   align-content: start;
   gap: 6px;
+}
+
+/* The three panels sit side by side when they are under the clip, so the
+ * grouping reads as columns rather than as a tall stack of headed lists. */
+[data-dial-layout='grid'] {
+  flex: 1;
+  min-width: 240px;
 }
 
 /* The rail is under the stage now, so it rounds along the bottom at every

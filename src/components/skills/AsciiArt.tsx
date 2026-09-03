@@ -1,7 +1,7 @@
 import { type DialValue, useDialKitController } from 'dialkit';
 import 'dialkit/styles.css';
 import { useReducedMotion } from 'motion/react';
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import butterflyClip from '../../assets/skills/butterfly.mp4';
 import { useFrameClock } from '../../utils/useFrameClock';
 import {
@@ -41,18 +41,20 @@ import DialPanel from './DialPanel';
  */
 
 /**
- * The two playback rates offered, as labels so they can be a `Select`.
+ * Playback rates, as a slider that lands only on values dividing 60Hz.
  *
- * Both divide 60Hz exactly — 15 is four refreshes per frame, 30 is two — so
- * neither judders. See `useFrameClock` for why that matters more than the
- * number itself: a rate that does not divide the display's is held for an
- * uneven number of refreshes and stutters by construction, whatever else is
- * correct.
+ * A frame is held for a whole number of display refreshes, so a rate that does
+ * not divide the display's is held for an uneven number and judders by
+ * construction — 8fps is 7.5 refreshes and measured 70ms of jitter, which is
+ * what `useFrameClock` exists to avoid. A free slider would offer those rates
+ * and then look wrong for reasons the reader cannot see, so the value snaps to
+ * the nearest one that works. Dragging feels continuous; where it settles is
+ * always honest.
  */
-const SPEEDS = { '15 fps': 15, '30 fps': 30 } as const;
-type Speed = keyof typeof SPEEDS;
-const SPEED_NAMES = Object.keys(SPEEDS) as Speed[];
-const SPEED_DEFAULT: Speed = '30 fps';
+const SPEEDS = [6, 10, 12, 15, 20, 30, 60];
+const SPEED_DEFAULT = 30;
+const snapSpeed = (fps: number) =>
+  SPEEDS.reduce((best, n) => (Math.abs(n - fps) < Math.abs(best - fps) ? n : best), SPEEDS[0]);
 
 const RAMPS = {
   standard: ' .:-=+*#%@',
@@ -90,6 +92,12 @@ const COLS = 84;
  * well as a flat colour.
  */
 const PALETTES = {
+  /**
+   * Resolved from the page rather than written down — see `themePalette`. It is
+   * the default, so the piece arrives wearing the site's own colours and turns
+   * with the light/dark toggle instead of sitting in its own permanent night.
+   */
+  theme: null,
   mono: { ink: '#f1f1f0', ink2: '#8a8a88', bg: '#0d0d0f' },
   paper: { ink: '#15151a', ink2: '#6b6b78', bg: '#f4f4f3' },
   phosphor: { ink: '#5eead4', ink2: '#0f766e', bg: '#04100d' },
@@ -97,6 +105,47 @@ const PALETTES = {
   ultra: { ink: '#c4b5fd', ink2: '#7c3aed', bg: '#0f0b1a' },
   blueprint: { ink: '#93c5fd', ink2: '#1d4ed8', bg: '#050b16' },
 } as const;
+
+/**
+ * Any CSS colour to `#rrggbb`, by painting one pixel and reading it back.
+ *
+ * The theme's variables are `oklch()` and `hsl()`; the colour control stores and
+ * compares hex. Handing it either meant the value written never equalled the
+ * value read, so the palette effect wrote it again on every render. A canvas is
+ * the only converter that already knows every colour space the browser does.
+ */
+const toHex = (css: string) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return css;
+  ctx.fillStyle = '#000000';
+  ctx.fillStyle = css;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return `#${[r, g, b].map((n) => (n ?? 0).toString(16).padStart(2, '0')).join('')}`;
+};
+
+/**
+ * The site's own colours, read off the document.
+ *
+ * Computed rather than written down twice: these are the same custom properties
+ * the rest of the page is painted with, so the palette cannot drift from the
+ * theme it is named after.
+ */
+const themePalette = () => {
+  const style = getComputedStyle(document.documentElement);
+  const read = (name: string, fallback: string) => {
+    const raw = style.getPropertyValue(name).trim();
+    return raw ? toHex(raw) : fallback;
+  };
+  return {
+    ink: read('--fg', '#f1f1f0'),
+    ink2: read('--muted', '#8a8a88'),
+    bg: read('--bg', '#0d0d0f'),
+  };
+};
 
 /**
  * The theme DialKit should wear, resolved rather than preferred.
@@ -150,59 +199,103 @@ const AsciiArt = () => {
    * needs a visible stop whatever the preference is — which is what the
    * `animation` toggle is for.
    */
-  const panelId = 'ascii-bake';
-  const panelTitle = 'ASCII';
-
-  const dial = useDialKitController(
-    panelTitle,
-    {
-      ramp: { type: 'select' as const, options: [...RAMPS_LIST], default: 'standard' },
-      palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'mono' },
-      ink: { type: 'color' as const, default: PALETTES.mono.ink },
-      ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
-      background: { type: 'color' as const, default: PALETTES.mono.bg },
-      gradient: false as boolean,
-      contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
-      zoom: [1, 0.5, 2.5, 0.05] as [number, number, number, number],
-      invert: false as boolean,
-      speed: {
-        type: 'select' as const,
-        options: [...SPEED_NAMES],
-        default: SPEED_DEFAULT,
-      },
-      playback: true as boolean,
-      /* Live now that every clip is really baked. It decides how many cells a
-         frame is cut into, which is a bake parameter — on the old pre-baked
-         sheet it could not do anything, and was shown anyway. */
-      density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
-    },
-    // Explicit, because `DialPanel` addresses the panel by id and a derived one
-    // would silently change if the display name ever did.
-    { id: panelId },
+  /**
+   * Three panels, one subject each, rather than one panel of everything.
+   *
+   * DialKit does have folders — a nested config object becomes one — and they
+   * are not usable here: nesting makes the store re-register the panel on every
+   * render, which notifies, which re-renders, and React stops it at "maximum
+   * update depth exceeded". Three flat panels get the same grouping through a
+   * mechanism that works, and each one's `Folder` header names its subject.
+   *
+   * Configs and options are memoised for the same reason a nested one is not
+   * safe: a fresh object each render is a fresh registration.
+   */
+  const characters = useDialKitController(
+    'Characters',
+    useMemo(
+      () => ({
+        ramp: { type: 'select' as const, options: [...RAMPS_LIST], default: 'standard' },
+        density: { type: 'select' as const, options: [...DENSITY_NAMES], default: 'normal' },
+        contrast: [0.85, 0.3, 2.5, 0.05] as [number, number, number, number],
+        invert: false as boolean,
+      }),
+      [],
+    ),
+    useMemo(() => ({ id: 'ascii-characters' }), []),
   );
 
-  const v = dial.values;
-  const ramp = v.ramp as RampName;
-  const speed = v.speed as Speed;
-  const { contrast, zoom, invert, gradient, ink, ink2 } = v;
-  const bg = v.background;
-  const playing = v.playback;
-  const density = v.density as DensityName;
+  const colour = useDialKitController(
+    'Colour',
+    useMemo(
+      () => ({
+        palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'theme' },
+        ink: { type: 'color' as const, default: PALETTES.mono.ink },
+        ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
+        background: { type: 'color' as const, default: PALETTES.mono.bg },
+        gradient: false as boolean,
+      }),
+      [],
+    ),
+    useMemo(() => ({ id: 'ascii-colour' }), []),
+  );
+
+  const motion = useDialKitController(
+    'Playback',
+    useMemo(
+      () => ({
+        /* A slider now rather than a two-option select. It snaps — see `SPEEDS`. */
+        speed: [SPEED_DEFAULT, 6, 60, 1] as [number, number, number, number],
+        playing: true as boolean,
+        zoom: [1, 0.5, 2.5, 0.05] as [number, number, number, number],
+      }),
+      [],
+    ),
+    useMemo(() => ({ id: 'ascii-playback' }), []),
+  );
+
+  const ramp = characters.values.ramp as RampName;
+  const density = characters.values.density as DensityName;
+  const { contrast, invert } = characters.values;
+  const { gradient, ink, ink2 } = colour.values;
+  const bg = colour.values.background;
+  const palette = colour.values.palette;
+  const { zoom, playing } = motion.values;
+  const speed = snapSpeed(motion.values.speed);
+
+  /**
+   * The slider moves in steps of 1 and only some of those play smoothly, so the
+   * value is written back to whichever of them is nearest.
+   */
+  useEffect(() => {
+    if (motion.values.speed === speed) return;
+    motion.setValues({ speed });
+  }, [motion, speed]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: applies the preference once; adding `dial` would re-fire it and override the reader turning playback back on.
   useEffect(() => {
-    if (reduceMotion) dial.setValues({ playback: false });
+    if (reduceMotion) motion.setValues({ playing: false });
   }, [reduceMotion]);
 
-  // A preset is a starting point: it writes its colours in, and editing one
-  // afterwards is what makes the palette read `custom`.
-  const lastPalette = useRef(v.palette);
+  /**
+   * A named palette writes its colours in; editing one by hand afterwards is
+   * what makes the palette read `custom`.
+   *
+   * `theme` is the exception, and the reason `resolvedTheme` is a dependency:
+   * its colours are the page's own, so they have to be re-read when the site's
+   * light/dark toggle changes them. Guarded on the colours differing rather
+   * than on the palette changing, because `colour` is a new object every render
+   * and an unguarded write here loops.
+   */
+  // biome-ignore lint/correctness/useExhaustiveDependencies: `resolvedTheme` is not read here, it is the signal. `themePalette()` reads the document's custom properties, which change when the site's light/dark class does, and nothing else in this effect can observe that.
   useEffect(() => {
-    if (v.palette === lastPalette.current) return;
-    lastPalette.current = v.palette;
-    const preset = PALETTES[v.palette as keyof typeof PALETTES];
-    if (preset) dial.setValues({ ink: preset.ink, ink2: preset.ink2, background: preset.bg });
-  }, [v.palette, dial]);
+    if (palette === 'custom') return;
+    const preset =
+      palette === 'theme' ? themePalette() : PALETTES[palette as keyof typeof PALETTES];
+    if (!preset) return;
+    if (preset.ink === ink && preset.ink2 === ink2 && preset.bg === bg) return;
+    colour.setValues({ ink: preset.ink, ink2: preset.ink2, background: preset.bg });
+  }, [palette, resolvedTheme, colour, ink, ink2, bg]);
 
   const [art, setArt] = useState('');
   const [fontPx, setFontPx] = useState(7);
@@ -311,7 +404,7 @@ const AsciiArt = () => {
 
   // Playback, separate from loading so pausing doesn't re-decode the sheet and
   // resuming continues from the frame it stopped on.
-  useFrameClock(SPEEDS[speed], ready && playing, () => {
+  useFrameClock(speed, ready && playing, () => {
     const clip = clipRef.current;
     if (!clip) return;
     frameRef.current = (frameRef.current + 1) % clip.grids.length;
@@ -470,6 +563,8 @@ const AsciiArt = () => {
   const clipAspect = crop && crop.w > 0 && crop.h > 0 ? crop.w / crop.h : null;
   const sizedToClip = mode === 'ready' && clipAspect !== null;
   const railBelow = sizedToClip && (clipAspect as number) > 1.2;
+  /** Rows across when the panels sit under the clip, stacked when beside it. */
+  const panelLayout = railBelow ? 'grid' : 'rail';
 
   const cellPx = fontPx * zoom;
   const artW = grid.cols * cellPx * cellRatio;
@@ -704,11 +799,25 @@ const AsciiArt = () => {
                 : 'sm:w-[240px] sm:shrink-0 sm:rounded-r-[10px] sm:rounded-bl-none sm:border-l'
             }`}
           >
+            {/* One panel per subject. Their titles are the grouping — see the
+                controllers above for why folders inside a single panel are not
+                an option. */}
             <DialPanel
-              layout={railBelow ? 'grid' : 'rail'}
-              id={panelId}
-              title={panelTitle}
-              values={v as Record<string, DialValue>}
+              layout={panelLayout}
+              id="ascii-characters"
+              title="Characters"
+              theme={resolvedTheme}
+            />
+            <DialPanel
+              layout={panelLayout}
+              id="ascii-colour"
+              title="Colour"
+              theme={resolvedTheme}
+            />
+            <DialPanel
+              layout={panelLayout}
+              id="ascii-playback"
+              title="Playback"
               theme={resolvedTheme}
             />
           </div>
@@ -722,7 +831,7 @@ const AsciiArt = () => {
             something. The empty and working states return their own band above
             and never reach this row. */}
         <p className="ml-auto px-0.5 text-muted text-xs">
-          {`${grid.cols}×${grid.rows} · ${(FRAME_COUNT / SPEEDS[speed]).toFixed(1)}s loop`}
+          {`${grid.cols}×${grid.rows} · ${(FRAME_COUNT / speed).toFixed(1)}s loop`}
         </p>
 
         {fileInput}

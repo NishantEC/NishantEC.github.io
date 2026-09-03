@@ -33,15 +33,12 @@ import { useEffect, useState } from 'react';
 const DialPanel = ({
   id,
   title,
-  values,
   theme,
   layout = 'rail',
 }: {
   /** The `id` passed to `useDialKitController`, not its display name. */
   id: string;
   title: string;
-  /** The controller's live values — already reactive, so this needs no second subscription. */
-  values: Record<string, DialValue>;
   theme: DialTheme;
   /**
    * `grid` when the panel sits under the thing it controls rather than beside
@@ -53,15 +50,36 @@ const DialPanel = ({
   layout?: 'rail' | 'grid';
 }) => {
   const [controls, setControls] = useState<ControlMeta[] | null>(null);
+  /**
+   * Values come from the store rather than from the controller.
+   *
+   * `ControlRenderer` looks each control up by its *dotted path* — `colour.ink`
+   * once the config is grouped into folders — and the controller hands back the
+   * nested shape instead. `DialStore.getValues` is already the flat map keyed
+   * that way, so reading it here is both correct and one less thing for the
+   * caller to get right.
+   */
+  const [values, setValues] = useState<Record<string, DialValue>>({});
 
   // Registration happens in the controller's own effect, so the panel does not
   // exist on the first render and cannot simply be read during it. The global
   // subscription is also what picks up a config that changes shape — which is
   // how the playground gets a `density` control the demo never registers.
   useEffect(() => {
-    const read = () => setControls(DialStore.getPanel(id)?.controls ?? null);
+    const read = () => {
+      setControls(DialStore.getPanel(id)?.controls ?? null);
+      setValues(DialStore.getValues(id));
+    };
     read();
-    return DialStore.subscribeGlobal(read);
+    // Two subscriptions: the global one fires when a panel registers or its
+    // config changes shape, the panel one when a value moves. Neither covers
+    // the other.
+    const stopGlobal = DialStore.subscribeGlobal(read);
+    const stopPanel = DialStore.subscribe(id, read);
+    return () => {
+      stopGlobal();
+      stopPanel();
+    };
   }, [id]);
 
   if (!controls) return null;

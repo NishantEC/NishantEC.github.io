@@ -43,17 +43,14 @@ const ClipActions = ({
 }) => (
   <div className="dialkit-root" data-theme={theme}>
     <div
-      className={`flex flex-wrap items-center gap-1.5 border-t p-2 ${
-        roundBottomLeft ? 'sm:rounded-bl-[10px]' : ''
-      }`}
+      className={`clip-actions border-t p-2 ${roundBottomLeft ? 'sm:rounded-bl-[10px]' : ''}`}
       style={{ background: 'var(--dial-glass-bg)', borderColor: 'var(--dial-border)' }}
     >
-      {/* A floor rather than a fixed width: the toggle keeps its label legible
-          and the two buttons take what is left, wrapping to a second row under
-          a narrow clip rather than breaking their own labels across lines. */}
-      <div className="min-w-[9.5rem] flex-1">
-        <Toggle label="Show source" checked={showSource} onChange={onShowSource} />
-      </div>
+      {/* `clip-actions` is the same grid the control panels use — same columns,
+          same 6px gutter, one definition in `index.css`. It was a flex row with
+          its own gap before, so the three of them lined up with nothing
+          underneath. */}
+      <Toggle label="Show source" checked={showSource} onChange={onShowSource} />
       {/* "Replace", not "Choose another". By the time this strip exists there
           is already a clip, so the shorter word is not less clear — and the two
           of them fit one line beside a portrait video, where the longer label
