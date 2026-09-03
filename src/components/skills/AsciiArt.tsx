@@ -287,8 +287,13 @@ const AsciiArt = () => {
     useMemo(
       () => ({
         palette: { type: 'select' as const, options: [...PALETTE_LIST], default: 'theme' },
-        ink: { type: 'color' as const, default: PALETTES.mono.ink },
-        ink2: { type: 'color' as const, default: PALETTES.mono.ink2 },
+        /* `inkStart`/`inkEnd`, not `ink`/`ink2`. DialKit derives a control's
+           label from its key by splitting on capitals, so `ink2` rendered as
+           the non-word "Ink2" beside "Ink" — and `ColorConfig` has no `label`
+           field to override it with. These are what the comment on `PALETTES`
+           has always called them anyway. */
+        inkStart: { type: 'color' as const, default: PALETTES.mono.ink },
+        inkEnd: { type: 'color' as const, default: PALETTES.mono.ink2 },
         background: { type: 'color' as const, default: PALETTES.mono.bg },
       }),
       [],
@@ -313,7 +318,7 @@ const AsciiArt = () => {
   const ramp = characters.values.ramp as RampName;
   const density = characters.values.density as DensityName;
   const { contrast, invert } = characters.values;
-  const { ink, ink2 } = colour.values;
+  const { inkStart: ink, inkEnd: ink2 } = colour.values;
   const bg = colour.values.background;
   const palette = colour.values.palette;
   const { zoom, playing } = motion.values;
@@ -350,7 +355,7 @@ const AsciiArt = () => {
       palette === 'theme' ? themePalette() : PALETTES[palette as keyof typeof PALETTES];
     if (!preset) return;
     if (preset.ink === ink && preset.ink2 === ink2 && preset.bg === bg) return;
-    colour.setValues({ ink: preset.ink, ink2: preset.ink2, background: preset.bg });
+    colour.setValues({ inkStart: preset.ink, inkEnd: preset.ink2, background: preset.bg });
   }, [palette, resolvedTheme, colour, ink, ink2, bg]);
 
   const [art, setArt] = useState<string[]>([]);
@@ -917,7 +922,7 @@ const AsciiArt = () => {
         {/* By here there is always a clip, so the size always belongs to
             something. The empty and working states return their own band above
             and never reach this row. */}
-        <p className="ml-auto px-0.5 text-muted text-xs">
+        <p className="ml-auto px-0.5 text-muted text-xs tabular-nums">
           {`${grid.cols}×${grid.rows} · ${(FRAME_COUNT / speed).toFixed(1)}s loop`}
         </p>
 

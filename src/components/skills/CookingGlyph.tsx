@@ -23,8 +23,10 @@ const CookingGlyph = () => (
     strokeWidth="1.25"
     strokeLinecap="round"
     strokeLinejoin="round"
-    role="img"
-    aria-label="Working"
+    // Decorative. The band beside it is an `aria-live` region already
+    // announcing the state, and a `role="img"` labelled "Working" made a screen
+    // reader say the wait twice, in two different words.
+    aria-hidden="true"
   >
     {/* Drawn behind the pot so a wisp leaving the top passes under the rim
         rather than crossing it. */}

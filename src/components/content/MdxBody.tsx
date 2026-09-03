@@ -18,17 +18,17 @@ const components: Record<string, ComponentType<{ children?: ReactNode }>> = {
   ),
   h3: ({ children }) => <h3 className="mt-7 mb-2 font-medium">{children}</h3>,
   p: ({ children }) => (
-    <p className="mb-4 leading-[26px] text-muted">
+    <p className="mb-4 leading-[1.73] text-muted">
       <Prose>{children}</Prose>
     </p>
   ),
   ul: ({ children }) => (
-    <ul className="mb-4 flex list-[circle] flex-col gap-1.5 pl-4 leading-[26px] text-muted">
+    <ul className="mb-4 flex list-[circle] flex-col gap-1.5 pl-4 leading-[1.73] text-muted">
       {children}
     </ul>
   ),
   ol: ({ children }) => (
-    <ol className="mb-4 flex list-decimal flex-col gap-1.5 pl-4 leading-[26px] text-muted">
+    <ol className="mb-4 flex list-decimal flex-col gap-1.5 pl-4 leading-[1.73] text-muted">
       {children}
     </ol>
   ),

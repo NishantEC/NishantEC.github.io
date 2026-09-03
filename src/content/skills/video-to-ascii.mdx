@@ -1,7 +1,7 @@
 ---
 title: video-to-ascii
 slug: video-to-ascii
-blurb: Bakes a clip into an ASCII sprite sheet small enough to ship. Install it and point it at your own footage.
+blurb: Bakes a clip into a grid of brightnesses small enough to ship, which a page reads out as characters.
 date: '2026-08-28'
 demo: ascii
 ---
@@ -28,9 +28,9 @@ the frame instantly.
 **Density** is the one that isn't. It decides how many cells a frame is cut
 into, which is a property of the bake, so changing it runs the bake again.
 
-Nothing is uploaded. The file becomes an object URL, a `<video>` element decodes
-it, and every frame is read out of a canvas — there is no server in this, which
-is also why your machine does the work. Drag the divider to compare: one clock
+Nothing is uploaded — the file becomes an object URL, a `<video>` element
+decodes it, and every frame is read out of a canvas, which is also why your
+machine does the work. Drag the divider to compare: one clock
 drives both sides, because a compare slider showing two different instants is
 worse than none.
 
