@@ -1,4 +1,4 @@
-import { type DialValue, useDialKitController } from 'dialkit';
+import { useDialKitController } from 'dialkit';
 import 'dialkit/styles.css';
 import { useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
