@@ -1,6 +1,5 @@
 import { Link } from 'react-router';
 import ArrowLeftIcon from '~icons/heroicons/arrow-left';
-import { profile } from '../../data/profile';
 import PanelContent from '../panel/PanelContent';
 import type { PanelTab } from '../panel/PanelProvider';
 
@@ -31,10 +30,8 @@ const StandaloneItem = ({ tab }: { tab: PanelTab }) => (
 
           A `Link` to `/`, not a history `back()`. Someone who opened this from
           a post or a message has no history to go back to, and the button has
-          to work the same for them as for a reader who came from the home page.
-
-          It names the destination rather than saying "back", for the same
-          reason: back implies a previous page, and there often isn't one. */}
+          to work the same for them as for a reader who came from the home page
+          — so it always goes to the home page rather than wherever they were. */}
       <div className="mx-auto mb-8 w-full max-w-2xl">
         <Link
           to="/"
@@ -43,7 +40,7 @@ const StandaloneItem = ({ tab }: { tab: PanelTab }) => (
           <span className="grid size-7 place-items-center rounded-full bg-fg/6 transition-colors group-hover:bg-fg/10">
             <ArrowLeftIcon className="size-3.5" />
           </span>
-          {profile.name}
+          Back
         </Link>
       </div>
 
