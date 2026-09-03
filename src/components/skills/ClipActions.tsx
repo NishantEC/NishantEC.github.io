@@ -58,13 +58,17 @@ const ClipActions = ({
           its own gap before, so the three of them lined up with nothing
           underneath. */}
       <Toggle label="Show source" checked={showSource} onChange={onShowSource} />
-      {/* "Replace", not "Choose another". By the time this strip exists there
-          is already a clip, so the shorter word is not less clear — and the two
-          of them fit one line beside a portrait video, where the longer label
-          broke across two. `whitespace-nowrap` so neither can break mid-label
-          however narrow the column gets; they wrap as whole buttons instead. */}
+      {/* "Upload video", not "Replace". Replace described what happens to the
+          clip that is already here; it did not tell anyone arriving that
+          bringing their own is the thing to do, which is the whole point of the
+          page. The word is a small lie — nothing is uploaded, as the paragraph
+          below the panel says — but it is the verb everyone has for "choose a
+          file", and the correction is one line away.
+
+          `whitespace-nowrap` so it cannot break mid-label however narrow the
+          column gets; the buttons wrap whole instead. */}
       <button type="button" className="dialkit-button whitespace-nowrap" onClick={onChoose}>
-        Replace
+        Upload video
       </button>
       <button type="button" className="dialkit-button whitespace-nowrap" onClick={onClear}>
         Clear

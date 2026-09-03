@@ -393,8 +393,16 @@ const AsciiArt = () => {
   const [crop, setCrop] = useState<Crop | null>(null);
   const [sampled, setSampled] = useState<Sampled | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** Whether the source video is drawn beside the characters. */
-  const [showSource, setShowSource] = useState(true);
+  /**
+   * Whether the source video is drawn beside the characters.
+   *
+   * Off to begin with. The page is about what the skill makes, and opening on a
+   * divider with half a video behind it showed the input first — on a clip
+   * whose subject is off to one side, the ASCII half could be empty on arrival.
+   * The comparison is the proof, and proof is worth more once you have seen the
+   * claim.
+   */
+  const [showSource, setShowSource] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
