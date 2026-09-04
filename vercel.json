@@ -20,6 +20,22 @@
   ],
   "redirects": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "video2ascii.nishantg.com"
+        }
+      ],
+      "destination": "https://www.nishantg.com/skills/video2ascii",
+      "permanent": false
+    },
+    {
+      "source": "/skills/video-to-ascii",
+      "destination": "/skills/video2ascii",
+      "permanent": true
+    },
+    {
       "source": "/stash/:slug",
       "destination": "/skills/:slug",
       "permanent": true

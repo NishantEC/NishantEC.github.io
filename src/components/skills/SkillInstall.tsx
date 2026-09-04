@@ -14,7 +14,7 @@ import { EASE } from '../../utils/motion';
  * button labelled "Skills" beside a button labelled "This one" would be two
  * routes to the same page.
  *
- * `--skill video-to-ascii` rather than the bare repo. The repo holds one skill
+ * `--skill video2ascii` rather than the bare repo. The repo holds one skill
  * today, so the two install exactly the same thing — but this page is about one
  * skill, and the command on it should name that skill rather than the drawer it
  * lives in. It also stops being right the day a second one lands. The CLI's own
@@ -58,7 +58,7 @@ const ICON_MOTION = {
 } as const;
 
 const SkillInstall = ({
-  command = 'npx skills add NishantEC/skills --skill video-to-ascii',
+  command = 'npx skills add NishantEC/skills --skill video2ascii',
 }: {
   command?: string;
 }) => {

@@ -56,7 +56,7 @@ const CopyPreset = ({ preset }: { preset: Preset }) => {
 
   const copy = async () => {
     const body = JSON.stringify(preset, null, 2);
-    if (await writeClipboard(`video-to-ascii preset\n${body}`)) setCopied(true);
+    if (await writeClipboard(`video2ascii preset\n${body}`)) setCopied(true);
   };
 
   return (

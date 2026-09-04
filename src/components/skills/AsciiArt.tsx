@@ -439,13 +439,12 @@ const AsciiArt = () => {
   /**
    * Whether the source video is drawn beside the characters.
    *
-   * Off to begin with. The page is about what the skill makes, and opening on a
-   * divider with half a video behind it showed the input first — on a clip
-   * whose subject is off to one side, the ASCII half could be empty on arrival.
-   * The comparison is the proof, and proof is worth more once you have seen the
-   * claim.
+   * On to begin with. The first question anyone asks about ASCII art is whether
+   * it came from something or was drawn — and the answer is the whole claim of
+   * the skill. Opening on the divider answers it before it is asked; the toggle
+   * then takes the video away for anyone who wants to just watch the output.
    */
-  const [showSource, setShowSource] = useState(false);
+  const [showSource, setShowSource] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);

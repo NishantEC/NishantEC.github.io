@@ -1,5 +1,5 @@
 /**
- * The `video-to-ascii` pipeline, in the browser.
+ * The `video2ascii` pipeline, in the browser.
  *
  * The skill does this with ffmpeg and python: sample frames, find the subject,
  * crop to it, normalise to a density grid, then let a human approve before

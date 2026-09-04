@@ -1,7 +1,7 @@
 import { createContext, type ReactNode, useCallback, useMemo, useState } from 'react';
 
 export type PanelTab = {
-  /** Stable key — `project:herm`, `skill:video-to-ascii`. */
+  /** Stable key — `project:herm`, `skill:video2ascii`. */
   id: string;
   kind: 'project' | 'skill';
   slug: string;
