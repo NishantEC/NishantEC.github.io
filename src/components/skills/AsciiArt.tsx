@@ -742,6 +742,21 @@ const AsciiArt = () => {
   const artH = grid.rows * cellPx * 1.02;
 
   /**
+   * The grid's own aspect, which is not the clip's.
+   *
+   * A 16:9 crop sampled at 124 columns comes back 124x42, and 124 cells wide by
+   * 42 tall is 1.742 rather than 1.778 — the row count is a whole number and
+   * absorbs the difference. Giving the stage the clip's ratio made the grid fit
+   * to whichever axis was tighter and leave a gap on the other: 13px down the
+   * side, which `object-contain` then matched on the video, so the source sat
+   * in a 6.5px pillarbox.
+   *
+   * `fontPx` cancels out of this, so it is safe to feed back into the box that
+   * `fontPx` is measured from.
+   */
+  const gridAspect = (grid.cols * cellRatio) / (grid.rows * 1.02);
+
+  /**
    * The source, framed to match the ASCII exactly.
    *
    * Two things were wrong with showing the raw `<video>` beside it. The bake
@@ -754,10 +769,19 @@ const AsciiArt = () => {
    * character grid, then offset so that region sits at the origin, inside a
    * window of exactly the grid's size. Both layers are then the same rectangle
    * showing the same part of the same frame, and `zoom` moves them together.
+   *
+   * The window is rounded up rather than exact. `fontPx` is fitted from a
+   * measured width, so the grid can land a tenth of a pixel inside the stage —
+   * and a tenth of a pixel of paper behind a black clip is a visible hairline
+   * once the display scales it up. Rounding up overruns into the stage's own
+   * `overflow-hidden` instead, which costs less than a pixel of alignment.
    */
   const sourceNode =
     crop && sampled ? (
-      <div className="relative overflow-hidden" style={{ width: `${artW}px`, height: `${artH}px` }}>
+      <div
+        className="relative overflow-hidden"
+        style={{ width: `${Math.ceil(artW)}px`, height: `${Math.ceil(artH)}px` }}
+      >
         {/*
           This element *is* the one the frame clock seeks. Rendering a second
           video and syncing the offscreen one left two clocks running: the
@@ -778,7 +802,16 @@ const AsciiArt = () => {
           muted
           playsInline
           loop
-          className="absolute max-w-none"
+          /*
+            `object-fill`, not the default `contain`. The box below is computed
+            to put the crop region exactly over the character grid, and the grid
+            quantises rows to a whole number — 124x42 for a 16:9 crop is 1.743,
+            not 1.778. `contain` answered that 2% by letterboxing inside its own
+            box: 3.9px of stage showing through above and below a black clip.
+            Filling makes the video take the same 2% the characters already did,
+            which is what puts the two layers on the same geometry.
+          */
+          className="absolute max-w-none object-fill"
           style={{
             width: `${(sampled.width / crop.w) * artW}px`,
             height: `${(sampled.height / crop.h) * artH}px`,
@@ -987,7 +1020,7 @@ const AsciiArt = () => {
               // Square until there is a clip, then the clip's own shape — so a
               // 16:9 video is not letterboxed into a square while the character
               // grid beside it is not.
-              style={{ background: bg, aspectRatio: sizedToClip ? (clipAspect as number) : 1 }}
+              style={{ background: bg, aspectRatio: sizedToClip ? gridAspect : 1 }}
             >
               {showSource ? (
                 <CompareSlider

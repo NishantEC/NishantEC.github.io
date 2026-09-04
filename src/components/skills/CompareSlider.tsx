@@ -50,8 +50,14 @@ const CompareSlider = ({
         sides have to occupy exactly the same box or the divider compares two
         different framings — the source is letterboxed by `object-contain`
         while the character grid is sized from the stage, and they drift apart.
+
+        No border or radius of its own. The container already rounds the top
+        and clips, and a border here is inside that clip: it took 1.8px off
+        `inset-0`, which moved the box off the clip's aspect ratio, and
+        `object-contain` answered by pillarboxing the video 5.6px each side.
+        The gap down the left edge was that.
       */
-      className="relative isolate h-full w-full touch-none select-none overflow-hidden rounded-[10px] border border-border/60"
+      className="relative isolate h-full w-full touch-none select-none overflow-hidden"
     >
       {/* No `max-w/max-h` clamp on the child: the source is now handed an
           explicit box the same size as the character grid, and clamping it here
