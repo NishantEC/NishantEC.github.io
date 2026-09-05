@@ -78,37 +78,44 @@ const SkillInstall = ({
   };
 
   return (
-    <div className="my-6 flex items-center gap-3 rounded-xl border border-border px-4 py-3">
-      {/* `select-all` so a reader without clipboard permission — or one who
+    /* The same two-layer card the demo panel wears: a tinted slab with the
+       stroked card inset into it. Radii are concentric — the inner is the outer
+       minus the gutter (16 - 6 = 10) — so the two curves stay parallel instead
+       of one cutting across the other. Only the inner layer is stroked; a
+       border on both is what reads as a doubled line. */
+    <div className="my-6 rounded-2xl bg-fg/2 p-1.5">
+      <div className="flex items-center gap-3 rounded-[10px] border border-border px-4 py-3">
+        {/* `select-all` so a reader without clipboard permission — or one who
           simply doesn't trust a copy button — can take it in one gesture.
 
           It wraps on a narrow screen and doesn't on a wide one. Naming the skill
           made the command long enough to overflow at 430px, and a command you
           have to scroll sideways to read is worse than one on two lines — it
           breaks at a space, between the repo and the flag. */}
-      <code className="min-w-0 flex-1 select-all whitespace-normal font-mono text-sm sm:overflow-x-auto sm:whitespace-nowrap">
-        <span className="text-muted">npx</span>{' '}
-        <span className="text-fg">{command.replace(/^npx\s+/, '')}</span>
-      </code>
+        <code className="min-w-0 flex-1 select-all whitespace-normal font-mono text-sm sm:overflow-x-auto sm:whitespace-nowrap">
+          <span className="text-muted">npx</span>{' '}
+          <span className="text-fg">{command.replace(/^npx\s+/, '')}</span>
+        </code>
 
-      <button
-        type="button"
-        onClick={copy}
-        // The label carries the result, not just the action, because the icon
-        // swap is invisible to a screen reader.
-        aria-label={copied ? 'Copied install command' : 'Copy install command'}
-        className="grid size-7 shrink-0 place-items-center rounded-md text-muted outline-none transition-[color,background-color,transform] hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
-      >
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={copied ? 'copied' : 'idle'}
-            {...ICON_MOTION}
-            className="grid place-items-center"
-          >
-            {copied ? <CheckIcon className="size-4" /> : <CopyIcon className="size-4" />}
-          </motion.span>
-        </AnimatePresence>
-      </button>
+        <button
+          type="button"
+          onClick={copy}
+          // The label carries the result, not just the action, because the icon
+          // swap is invisible to a screen reader.
+          aria-label={copied ? 'Copied install command' : 'Copy install command'}
+          className="grid size-7 shrink-0 place-items-center rounded-md text-muted outline-none transition-[color,background-color,transform] hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={copied ? 'copied' : 'idle'}
+              {...ICON_MOTION}
+              className="grid place-items-center"
+            >
+              {copied ? <CheckIcon className="size-4" /> : <CopyIcon className="size-4" />}
+            </motion.span>
+          </AnimatePresence>
+        </button>
+      </div>
     </div>
   );
 };
