@@ -889,8 +889,8 @@ const AsciiArt = () => {
        bundled clip is there so clearing is not a one-way door. */
     return (
       <div className="my-6 flex w-full flex-col gap-3">
-        <div className="rounded-2xl bg-fg/2 p-1.5">
-          <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center">
+        <div className="rounded-2xl border border-border p-1.5">
+          <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border px-6 py-9 text-center">
             <p className="max-w-[42ch] text-muted text-xs leading-relaxed">
               Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
             </p>
@@ -930,9 +930,9 @@ const AsciiArt = () => {
     const failed = error !== null;
     return (
       <div className="my-6 flex w-full flex-col gap-3">
-        <div className="rounded-2xl bg-fg/2 p-1.5">
+        <div className="rounded-2xl border border-border p-1.5">
           <div
-            className={`flex flex-col items-center gap-3 rounded-[10px] border border-border/60 px-6 py-9 text-center ${
+            className={`flex flex-col items-center gap-3 rounded-[10px] border border-border px-6 py-9 text-center ${
               failed ? '' : 'shimmer'
             }`}
           >
@@ -993,14 +993,14 @@ const AsciiArt = () => {
           16px — so the two curves remain parallel. The controls moved to
           DialKit's popover and the actions sit below, which is why this is a
           single column rather than the art plus a panel beside it. */}
-      <div className="rounded-2xl bg-fg/2 p-1.5">
+      <div className="rounded-2xl border border-border p-1.5">
         {/* One bordered box around both, rather than two boxes with a gap.
             Deliberately *not* `overflow-hidden`: clipping the parent was the
             tidy way to round DialKit's square edges, but its select menus
             render inside the panel rather than portalling out, so the clip ate
             the dropdown. Each side rounds its own corners instead. */}
         <div
-          className={`flex rounded-[10px] border border-border/60 ${
+          className={`flex rounded-[10px] border border-border ${
             railBelow ? 'flex-col' : 'flex-col sm:flex-row'
           }`}
         >

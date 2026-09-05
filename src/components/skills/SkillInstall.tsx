@@ -78,12 +78,11 @@ const SkillInstall = ({
   };
 
   return (
-    /* The same two-layer card the demo panel wears: a tinted slab with the
-       stroked card inset into it. Radii are concentric — the inner is the outer
-       minus the gutter (16 - 6 = 10) — so the two curves stay parallel instead
-       of one cutting across the other. Only the inner layer is stroked; a
-       border on both is what reads as a doubled line. */
-    <div className="my-6 rounded-2xl bg-fg/2 p-1.5">
+    /* The same two-layer card the demo panel wears: two strokes with an empty
+       gutter between them, no fill on either. Radii are concentric — the inner
+       is the outer minus the gutter (16 - 6 = 10) — so the two curves stay
+       parallel rather than one cutting across the other. */
+    <div className="my-6 rounded-2xl border border-border p-1.5">
       <div className="flex items-center gap-3 rounded-[10px] border border-border px-4 py-3">
         {/* `select-all` so a reader without clipboard permission — or one who
           simply doesn't trust a copy button — can take it in one gesture.
