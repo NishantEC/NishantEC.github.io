@@ -50,7 +50,7 @@ const ClipActions = ({
          card. The border stays: it is the only thing that needs to separate the
          clip's own controls from the render's. */
       className={`clip-actions border-border/60 border-t p-2 ${
-        roundBottomLeft ? 'sm:rounded-bl-[10px]' : ''
+        roundBottomLeft ? 'sm:rounded-bl-[13px]' : ''
       }`}
     >
       {/* `clip-actions` is the same grid the control panels use — same columns,

@@ -889,8 +889,8 @@ const AsciiArt = () => {
        bundled clip is there so clearing is not a one-way door. */
     return (
       <div className="my-6 flex w-full flex-col gap-3">
-        <div className="rounded-2xl border border-border p-1.5">
-          <div className="flex flex-col items-center gap-3 rounded-[10px] border border-border px-6 py-9 text-center">
+        <div className="rounded-2xl border border-border p-[3px]">
+          <div className="flex flex-col items-center gap-3 rounded-[13px] border border-border px-6 py-9 text-center">
             <p className="max-w-[42ch] text-muted text-xs leading-relaxed">
               Choose a video and it is rendered here, in this tab. Nothing is uploaded anywhere.
             </p>
@@ -930,9 +930,9 @@ const AsciiArt = () => {
     const failed = error !== null;
     return (
       <div className="my-6 flex w-full flex-col gap-3">
-        <div className="rounded-2xl border border-border p-1.5">
+        <div className="rounded-2xl border border-border p-[3px]">
           <div
-            className={`flex flex-col items-center gap-3 rounded-[10px] border border-border px-6 py-9 text-center ${
+            className={`flex flex-col items-center gap-3 rounded-[13px] border border-border px-6 py-9 text-center ${
               failed ? '' : 'shimmer'
             }`}
           >
@@ -989,18 +989,18 @@ const AsciiArt = () => {
     // above a paragraph's own 16px, so the gap says "different kind of thing".
     <div className="my-6 flex w-full flex-col gap-3">
       {/* One ring, and the art is all that is inside it now. The radii stay
-          concentric — the inner 10px plus the 6px of padding equals the outer
+          concentric — the inner 13px plus the 3px of padding equals the outer
           16px — so the two curves remain parallel. The controls moved to
           DialKit's popover and the actions sit below, which is why this is a
           single column rather than the art plus a panel beside it. */}
-      <div className="rounded-2xl border border-border p-1.5">
+      <div className="rounded-2xl border border-border p-[3px]">
         {/* One bordered box around both, rather than two boxes with a gap.
             Deliberately *not* `overflow-hidden`: clipping the parent was the
             tidy way to round DialKit's square edges, but its select menus
             render inside the panel rather than portalling out, so the clip ate
             the dropdown. Each side rounds its own corners instead. */}
         <div
-          className={`flex rounded-[10px] border border-border ${
+          className={`flex rounded-[13px] border border-border ${
             railBelow ? 'flex-col' : 'flex-col sm:flex-row'
           }`}
         >
@@ -1014,7 +1014,7 @@ const AsciiArt = () => {
               // Flush, with no inset. The stage takes the clip's own aspect, so
               // there is nothing to letterbox and padding would only shrink the
               // picture inside a box already cut to fit it.
-              className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[10px] ${
+              className={`grid w-full min-w-0 place-items-center overflow-hidden rounded-t-[13px] ${
                 railBelow ? '' : 'sm:rounded-tr-none'
               }`}
               // Square until there is a clip, then the clip's own shape — so a
@@ -1058,10 +1058,10 @@ const AsciiArt = () => {
               as a dev tool; inline in the card it reads as part of the piece.
               `productionEnabled` because these controls ship. */}
           <div
-            className={`min-w-0 rounded-b-[10px] border-border/60 ${
+            className={`min-w-0 rounded-b-[13px] border-border/60 ${
               railBelow
                 ? 'w-full border-t'
-                : 'sm:w-[240px] sm:shrink-0 sm:rounded-r-[10px] sm:rounded-bl-none sm:border-l'
+                : 'sm:w-[240px] sm:shrink-0 sm:rounded-r-[13px] sm:rounded-bl-none sm:border-l'
             }`}
           >
             {/* One panel per subject, each a single column of rows. Side by
