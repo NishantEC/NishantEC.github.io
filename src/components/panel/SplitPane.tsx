@@ -1,10 +1,10 @@
 import { motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import ArrowLeftIcon from '~icons/heroicons/arrow-left';
-import SidebarIcon from '~icons/heroicons/bars-3-bottom-left';
 import { EASE } from '../../utils/motion';
 import FusedTabs from './FusedTabs';
 import PanelContent from './PanelContent';
+import SidebarToggleIcon from './SidebarToggleIcon';
 import { usePanel } from './usePanel';
 
 /**
@@ -107,16 +107,31 @@ const SplitPane = ({ duration }: { duration: number }) => {
 
           {/* Sits where the mobile back arrow does, in the slot the tabs leave
               empty on wide screens. `aria-expanded` refers to the sidebar it
-              controls, so the state is announced rather than inferred from an
-              icon that looks the same either way. */}
+              controls, and the glyph carries that same state visually — its
+              left column is filled while the sidebar is there — so the button
+              no longer has to be clicked to find out which way it goes.
+
+              It carries a fill at rest, which is the one thing in this strip
+              that does. That is the point: tabs are transient and earn their
+              fill on hover, but this is permanent chrome, and drawn the same
+              way it read as a tab that had lost its label. The fill is the
+              distinction. It deliberately isn't a stroke — a bordered box here
+              would be a third ring around a glyph that is already a rounded
+              rectangle.
+
+              The fill is `--panel`, the exact colour the active tab is filled
+              with, so the button is cut from the pane's material rather than
+              the strip's. Hover is carried by the glyph alone: lightening the
+              fill would break that match on the one interaction where the
+              button is being compared to the tab beside it. */}
           <button
             type="button"
             onClick={() => setSidebarCollapsed(!isSidebarCollapsed)}
             aria-expanded={!isSidebarCollapsed}
             aria-label={isSidebarCollapsed ? 'Show profile sidebar' : 'Hide profile sidebar'}
-            className="mb-1 ml-2 grid size-9 shrink-0 place-items-center rounded-lg text-muted outline-none transition-colors hover:bg-fg/6 hover:text-fg focus-visible:ring-2 focus-visible:ring-accent max-lg:hidden"
+            className="mb-1 ml-2 grid size-9 shrink-0 place-items-center rounded-lg bg-[var(--panel)] text-muted outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-accent max-lg:hidden"
           >
-            <SidebarIcon className="size-4.5" />
+            <SidebarToggleIcon collapsed={isSidebarCollapsed} className="size-4.5" />
           </button>
 
           <FusedTabs tabs={tabs} activeId={activeTab.id} onSelect={focus} onClose={close} />
