@@ -1,7 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Route, Routes, useLocation, useParams } from 'react-router';
 import VisitorCount from './components/analytics/VisitorCount';
-import Menu from './components/menu/Menu';
 import CommandPalette from './components/palette/CommandPalette';
 import PanelRouteSync, { isKnownPath, tabFromPath } from './components/panel/PanelRouteSync';
 import SplitPane from './components/panel/SplitPane';
@@ -201,7 +200,6 @@ function App() {
 
       <AnimatePresence>{isSplit && <SplitPane key="pane" duration={duration} />}</AnimatePresence>
 
-      <Menu />
       <CommandPalette />
     </div>
   );
