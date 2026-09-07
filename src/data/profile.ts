@@ -38,14 +38,14 @@ export const experience: Job[] = [
     logo: healthifymeLogo,
     bullets: [
       {
-        text: 'Built the interface for RIA, an AI health coach, including the full onboarding flow for new users.',
+        text: 'Built RIA’s AI health-coach interface and onboarding.',
         tooltip: 'RIA answers health questions in chat and coaches users through their plan.',
       },
       {
-        text: 'Designed and shipped a Diagnostic Panel that lets users upload and analyse their metabolic panel through chat.',
+        text: 'Shipped a chat-based panel for uploading and analysing health reports.',
       },
       {
-        text: 'Built dynamic food pages at 100% SEO, serving thousands of pages of nutritional data.',
+        text: 'Built thousands of food pages with 100 Lighthouse SEO scores.',
         tooltip:
           'Generated per-food pages with structured data, each scoring 100 on Lighthouse SEO.',
       },
@@ -60,14 +60,14 @@ export const experience: Job[] = [
     logo: ticketeLogo,
     bullets: [
       {
-        text: 'Built the shared component library the booking product was assembled from, so a new page was composition rather than a rewrite.',
+        text: 'Built the shared component library for the booking product.',
         tooltip: 'Roughly a third off the time it took to stand up a new surface.',
       },
       {
-        text: 'Took 200+ product pages from failing SEO and accessibility audits to passing, which is where most of the organic traffic came from.',
+        text: 'Fixed SEO and accessibility across 200+ product pages.',
       },
       {
-        text: 'Shipped multi-variant booking — the same product sold as several ticket types, priced and scheduled independently.',
+        text: 'Shipped booking flows for ticket types with separate prices and schedules.',
       },
     ],
     stack: ['React', 'TypeScript', 'SCSS', 'RestAPI'],
@@ -78,8 +78,8 @@ export const experience: Job[] = [
     period: '2023',
     location: 'Mumbai',
     bullets: [
-      { text: 'Developed and shipped user-facing features across the company web applications.' },
-      { text: 'Optimised applications for speed, scalability and cross-browser compatibility.' },
+      { text: 'Shipped features across the company’s web apps.' },
+      { text: 'Improved performance, scalability, and browser compatibility.' },
     ],
     stack: ['Angular', 'Ionic', 'Capacitor'],
   },
