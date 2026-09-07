@@ -23,7 +23,10 @@ counter endpoint requires no API key or paid plan. Hosting remains on Vercel.
 
 ## What the number means
 
-The footer shows **page visits across the site since tracking began**. It does
+The compact counter shows **page visits across the site since tracking began**,
+with the scope explained in its tooltip. Zero and unavailable counts are hidden.
+On the homepage it sits in the existing social/status footer, without a separate
+border or explanatory sentence. It does
 not claim distinct people or a rolling 30-day total. GoatCounter deduplicates
 repeat visits to the same page within its session window; someone visiting
 multiple pages can contribute multiple visits. Collection starts at setup.

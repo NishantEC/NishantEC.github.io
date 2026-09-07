@@ -1,6 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Route, Routes, useLocation, useParams } from 'react-router';
-import VisitorCount from './components/analytics/VisitorCount';
 import CommandPalette from './components/palette/CommandPalette';
 import PanelRouteSync, { isKnownPath, tabFromPath } from './components/panel/PanelRouteSync';
 import SplitPane from './components/panel/SplitPane';
@@ -151,7 +150,6 @@ function App() {
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          {!isSplit && <VisitorCount />}
         </motion.main>
       </motion.div>
 

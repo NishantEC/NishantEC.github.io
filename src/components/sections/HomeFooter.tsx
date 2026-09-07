@@ -1,4 +1,5 @@
 import { profile } from '../../data/profile';
+import VisitorCount from '../analytics/VisitorCount';
 import { useTheme } from '../theme/useTheme';
 
 const HomeFooter = () => {
@@ -16,7 +17,10 @@ const HomeFooter = () => {
           X ↗
         </a>
       </div>
-      <span>{profile.status}</span>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <span>{profile.status}</span>
+        <VisitorCount />
+      </div>
       <button
         type="button"
         onClick={() => setTheme(theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light')}
