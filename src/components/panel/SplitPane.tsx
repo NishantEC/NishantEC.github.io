@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { useEffect, useRef } from 'react';
 import ArrowLeftIcon from '~icons/heroicons/arrow-left';
 import { EASE } from '../../utils/motion';
+import VisitorCount from '../analytics/VisitorCount';
 import FusedTabs from './FusedTabs';
 import PanelContent from './PanelContent';
 import SidebarToggleIcon from './SidebarToggleIcon';
@@ -163,6 +164,7 @@ const SplitPane = ({ duration }: { duration: number }) => {
               {activeTab.title}
             </h2>
             <PanelContent tab={activeTab} />
+            <VisitorCount />
           </motion.div>
         </div>
       </section>

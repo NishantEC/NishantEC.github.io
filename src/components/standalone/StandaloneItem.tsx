@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import ArrowLeftIcon from '~icons/heroicons/arrow-left';
+import VisitorCount from '../analytics/VisitorCount';
 import PanelContent from '../panel/PanelContent';
 import type { PanelTab } from '../panel/PanelProvider';
 
@@ -12,8 +13,8 @@ import type { PanelTab } from '../panel/PanelProvider';
  * are reserved for navigation that happens inside the app and a fresh load
  * always lands here.
  *
- * There is still no header or footer. The page is the project. What it has now
- * is one way out: a page reached from a link somewhere else used to be a dead
+ * The page keeps its reading layout, with a quiet visitor footer and
+ * one way out: a page reached from a link somewhere else used to be a dead
  * end unless you knew the command palette was mounted, which nobody arriving
  * from outside does.
  *
@@ -48,6 +49,7 @@ const StandaloneItem = ({ tab }: { tab: PanelTab }) => (
         {tab.title}
       </h1>
       <PanelContent tab={tab} />
+      <VisitorCount />
     </main>
   </div>
 );
