@@ -8,9 +8,10 @@ import { usePanel } from './components/panel/usePanel';
 import { usePanelShortcuts } from './components/panel/usePanelShortcuts';
 import Experience from './components/sections/Experience';
 import Hero from './components/sections/Hero';
+import HomeFooter from './components/sections/HomeFooter';
 import OpenSource from './components/sections/OpenSource';
+import SelectedWork from './components/sections/SelectedWork';
 import Skills from './components/sections/Skills';
-import Stack from './components/sections/Stack';
 import StandaloneItem from './components/standalone/StandaloneItem';
 import BlurGradient from './components/ui/BlurGradient';
 import SectionSpine from './components/ui/SectionSpine';
@@ -18,64 +19,20 @@ import { projects, skills } from './content/collections';
 import NotFound from './pages/NotFound';
 import { EASE, SPLIT_DURATION } from './utils/motion';
 
-const Page = ({ isSplit, duration }: { isSplit: boolean; duration: number }) => {
-  // Numbering follows what actually renders, asked of the collections rather
-  // than hardcoded. A section with no entries renders nothing, so counting it
-  // anyway leaves a hole — with every entry drafted the page read "01
-  // experience" and then "04 stack".
-  //
-  // The sidebar carries only what's navigable: Experience and Stack are
-  // read-only detail that nothing in the pane links to, so at that width they
-  // cost space without earning it.
-  const present = [
-    ...(skills.length > 0 ? ['skills'] : []),
-    ...(projects.length > 0 ? ['projects'] : []),
-  ];
-
-  const numbered = isSplit ? present : ['experience', ...present, 'stack'];
-
-  const indexOf = (id: string) => {
-    const at = numbered.indexOf(id);
-    return at === -1 ? undefined : at + 1;
-  };
-
+const Page = ({ isSplit }: { isSplit: boolean; duration: number }) => {
   return (
     <>
       <Hero />
-
-      {/* Experience collapses rather than vanishing, so the sections below
-          travel with the width change instead of jumping when it unmounts. */}
-      <AnimatePresence initial={false}>
-        {!isSplit && (
-          <motion.div
-            key="experience"
-            className="flex w-full flex-col items-center overflow-hidden"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{
-              height: { duration, ease: EASE },
-              opacity: { duration: duration * 0.5, ease: EASE },
-            }}
-          >
-            <Experience index={indexOf('experience')} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Same order in both states, so nothing swaps places mid-animation —
-          the sidebar is the page with two sections lifted out. In the sidebar
-          they share one spine, which is why they need a wrapper there. */}
       {isSplit ? (
         <SectionSpine>
-          <Skills index={indexOf('skills')} />
-          <OpenSource index={indexOf('projects')} />
+          <Skills />
+          <OpenSource />
         </SectionSpine>
       ) : (
         <>
-          <Skills index={indexOf('skills')} />
-          <OpenSource index={indexOf('projects')} />
-          <Stack index={indexOf('stack')} />
+          <SelectedWork />
+          <Experience />
+          <HomeFooter />
         </>
       )}
     </>
@@ -174,9 +131,9 @@ function App() {
             negative margin rather than overriding the padding — that keeps the
             responsive `sm:` step intact and still animates. */}
         <motion.main
-          className="flex flex-col items-center px-8 pt-40 pb-24 sm:pt-48"
+          className="flex flex-col items-center px-8 pt-20 pb-12 sm:pt-28"
           initial={false}
-          animate={{ gap: isSplit ? '3rem' : '7rem', marginTop: isSplit ? '-6.5rem' : '0rem' }}
+          animate={{ gap: isSplit ? '3rem' : '4.5rem', marginTop: isSplit ? '-1.5rem' : '0rem' }}
           transition={{ duration, ease: EASE }}
         >
           <Routes>
