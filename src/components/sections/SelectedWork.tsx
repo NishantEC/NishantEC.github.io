@@ -12,10 +12,10 @@ const SelectedWork = () => {
     <>
       <motion.div
         layoutId={cterm ? 'mark:cterm' : undefined}
-        className="mb-4 h-48 overflow-hidden rounded-lg border border-border bg-stone-900 p-5 transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transform-none"
+        className="mb-4 h-48 rounded-2xl border border-border p-[3px] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transform-none"
         aria-hidden="true"
       >
-        <div className="flex h-full flex-col overflow-hidden rounded-md border border-stone-600 bg-stone-950">
+        <div className="flex h-full flex-col overflow-hidden rounded-[13px] border border-border bg-stone-950">
           <div className="border-b border-stone-700 px-3 py-2 font-mono text-[10px] text-stone-400">
             ● ● ● &nbsp; cterm
           </div>
@@ -45,8 +45,10 @@ const SelectedWork = () => {
               open({ id: 'skill:video2ascii', kind: 'skill', slug: ascii.slug, title: ascii.title })
             }
           >
-            <div className="mb-4 h-48 overflow-hidden rounded-lg border border-border bg-surface transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transform-none">
-              <SkillThumb demo={ascii.demo} />
+            <div className="mb-4 h-48 rounded-2xl border border-border p-[3px] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transform-none">
+              <div className="h-full overflow-hidden rounded-[13px] border border-border bg-surface">
+                <SkillThumb demo={ascii.demo} />
+              </div>
             </div>
             <span className="flex items-center justify-between">
               video2ascii <span aria-hidden="true">↗</span>
