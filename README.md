@@ -50,9 +50,9 @@ SOFTWARE.
 The inline hover-reveal in the hero was inspired by [arlan.me](https://www.arlan.me).
 The `Button` component is adapted from the in-house `@workspace/ui` package.
 
-The control rows used by the stash demos (`src/components/ui/Controls.tsx`) adopt
-the visual language of [DialKit](https://github.com/joshpuckett/dialkit) by Josh
-Puckett, used under the MIT License:
+The interactive demo controls use [DialKit](https://github.com/joshpuckett/dialkit)
+2.0 by Josh Puckett through its React adapter (`DialPanel`, `ClipActions`, and
+`AsciiArt`). The package is a direct dependency, used under the MIT License:
 
 ```
 MIT License
@@ -78,7 +78,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-Only the shapes are taken — the row height, the full-bleed track with the value as
-a filled proportion of it, the bar handle, the segmented Off/On. The palette is
-this site's own tokens, and the components are sized to span a content column
-rather than a 280px floating panel. The library itself is not a dependency.
+The palette uses this site's tokens, and the controls span the content column
+through a custom layout built with DialKit's exported components and store.
+The separately distributed `video2ascii` skill still uses native HTML controls;
+it does not yet use DialKit's dependency-free vanilla adapter.

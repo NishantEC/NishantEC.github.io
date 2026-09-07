@@ -80,13 +80,13 @@ on the skill route. GoatCounter recorded one homepage visit and one skill-route
 visit during browser verification. Public totals may remain cached at zero for
 up to four hours. Email verification is the remaining account step.
 
-Deployment: `dpl_62Yksnfpo9exd1ZHKMYKHYz98c8q` (8 September 2026 IST).
-Vercel hosted prerendering crashed, so this release used a successful local
-`vercel build --prod` with installed Chrome, followed by
-`vercel deploy --prebuilt --prod`. The deployment used committed dependency
-files; the pre-existing local DialKit upgrade was not included. Future cloud
-builds still need the existing prerender issue resolved, or the same local
-prebuilt workflow. Never present fixture counts as production traffic.
+The first analytics deployment used a local prebuilt release. The subsequent
+DialKit 2 upgrade fixes cloud prerendering by using fresh pages in Chromium's
+default context and clearing storage before each route. Yarn 4.18.0 is pinned
+with `packageManager` and a checked-in `.cjs` executable through `yarnPath`.
+Vercel's experimental Corepack environment variable must remain unset: its
+cached `.js` executable inherits this project's ES module setting and fails.
+Never present fixture counts as production traffic.
 
 References: https://www.goatcounter.com/ (free hosted usage),
 https://www.goatcounter.com/help/visitor-counter (public TOTAL endpoint),

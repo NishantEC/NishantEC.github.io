@@ -108,14 +108,15 @@ export const prerender = async (dist: string, routes: string[]) => {
 
   try {
     for (const route of routes) {
-      // A fresh context per route, because every route is served from the same
-      // origin and therefore shares localStorage. Without isolation the tabs
-      // opened while crawling one route persist into the next, `PanelProvider`
-      // restores the last one, and route-sync navigates away from the URL being
-      // captured — which silently wrote hale's title and canonical into the
-      // skills page.
-      const context = await browser.createBrowserContext();
-      const page = await context.newPage();
+      // Chromium's serverless single-process mode cannot reliably open an
+      // incognito BrowserContext. Use a fresh page in the default context,
+      // clearing storage before application code runs so one route's panel or
+      // theme state cannot contaminate the next route's static snapshot.
+      const page = await browser.newPage();
+      await page.evaluateOnNewDocument(() => {
+        localStorage.clear();
+        sessionStorage.clear();
+      });
 
       // GitHub's API is rate limited and its answers age. Baking "2 months ago"
       // and a commit subject into static HTML would ship prose that silently
@@ -143,7 +144,6 @@ export const prerender = async (dist: string, routes: string[]) => {
       await writeFile(join(dir, 'index.html'), html);
 
       await page.close();
-      await context.close();
       written += 1;
     }
   } finally {
