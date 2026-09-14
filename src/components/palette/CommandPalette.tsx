@@ -1,17 +1,16 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import ArchiveIcon from '~icons/heroicons/archive-box';
 import ArrowTopRightIcon from '~icons/heroicons/arrow-top-right-on-square';
-import BookOpenIcon from '~icons/heroicons/book-open';
 import ComputerDesktopIcon from '~icons/heroicons/computer-desktop';
 import EnvelopeIcon from '~icons/heroicons/envelope';
 import MoonIcon from '~icons/heroicons/moon';
 import StarIcon from '~icons/heroicons/star';
 import SunIcon from '~icons/heroicons/sun';
-import XMarkIcon from '~icons/heroicons/x-mark';
 import { projects, skills } from '../../content/collections';
+import { projectDestination } from '../../content/projectDestination';
 import { profile } from '../../data/profile';
-import { usePanel } from '../panel/usePanel';
 import { originOf, type Theme } from '../theme/ThemeProvider';
 import { useTheme } from '../theme/useTheme';
 
@@ -36,7 +35,7 @@ const CommandPalette = () => {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
 
-  const { open, closeAll, tabs } = usePanel();
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,13 +56,10 @@ const CommandPalette = () => {
         group: 'Projects',
         icon: <StarIcon />,
         keywords: `${project.tagline} ${project.stack.join(' ')}`,
-        run: () =>
-          open({
-            id: `project:${project.slug}`,
-            kind: 'project' as const,
-            slug: project.slug,
-            title: project.title,
-          }),
+        run: () => {
+          const destination = projectDestination(project);
+          if (destination) window.open(destination, '_blank', 'noopener,noreferrer');
+        },
       })),
 
       ...skills.map((item) => ({
@@ -72,13 +68,7 @@ const CommandPalette = () => {
         group: 'Skills',
         icon: <ArchiveIcon />,
         keywords: `${item.blurb} ${item.slug}`,
-        run: () =>
-          open({
-            id: `skill:${item.slug}`,
-            kind: 'skill' as const,
-            slug: item.slug,
-            title: item.title,
-          }),
+        run: () => navigate(`/skills/${item.slug}`),
       })),
 
       {
@@ -115,20 +105,8 @@ const CommandPalette = () => {
       })),
     ];
 
-    if (tabs.length > 0) {
-      list.push({
-        id: 'close-all',
-        label: 'Close all tabs',
-        group: 'Panel',
-        icon: <XMarkIcon />,
-        keywords: 'back to page dismiss',
-        hint: 'Esc',
-        run: closeAll,
-      });
-    }
-
     return list;
-  }, [open, closeAll, tabs.length, theme, setTheme]);
+  }, [navigate, theme, setTheme]);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();

@@ -82,8 +82,8 @@ const SkillInstall = ({
        gutter between them, no fill on either. Radii are concentric — the inner
        is the outer minus the gutter (16 - 3 = 13) — so the two curves stay
        parallel rather than one cutting across the other. */
-    <div className="my-6 rounded-2xl border border-border p-[3px]">
-      <div className="flex items-center gap-3 rounded-[13px] border border-border px-4 py-3">
+    <div className="my-6 rounded-2xl border border-border bg-surface p-[3px]">
+      <div className="flex items-center gap-3 rounded-[13px] border border-border bg-surface px-4 py-3">
         {/* `select-all` so a reader without clipboard permission — or one who
           simply doesn't trust a copy button — can take it in one gesture.
 

@@ -1,17 +1,16 @@
 import { motion } from 'motion/react';
 import GithubIcon from '~icons/simple-icons/github';
 import { projects } from '../../content/collections';
+import { projectDestination } from '../../content/projectDestination';
 import { profile } from '../../data/profile';
 import { useRepos } from '../../utils/useRepos';
 import { useCompact } from '../panel/useCompact';
-import { usePanel } from '../panel/usePanel';
 import ProjectThumb from '../projects/ProjectThumb';
 import IndexRow from '../ui/IndexRow';
 import SectionLabel from '../ui/SectionLabel';
 import SidebarSection from '../ui/SidebarSection';
 
 const OpenSource = ({ index }: { index?: number }) => {
-  const { open, activeId } = usePanel();
   const compact = useCompact();
   // Star counts come from the API rather than frontmatter — a number written
   // into a file is a number that goes stale.
@@ -19,8 +18,11 @@ const OpenSource = ({ index }: { index?: number }) => {
 
   if (projects.length === 0) return null;
 
-  const openProject = (slug: string, title: string) =>
-    open({ id: `project:${slug}`, kind: 'project', slug, title });
+  const openProject = (slug: string) => {
+    const project = projects.find((item) => item.slug === slug);
+    const destination = project && projectDestination(project);
+    if (destination) window.open(destination, '_blank', 'noopener,noreferrer');
+  };
 
   const starsFor = (slug: string) => repos?.[slug]?.stars ?? 0;
 
@@ -32,8 +34,7 @@ const OpenSource = ({ index }: { index?: number }) => {
             key={project.slug}
             label={project.title}
             meta={starsFor(project.slug) > 0 ? `★ ${starsFor(project.slug)}` : undefined}
-            isActive={activeId === `project:${project.slug}`}
-            onClick={() => openProject(project.slug, project.title)}
+            onClick={() => openProject(project.slug)}
           />
         ))}
       </SidebarSection>
@@ -49,7 +50,7 @@ const OpenSource = ({ index }: { index?: number }) => {
           <button
             type="button"
             key={project.slug}
-            onClick={() => openProject(project.slug, project.title)}
+            onClick={() => openProject(project.slug)}
             className="squircle-sm relative flex flex-col border border-border bg-surface p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-lg/5"
           >
             {/* Shares a `layoutId` with the same block in the pane, so the card

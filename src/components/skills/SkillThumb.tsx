@@ -3,21 +3,38 @@ import { useRef } from 'react';
 import preview from '../../assets/skills/butterfly-preview.json';
 import type { SkillMeta } from '../../content/schema';
 import { useFrameClock } from '../../utils/useFrameClock';
+import LogoMarks from './LogoMarks';
 
 // Baked from the same butterfly.mp4 used by the interactive ASCII page.
 // A small text preview avoids decoding and sampling video on the homepage.
 const POSTER = 25;
-const SkillThumb = ({ demo }: { demo: SkillMeta['demo'] }) => {
+const SkillThumb = ({ demo, slug }: { demo: SkillMeta['demo']; slug: string }) => {
   const root = useRef<HTMLDivElement>(null);
   const text = useRef<HTMLPreElement>(null);
   const frame = useRef(POSTER);
   const reducedMotion = useReducedMotion();
   const visible = useInView(root);
-  useFrameClock(preview.fps, demo === 'ascii' && visible && !reducedMotion, () => {
+  const usesAsciiPreview = demo === 'ascii';
+
+  useFrameClock(preview.fps, usesAsciiPreview && visible && !reducedMotion, () => {
     frame.current = (frame.current + 1) % preview.frames.length;
     if (text.current) text.current.textContent = preview.frames[frame.current];
   });
-  if (demo !== 'ascii') return null;
+  if (slug === 'creating-logos') {
+    return (
+      <div className="h-full bg-bg" aria-hidden="true">
+        <LogoMarks />
+      </div>
+    );
+  }
+
+  if (!usesAsciiPreview) {
+    return (
+      <div className="grid h-full place-items-center bg-surface" aria-hidden="true">
+        <span className="font-display text-2xl italic text-muted">logo</span>
+      </div>
+    );
+  }
   return (
     <div
       ref={root}

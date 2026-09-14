@@ -95,6 +95,8 @@ const ASCII_PARTS = {
   Demo: AsciiArt,
 } as unknown as Record<string, ComponentType>;
 
+const SKILL_PARTS = { Install: SkillInstall } as unknown as Record<string, ComponentType>;
+
 const SkillView = ({ slug }: { slug: string }) => {
   const entry = findSkill(slug);
   if (!entry) return null;
@@ -114,7 +116,7 @@ const SkillView = ({ slug }: { slug: string }) => {
           the art was large; it is a small square now and the breakout only
           bought a third alignment. */}
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        <MdxBody Content={entry.Content} extra={composed ? ASCII_PARTS : undefined} />
+        <MdxBody Content={entry.Content} extra={composed ? ASCII_PARTS : SKILL_PARTS} />
       </div>
     </div>
   );

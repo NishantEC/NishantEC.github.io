@@ -1,5 +1,9 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { useEffect, useState } from 'react';
+import ctermScreenshot from '../../assets/projects/cterm.png';
+import enformScreenshot from '../../assets/projects/enform-analysis.png';
+import nekoScreenshot from '../../assets/projects/neko.png';
+import resumeScreenshot from '../../assets/projects/the-resume-thing.png';
 
 /**
  * A moving preview per project, instead of the same gradient four times.
@@ -177,17 +181,69 @@ const ArcThumb = ({ accent, animate }: { accent: string; animate: boolean }) => 
   </div>
 );
 
+const EnformThumb = ({ accent, animate }: { accent: string; animate: boolean }) => (
+  <div className="flex h-full items-center justify-center gap-2 px-4 font-mono text-[10px] text-muted">
+    <span className="squircle-xs border border-border px-2 py-1">ask</span>
+    <motion.span
+      className="size-1.5 rounded-full"
+      style={{ background: accent }}
+      animate={animate ? { scale: [1, 1.5, 1] } : { scale: 1 }}
+      transition={{ duration: 1.4, repeat: Number.POSITIVE_INFINITY }}
+    />
+    <span className="squircle-xs border border-border px-2 py-1">theme</span>
+  </div>
+);
+
+const NekoThumb = ({ accent, animate }: { accent: string; animate: boolean }) => (
+  <div className="flex h-full items-center justify-center gap-1.5 px-4 font-mono text-[10px] text-muted">
+    <span className="squircle-xs border border-border px-2 py-1">⌘</span>
+    {['apps', 'tasks', 'files'].map((item, index) => (
+      <motion.span
+        key={item}
+        className="squircle-xs border border-border px-2 py-1"
+        animate={animate ? { opacity: [0.45, 1, 0.45] } : { opacity: 1 }}
+        transition={{ duration: 1.8, delay: index * 0.2, repeat: Number.POSITIVE_INFINITY }}
+        style={index === 1 ? { borderColor: accent, color: asText(accent) } : undefined}
+      >
+        {item}
+      </motion.span>
+    ))}
+  </div>
+);
+
 const THUMBS: Record<string, typeof HermThumb> = {
   herm: HermThumb,
   cterm: CtermThumb,
   'the-resume-thing': ResumeThumb,
   hale: HaleThumb,
   'arc-sidepanel-api': ArcThumb,
+  enform: EnformThumb,
+  neko: NekoThumb,
+};
+
+const SCREENSHOTS: Record<string, string> = {
+  enform: enformScreenshot,
+  cterm: ctermScreenshot,
+  neko: nekoScreenshot,
+  'the-resume-thing': resumeScreenshot,
 };
 
 const ProjectThumb = ({ name, accent }: { name: string; accent: string }) => {
   const reduceMotion = useReducedMotion();
   const Thumb = THUMBS[name];
+  const screenshot = SCREENSHOTS[name];
+
+  if (screenshot) {
+    return (
+      <img
+        src={screenshot}
+        alt=""
+        className={`h-full w-full ${
+          name === 'the-resume-thing' ? 'object-contain' : 'object-cover object-top'
+        }`}
+      />
+    );
+  }
 
   // A project without a thumb falls back to its wordmark rather than a gap.
   if (!Thumb) {

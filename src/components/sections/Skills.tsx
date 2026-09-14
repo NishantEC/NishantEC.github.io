@@ -1,18 +1,18 @@
+import { useNavigate } from 'react-router';
 import { skills } from '../../content/collections';
-import { formatMonth } from '../../utils/date';
+import { FEATURED_SKILL_SLUGS, selectBySlug } from '../../content/featured';
 import { useCompact } from '../panel/useCompact';
-import { usePanel } from '../panel/usePanel';
 import SkillThumb from '../skills/SkillThumb';
 import IndexRow from '../ui/IndexRow';
 import SectionLabel from '../ui/SectionLabel';
 import SidebarSection from '../ui/SidebarSection';
 
 const Skills = ({ index }: { index?: number }) => {
-  const { open, activeId } = usePanel();
+  const navigate = useNavigate();
   const compact = useCompact();
+  const featuredSkills = selectBySlug(skills, FEATURED_SKILL_SLUGS);
 
-  const openItem = (slug: string, title: string) =>
-    open({ id: `skill:${slug}`, kind: 'skill', slug, title });
+  const openItem = (slug: string) => navigate(`/skills/${slug}`);
 
   // Nothing to show, nothing to render — and no empty heading left behind.
   if (skills.length === 0) return null;
@@ -21,13 +21,7 @@ const Skills = ({ index }: { index?: number }) => {
     return (
       <SidebarSection id="skills" index={index} label="skills">
         {skills.map((item) => (
-          <IndexRow
-            key={item.slug}
-            label={item.title}
-            meta={formatMonth(item.date)}
-            isActive={activeId === `skill:${item.slug}`}
-            onClick={() => openItem(item.slug, item.title)}
-          />
+          <IndexRow key={item.slug} label={item.title} onClick={() => openItem(item.slug)} />
         ))}
       </SidebarSection>
     );
@@ -46,22 +40,27 @@ const Skills = ({ index }: { index?: number }) => {
         gets a page here with the thing it made, running.
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {skills.map((item) => (
-          <button
-            type="button"
+      <div className="grid gap-5 sm:grid-cols-2">
+        {featuredSkills.map((item) => (
+          <div
             key={item.slug}
-            onClick={() => openItem(item.slug, item.title)}
-            className="squircle-sm flex flex-col border border-border bg-surface p-4 text-left transition-all hover:-translate-y-0.5 hover:shadow-lg/5"
+            className="group w-full overflow-hidden rounded-2xl border border-border bg-surface p-[3px] transition-transform hover:-translate-y-0.5 hover:shadow-lg/5"
           >
-            <div className="squircle-xs mb-4 h-28 overflow-hidden bg-bg">
-              <SkillThumb demo={item.demo} />
-            </div>
+            <button
+              type="button"
+              onClick={() => openItem(item.slug)}
+              className="flex h-full w-full flex-col overflow-hidden rounded-xl border border-border bg-surface text-left appearance-none"
+            >
+              <span className="block h-44 shrink-0 overflow-hidden border-b border-border bg-bg sm:h-48">
+                <SkillThumb demo={item.demo} slug={item.slug} />
+              </span>
 
-            <h3 className="mb-1">{item.title}</h3>
-            <p className="mb-3 text-sm text-muted">{item.blurb}</p>
-            <span className="mt-auto text-sm text-muted">{formatMonth(item.date)}</span>
-          </button>
+              <span className="block flex-1 p-5">
+                <span className="mb-1 block text-base font-medium">{item.title}</span>
+                <span className="block text-sm text-muted">{item.blurb}</span>
+              </span>
+            </button>
+          </div>
         ))}
       </div>
     </section>
