@@ -1,3 +1,4 @@
+import dotmetricsMark from '../../assets/dotmetrics-mark.svg';
 import nekoAppIcon from '../../assets/neko-app-icon.svg';
 
 const EnformMark = () => (
@@ -11,11 +12,14 @@ const EnformMark = () => (
 );
 
 const LogoMarks = () => (
-  <div className="flex h-full items-center justify-center gap-4">
+  <div className="flex h-full items-center justify-center gap-3">
     <div className="grid size-16 place-items-center rounded-xl border border-border bg-black text-white">
       <EnformMark />
     </div>
     <img src={nekoAppIcon} alt="Neko" className="size-16" />
+    <div className="grid size-16 place-items-center rounded-xl border border-border bg-[#f7f1e4]">
+      <img src={dotmetricsMark} alt="Dotmetrics" className="size-9" />
+    </div>
   </div>
 );
 

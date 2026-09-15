@@ -28,17 +28,8 @@ const Skills = ({ index }: { index?: number }) => {
   }
 
   return (
-    <section className="section flex scroll-mt-24 flex-col gap-8" id="skills">
+    <section className="section flex scroll-mt-24 flex-col gap-5" id="skills">
       <SectionLabel index={index}>skills</SectionLabel>
-
-      {/* What the section is for, not what I think of it. Each of these is
-          installable, so the sentence has to say that before it says anything
-          about craft — a reader who wants the artefact should not have to open
-          an entry to find out they can take it. */}
-      <p className="text-sm leading-[22px] text-muted">
-        Agent skills I build alongside the work and publish so anyone can install them. Each one
-        gets a page here with the thing it made, running.
-      </p>
 
       <div className="grid gap-5 sm:grid-cols-2">
         {featuredSkills.map((item) => (

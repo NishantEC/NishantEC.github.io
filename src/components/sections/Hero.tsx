@@ -41,7 +41,7 @@ const Hero = () => {
     <section className="section flex scroll-mt-24 flex-col gap-12" id="hero">
       <h1 className="font-display text-2xl leading-8 tracking-[-0.6px] italic">{profile.name}</h1>
 
-      <div className="flex flex-col gap-4 leading-[26px] text-muted">
+      <div className="flex max-w-2xl flex-col gap-4 leading-[26px] text-muted">
         <p>
           👋 Hey! I'm a <strong className="text-fg">software engineer</strong> in{' '}
           <strong className="text-fg">Bangalore, India 🇮🇳</strong>, with 3+ years of experience.

@@ -91,7 +91,7 @@
    * shrink into the sidebar when a project pane is open. */
   .section {
     width: 100%;
-    max-width: 40rem;
+    max-width: 60rem;
   }
 
   /* Solid surface for the tab fusion. The radial-gradient corners need an

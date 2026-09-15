@@ -2,8 +2,12 @@ import { motion, useReducedMotion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import ctermScreenshot from '../../assets/projects/cterm.png';
 import enformScreenshot from '../../assets/projects/enform-analysis.png';
+import haleHomeScreenshot from '../../assets/projects/hale-home.png';
+import haleRecoveryScreenshot from '../../assets/projects/hale-recovery.png';
+import haleSleepScreenshot from '../../assets/projects/hale-sleep.png';
+import hermSlackScreenshot from '../../assets/projects/herm-slack.png';
 import nekoScreenshot from '../../assets/projects/neko.png';
-import resumeScreenshot from '../../assets/projects/the-resume-thing.png';
+import resumeDemo from '../../assets/projects/the-resume-thing.gif';
 
 /**
  * A moving preview per project, instead of the same gradient four times.
@@ -51,26 +55,60 @@ const useTypewriter = (text: string, enabled: boolean, speed = 55) => {
   return shown;
 };
 
-/** herm — a private link between your device and a box with nothing exposed. */
-const HermThumb = ({ accent, animate }: { accent: string; animate: boolean }) => (
-  <div className="flex h-full items-center justify-center gap-2 px-4 font-mono text-[10px] text-muted">
-    <span className="squircle-xs border border-border px-1.5 py-1">you</span>
+/** herm — the agent where it is useful: a private Slack conversation. */
+const HermThumb = ({ accent }: { accent: string; animate: boolean }) => (
+  <div className="flex h-full flex-col overflow-hidden bg-[#1a1d21] font-sans text-[9px] text-[#d1d2d3]">
+    <div className="flex h-9 shrink-0 items-center gap-2 border-b border-white/10 bg-[#20242a] px-3">
+      <span className="grid size-5 place-items-center rounded-[4px] bg-[radial-gradient(circle_at_35%_25%,#7788ff,#242051_68%)] text-[8px] font-bold text-white">
+        H
+      </span>
+      <span className="font-semibold text-[11px] tracking-tight text-white">Herm</span>
+      <span className="rounded bg-white/10 px-1 py-px text-[7px] font-semibold tracking-wide text-[#d5d7dc]">
+        VIP
+      </span>
+      <span className="ml-auto size-1.5 rounded-full" style={{ background: accent }} />
+    </div>
 
-    <span className="relative h-px flex-1 bg-border">
-      {animate && (
-        <motion.span
-          className="absolute -top-[2px] size-[5px] rounded-full"
-          style={{ background: accent }}
-          initial={{ left: '0%' }}
-          animate={{ left: '100%' }}
-          transition={{ duration: 1.6, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-        />
-      )}
-    </span>
+    <div className="flex h-7 shrink-0 items-end gap-3 border-b border-white/10 px-3 text-[#a8adb5]">
+      <span className="border-b-2 border-white pb-1 text-white">⌂ Home</span>
+      <span className="pb-1">● Chat</span>
+      <span className="pb-1">◷ History</span>
+      <span className="ml-auto pb-1">More⌄</span>
+    </div>
 
-    <span className="squircle-xs border border-dashed px-1.5 py-1" style={{ borderColor: accent }}>
-      agent
-    </span>
+    <div className="flex min-h-0 flex-1 flex-col justify-center gap-2 px-3 py-2.5 leading-[1.35]">
+      <div className="flex items-start gap-1.5">
+        <span className="grid size-4 shrink-0 place-items-center rounded-[4px] bg-[#d8dce5] text-[8px] font-semibold text-[#20242a]">
+          N
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold text-[#f1f2f3]">Nishant</p>
+          <p className="text-[#c8cbd0]">
+            Hello, can you reply with a short status message for a portfolio screenshot?
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-1.5">
+        <span className="grid size-4 shrink-0 place-items-center rounded-[4px] bg-[radial-gradient(circle_at_35%_25%,#7686ff,#211c59_68%)] text-[8px] font-bold text-white">
+          H
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold text-[#f1f2f3]">
+            Herm{' '}
+            <span className="ml-1 rounded bg-white/10 px-1 py-px text-[7px] tracking-wide text-[#d5d7dc]">
+              AGENT
+            </span>
+          </p>
+          <p className="text-[#c8cbd0]">
+            Ready. Private gateway is healthy and no public ingress is exposed.
+          </p>
+          <span className="mt-1 inline-flex rounded bg-white/10 px-1.5 py-0.5 font-mono text-[8px] text-[#dfe1e5]">
+            tailscale · connected
+          </span>
+        </div>
+      </div>
+    </div>
   </div>
 );
 
@@ -121,38 +159,29 @@ const ResumeThumb = ({ accent, animate }: { accent: string; animate: boolean }) 
   </div>
 );
 
-/** hale — recovery computed on the device, no account. */
-const HaleThumb = ({ accent, animate }: { accent: string; animate: boolean }) => (
-  <div className="flex h-full items-center justify-center gap-3 px-4">
-    <svg viewBox="0 0 36 36" className="size-11 -rotate-90" aria-hidden="true">
-      <circle
-        cx="18"
-        cy="18"
-        r="15"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="3"
-        className="text-border"
-      />
-      <motion.circle
-        cx="18"
-        cy="18"
-        r="15"
-        fill="none"
-        stroke={accent}
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeDasharray={2 * Math.PI * 15}
-        initial={animate ? { strokeDashoffset: 2 * Math.PI * 15 } : false}
-        animate={{ strokeDashoffset: 2 * Math.PI * 15 * 0.28 }}
-        transition={animate ? { duration: 1.4, ease: [0.22, 1, 0.36, 1] } : undefined}
-      />
-    </svg>
+/** hale — three real iPhone simulator captures, arranged like a small health story. */
+const HaleThumb = () => (
+  <div className="relative h-full overflow-hidden bg-[#071514]">
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-25%,rgba(72,153,118,0.55),transparent_63%),linear-gradient(130deg,#06110f_8%,#0d1b1b_58%,#171025)]" />
+    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-[linear-gradient(transparent,rgba(3,10,9,0.72))]" />
 
-    <div className="font-mono text-[10px] leading-4 text-muted">
-      <p style={{ color: asText(accent) }}>72% recovered</p>
-      <p>on-device</p>
-    </div>
+    <img
+      src={haleRecoveryScreenshot}
+      alt=""
+      className="absolute left-[8%] top-6 w-[29%] -rotate-[7deg] rounded-[11px] object-cover object-top opacity-75 shadow-[0_16px_34px_rgba(0,0,0,0.45)] ring-1 ring-white/15"
+    />
+    <img
+      src={haleHomeScreenshot}
+      alt=""
+      className="absolute left-1/2 top-3 z-10 w-[35%] -translate-x-1/2 rounded-[13px] object-cover object-top shadow-[0_22px_44px_rgba(0,0,0,0.58)] ring-1 ring-white/25"
+    />
+    <img
+      src={haleSleepScreenshot}
+      alt=""
+      className="absolute right-[8%] top-7 w-[29%] rotate-[7deg] rounded-[11px] object-cover object-top opacity-80 shadow-[0_16px_34px_rgba(0,0,0,0.45)] ring-1 ring-white/15"
+    />
+
+    <div className="absolute inset-x-0 bottom-0 h-10 bg-[linear-gradient(transparent,#071514)]" />
   </div>
 );
 
@@ -224,8 +253,9 @@ const THUMBS: Record<string, typeof HermThumb> = {
 const SCREENSHOTS: Record<string, string> = {
   enform: enformScreenshot,
   cterm: ctermScreenshot,
+  herm: hermSlackScreenshot,
   neko: nekoScreenshot,
-  'the-resume-thing': resumeScreenshot,
+  'the-resume-thing': resumeDemo,
 };
 
 const ProjectThumb = ({ name, accent }: { name: string; accent: string }) => {
@@ -234,15 +264,27 @@ const ProjectThumb = ({ name, accent }: { name: string; accent: string }) => {
   const screenshot = SCREENSHOTS[name];
 
   if (screenshot) {
-    return (
-      <img
-        src={screenshot}
-        alt=""
-        className={`h-full w-full ${
-          name === 'the-resume-thing' ? 'object-contain' : 'object-cover object-top'
-        }`}
-      />
-    );
+    if (name === 'herm' || name === 'cterm') {
+      return (
+        <div className="relative flex h-full w-full items-center justify-center overflow-hidden bg-[#171327] p-7">
+          <div className="absolute -left-12 -top-14 size-40 rounded-full bg-[#6d4cff]/45 blur-3xl" />
+          <div className="absolute -bottom-20 -right-8 size-44 rounded-full bg-[#ef6947]/40 blur-3xl" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(77,57,164,0.4),transparent_45%,rgba(231,103,70,0.26))]" />
+          <img
+            src={screenshot}
+            alt=""
+            className="relative h-full w-full rounded-[10px] object-cover object-top shadow-[0_18px_40px_rgba(0,0,0,0.48)] ring-1 ring-white/10"
+          />
+        </div>
+      );
+    }
+
+    const screenshotClass =
+      name === 'the-resume-thing'
+        ? 'bg-[#f7f6f3] object-cover object-top'
+        : 'object-cover object-top';
+
+    return <img src={screenshot} alt="" className={`h-full w-full ${screenshotClass}`} />;
   }
 
   // A project without a thumb falls back to its wordmark rather than a gap.

@@ -14,7 +14,7 @@ const SelectedWork = () => {
       <h2 id="latest-work-title" className="mb-6 text-xs tracking-widest text-muted uppercase">
         Latest work
       </h2>
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] gap-5">
         {latestWork.map((project) => {
           const destination = projectDestination(project);
           if (!destination) return null;
@@ -32,7 +32,7 @@ const SelectedWork = () => {
               >
                 <motion.span
                   layoutId={`mark:${project.slug}`}
-                  className="block h-44 shrink-0 overflow-hidden border-b border-border bg-bg transition-transform duration-300 group-hover:-translate-y-1 sm:h-48 motion-reduce:transform-none"
+                  className="block aspect-[16/10] shrink-0 overflow-hidden border-b border-border bg-bg transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transform-none"
                 >
                   <ProjectThumb name={project.slug} accent={project.accent} />
                 </motion.span>
@@ -47,6 +47,14 @@ const SelectedWork = () => {
           );
         })}
       </div>
+      <a
+        href="https://github.com/NishantEC"
+        target="_blank"
+        rel="noreferrer"
+        className="mt-5 inline-flex text-sm text-muted underline underline-offset-4 transition-colors hover:text-fg"
+      >
+        More at GitHub ↗
+      </a>
     </section>
   );
 };

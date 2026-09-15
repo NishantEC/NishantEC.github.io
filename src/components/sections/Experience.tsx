@@ -13,7 +13,7 @@ const Experience = ({ index }: { index?: number }) => {
     <section className="section flex scroll-mt-24 flex-col gap-6" id="experience">
       <SectionLabel index={index}>experience</SectionLabel>
 
-      <ul className="flex flex-col gap-7">
+      <ul className="flex w-full max-w-2xl flex-col gap-7 text-left">
         {experience.map((job) => (
           <li key={job.company} className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
