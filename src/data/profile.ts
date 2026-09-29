@@ -1,10 +1,11 @@
+import bleedingEdgeLogo from '../assets/logo-bleedingedge.png';
 import healthifymeLogo from '../assets/logo-healthifyme.png';
 import ticketeLogo from '../assets/logo-tickete.png';
 
 export const profile = {
   name: 'Nishant Gupta',
   role: 'Software Engineer',
-  location: 'Bangalore, India',
+  location: 'Bangalore (IST)',
   status: 'Open to interesting work',
   email: 'guptanishant1307@gmail.com',
   socials: {
@@ -29,32 +30,28 @@ export type Job = {
 export const experience: Job[] = [
   {
     company: 'Healthifyme',
-    title: 'Software Engineer',
-    // One span, not two. The `previously` rail exists to show a title changing
-    // partway through a stint; with one title throughout it printed the same
-    // words twice under themselves.
+    title: 'Software Engineer 2',
     period: '2024 - Present',
     location: 'Bangalore',
     logo: healthifymeLogo,
     bullets: [
       {
-        text: 'Built RIA’s AI health-coach interface and onboarding.',
-        tooltip: 'RIA answers health questions in chat and coaches users through their plan.',
+        text: 'Built RIA, Healthifyme’s AI health coach, across chat and voice: members ask it questions, share health reports and get coached.',
       },
       {
-        text: 'Shipped a chat-based panel for uploading and analysing health reports.',
+        text: 'Built Coach Copilot, an AI assistant for Healthifyme’s coaches: it preps them for calls, drafts replies, suggests next steps and answers questions about each member’s food, sleep, activity and glucose.',
       },
       {
-        text: 'Built thousands of food pages with 100 Lighthouse SEO scores.',
-        tooltip:
-          'Generated per-food pages with structured data, each scoring 100 on Lighthouse SEO.',
+        text: 'Shipped thousands of food nutrition pages, each scoring 100 on Google’s SEO audit.',
       },
+      { text: 'Moved 20+ apps to a faster build tool and server-side rendering.' },
+      { text: 'Merged 260+ pull requests in a year.' },
     ],
     stack: ['Next.js', 'React', 'TypeScript', 'Jotai', 'PandaCSS'],
   },
   {
     company: 'Tickete',
-    title: 'Software Engineer',
+    title: 'Frontend Engineer',
     period: '2023 - 2024',
     location: 'Bangalore',
     logo: ticketeLogo,
@@ -77,9 +74,10 @@ export const experience: Job[] = [
     title: 'Software Engineer',
     period: '2023',
     location: 'Mumbai',
+    logo: bleedingEdgeLogo,
     bullets: [
-      { text: 'Shipped features across the company’s web apps.' },
-      { text: 'Improved performance, scalability, and browser compatibility.' },
+      { text: 'Built real-time rider and vendor apps for food delivery.' },
+      { text: 'Built the EEE Taxi fleet management system.' },
     ],
     stack: ['Angular', 'Ionic', 'Capacitor'],
   },

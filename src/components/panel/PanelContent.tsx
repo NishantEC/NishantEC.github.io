@@ -31,12 +31,14 @@ const ProjectView = ({ slug }: { slug: string }) => {
       {/* The other half of the card morph — see OpenSource.tsx. */}
       <motion.div
         layoutId={`mark:${project.slug}`}
-        className="squircle-xs grid h-28 place-items-center"
+        className="squircle-xs relative aspect-[16/10] overflow-hidden border border-border"
         style={{
           background: `radial-gradient(120% 100% at 50% 0%, ${project.accent}22, transparent 70%)`,
         }}
       >
-        <ProjectThumb name={project.slug} accent={project.accent} />
+        <span className="absolute inset-0">
+          <ProjectThumb name={project.slug} accent={project.accent} />
+        </span>
       </motion.div>
 
       <p className="leading-[26px] text-muted">{project.tagline}</p>

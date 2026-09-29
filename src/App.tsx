@@ -6,7 +6,6 @@ import Experience from './components/sections/Experience';
 import Hero from './components/sections/Hero';
 import HomeFooter from './components/sections/HomeFooter';
 import SelectedWork from './components/sections/SelectedWork';
-import Skills from './components/sections/Skills';
 import StandaloneItem from './components/standalone/StandaloneItem';
 import BlurGradient from './components/ui/BlurGradient';
 import { projects, skills } from './content/collections';
@@ -15,9 +14,8 @@ import NotFound from './pages/NotFound';
 const Page = () => (
   <>
     <Hero />
-    <Skills />
     <SelectedWork />
-    <Experience />
+    <Experience index={2} />
     <HomeFooter />
   </>
 );

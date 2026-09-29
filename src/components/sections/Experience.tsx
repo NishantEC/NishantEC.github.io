@@ -10,15 +10,15 @@ const Experience = ({ index }: { index?: number }) => {
   if (compact || experience.length === 0) return null;
 
   return (
-    <section className="section flex scroll-mt-24 flex-col gap-6" id="experience">
+    <section className="section flex scroll-mt-24 flex-col gap-8" id="experience">
       <SectionLabel index={index}>experience</SectionLabel>
 
-      <ul className="flex w-full max-w-2xl flex-col gap-7 text-left">
+      <ul className="flex flex-col gap-12">
         {experience.map((job) => (
           <li key={job.company} className="flex flex-col gap-2">
             <div className="flex flex-col gap-1">
               <div>
-                <p className="text-xs text-muted">
+                <p className="text-sm text-muted">
                   {job.period}, {job.location}
                 </p>
                 <h3 className="inline items-center">
@@ -46,7 +46,7 @@ const Experience = ({ index }: { index?: number }) => {
               ))}
             </div>
 
-            <ul className="mt-1 flex list-[circle] flex-col gap-1 pl-4 text-sm leading-[22px] text-pretty text-muted">
+            <ul className="mt-2 flex list-[circle] flex-col gap-1 pl-4 leading-relaxed text-pretty text-muted">
               {job.bullets.map((bullet) => (
                 <li key={bullet.text}>
                   {bullet.tooltip ? (
@@ -66,11 +66,11 @@ const Experience = ({ index }: { index?: number }) => {
               ))}
             </ul>
 
-            <ul className="mt-1 flex flex-wrap gap-1.5">
+            <ul className="mt-2 flex flex-wrap gap-2">
               {job.stack.map((tech) => (
                 <li
                   key={tech}
-                  className="squircle-xs border border-border px-2 py-0.5 text-xs text-muted"
+                  className="squircle-xs border border-border px-2 py-1 text-sm text-muted"
                 >
                   {tech}
                 </li>

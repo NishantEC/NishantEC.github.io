@@ -588,3 +588,111 @@
     opacity: 0.55;
   }
 }
+
+/* Squircle corners where the browser supports corner-shape, a plain radius
+ * elsewhere. A squircle reads smaller than a circle at the same radius, so the
+ * supported path uses a larger one to land on the same visual size. */
+@utility squircle-outer {
+  border-radius: 1.25rem;
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    border-radius: 2rem;
+  }
+}
+@utility squircle-inner {
+  border-radius: calc(1.25rem - 3px);
+  @supports (corner-shape: squircle) {
+    corner-shape: squircle;
+    border-radius: calc(2rem - 3px);
+  }
+}
+
+/* Gem backdrop for project cards: a bright facet top-left, the stone's body in
+ * the middle, depth bottom-right, a lit rim, and a sheen that crosses on hover.
+ * Each card sets two palettes — --l1..3 (pale, light theme) and --g1..3 (deep,
+ * dark theme) — and the caption colours follow, so text stays readable on both. */
+@utility gem {
+  --gg1: var(--l1);
+  --gg2: var(--l2);
+  --gg3: var(--l3);
+  --gem-shade: 10%;
+  --gem-rim: rgb(255 255 255 / 0.9);
+  --gem-cap-fg: var(--color-stone-900);
+  --gem-cap-muted: color-mix(in oklch, var(--color-stone-900) 72%, transparent);
+  --gem-sheen: rgb(255 255 255 / 0.45);
+
+  &:where(.dark *) {
+    --gg1: var(--g1);
+    --gg2: var(--g2);
+    --gg3: var(--g3);
+    --gem-shade: 35%;
+    --gem-rim: color-mix(in oklch, var(--g1) 45%, transparent);
+    --gem-cap-fg: white;
+    --gem-cap-muted: rgb(255 255 255 / 0.65);
+    --gem-sheen: rgb(255 255 255 / 0.14);
+  }
+
+  isolation: isolate;
+  background:
+    radial-gradient(120% 90% at 12% 0%, color-mix(in oklch, var(--gg1) 60%, transparent), transparent 55%),
+    radial-gradient(90% 80% at 100% 100%, color-mix(in oklch, var(--gg3), black var(--gem-shade)), transparent 70%),
+    conic-gradient(from 210deg at 70% 30%, var(--gg2), var(--gg3), color-mix(in oklch, var(--gg2) 70%, var(--gg1)), var(--gg3), var(--gg2));
+  box-shadow:
+    inset 0 1px 0 var(--gem-rim),
+    inset 0 0 0 1px color-mix(in oklch, var(--gg1) 22%, transparent);
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -40%;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(115deg, transparent 40%, var(--gem-sheen) 48%, transparent 58%);
+    transform: translateX(-35%);
+    transition: transform 1.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  &:hover::before {
+    transform: translateX(35%);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    &::before {
+      transition: none;
+    }
+  }
+}
+
+/* Caption band inside a gem card, fading up from the stone's depth colour. */
+@utility gem-cap {
+  color: var(--gem-cap-fg);
+  background: linear-gradient(to top, color-mix(in oklch, var(--gg3) 94%, transparent) 45%, transparent);
+}
+
+/* The video2ascii butterfly crosses its card: it glides in from off the left
+ * edge, drifts slowly through the middle where nothing overlaps it, and
+ * leaves off the right, with a gentle rise and fall as it flaps. */
+@keyframes ascii-fly {
+  0% {
+    transform: translate(-100%, -50%);
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  }
+  38% {
+    transform: translate(calc(44cqw - 50%), -50%);
+    animation-timing-function: linear;
+  }
+  66% {
+    transform: translate(calc(56cqw - 50%), -50%);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.8, 0.4);
+  }
+  100% {
+    transform: translate(100cqw, -50%);
+  }
+}
+@keyframes ascii-bob {
+  0%,
+  100% {
+    transform: translateY(3cqh);
+  }
+  50% {
+    transform: translateY(-3cqh);
+  }
+}

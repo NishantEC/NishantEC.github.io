@@ -1,7 +1,7 @@
 import dotmetricsMark from '../../assets/dotmetrics-mark.svg';
 import nekoAppIcon from '../../assets/neko-app-icon.svg';
 
-const EnformMark = () => (
+export const EnformMark = () => (
   <svg viewBox="112 112 798 798" className="size-9" aria-hidden="true">
     <g transform="rotate(-13 512 512)" fill="currentColor">
       <path d="M364.72 232.35h493.09q30.51 0 10.62 23.12L760.85 380.56q-4.19 4.87-10.61 4.87H257.15q-30.51 0-10.62-23.12l107.58-125.09q4.19-4.87 10.61-4.87Z" />
