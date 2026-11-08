@@ -45,19 +45,14 @@
     --accent: oklch(0.72 0.15 288);
   }
 
-  /* The app is a fixed shell with its own scrollers inside it, so the document
-   * itself must never scroll. Sizing the shell to 100vh is not enough on its
-   * own: an overflowing descendant still lets the *page* scroll behind it,
-   * which slid the tab strip off the top of the window. */
-  html,
-  body {
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-  }
-
-  #root {
-    height: 100%;
+  /* The document scrolls, not an inner box. iOS 26 Safari only draws a page
+   * under its floating toolbar and status bar when the page itself is the
+   * scroller; with a fixed shell and an inner scroller the page stopped at the
+   * toolbar's edge and the rest was flat colour. (The fixed shell existed for
+   * a split pane and tab strip the home page no longer has.) */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklch, var(--fg) 20%, transparent) transparent;
   }
 
   html {

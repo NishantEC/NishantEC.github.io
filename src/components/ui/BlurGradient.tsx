@@ -1,4 +1,4 @@
-import { type RefObject, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 /** Progressive blur strips that only appear where a page has more content. */
 const LAYERS = [
@@ -19,28 +19,27 @@ export const getScrollFadeVisibility = ({
   return { top: scrollTop > 1, bottom: scrollTop < maximumScroll - 1 };
 };
 
-const BlurGradient = ({
-  scrollContainerRef,
-}: {
-  scrollContainerRef: RefObject<HTMLDivElement | null>;
-}) => {
+/**
+ * Edge fades for the document scroller. Hidden on touch screens: there the
+ * browser's own bars already soften the edges (iOS 26 Safari draws the page
+ * under its glass toolbar), and a fixed strip would sit on top of them.
+ */
+const BlurGradient = () => {
   const [visibility, setVisibility] = useState({ top: false, bottom: false });
 
   useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    const updateVisibility = () => setVisibility(getScrollFadeVisibility(scrollContainer));
+    const doc = document.documentElement;
+    const updateVisibility = () => setVisibility(getScrollFadeVisibility(doc));
     const resizeObserver = new ResizeObserver(updateVisibility);
-    resizeObserver.observe(scrollContainer);
-    scrollContainer.addEventListener('scroll', updateVisibility, { passive: true });
+    resizeObserver.observe(document.body);
+    window.addEventListener('scroll', updateVisibility, { passive: true });
     updateVisibility();
 
     return () => {
       resizeObserver.disconnect();
-      scrollContainer.removeEventListener('scroll', updateVisibility);
+      window.removeEventListener('scroll', updateVisibility);
     };
-  }, [scrollContainerRef]);
+  }, []);
 
   return (
     <>
@@ -56,10 +55,10 @@ const BlurStrip = ({ edge }: { edge: 'top' | 'bottom' }) => {
 
   return (
     <div
-      className={`pointer-events-none absolute inset-x-0 ${isTop ? 'top-0' : 'bottom-0'} z-40 h-16`}
+      className={`pointer-events-none fixed inset-x-0 pointer-coarse:hidden ${isTop ? 'top-0' : 'bottom-0'} z-40 h-16`}
     >
       <div
-        className={`absolute inset-0 ${isTop ? 'bg-linear-to-b' : 'bg-linear-to-t'} from-bg to-transparent`}
+        className={`blur-tint absolute inset-0 ${isTop ? 'bg-linear-to-b' : 'bg-linear-to-t'} from-bg to-transparent`}
       />
       {LAYERS.map((layer) => (
         <div

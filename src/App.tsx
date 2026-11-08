@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef } from 'react';
+import { lazy, Suspense } from 'react';
 import { Route, Routes, useLocation, useParams } from 'react-router';
 import CommandPalette from './components/palette/CommandPalette';
 import PanelRouteSync, { tabFromPath } from './components/panel/PanelRouteSync';
@@ -53,7 +53,6 @@ const useStandalone = () => {
 };
 
 function App() {
-  const pageScrollerRef = useRef<HTMLDivElement>(null);
   const standalone = useStandalone();
 
   // A shared link renders as a document, not as the app. The palette stays —
@@ -62,7 +61,7 @@ function App() {
   // doesn't have.
   if (standalone) {
     return (
-      <div className="h-dvh overflow-hidden">
+      <div className="min-h-dvh">
         <PanelRouteSync />
         <StandaloneItem tab={standalone} />
         <CommandPalette />
@@ -71,17 +70,11 @@ function App() {
   }
 
   return (
-    // lvh, not dvh: on iOS 26 Safari the toolbar floats over the page, and a
-    // dvh shell stopped at its top edge, so the page (and the bottom blur)
-    // ended above the toolbar instead of running under it.
-    <div className="relative flex h-lvh overflow-hidden">
+    <div className="relative">
       <PanelRouteSync />
-      <BlurGradient scrollContainerRef={pageScrollerRef} />
+      <BlurGradient />
 
-      <div
-        ref={pageScrollerRef}
-        className="page-scroller relative min-w-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-fg/20 scrollbar-track-transparent"
-      >
+      <div className="page-scroller relative min-h-dvh">
         <PrintBackground />
 
         {/* The landing top padding is tuned for a full-width composition and is
@@ -89,7 +82,7 @@ function App() {
             negative margin rather than overriding the padding — that keeps the
             responsive `sm:` step intact and still animates. */}
         <main
-          className="relative flex flex-col items-center px-8 pt-20 pb-[calc(3rem+100lvh-100dvh)] sm:pt-28"
+          className="relative flex flex-col items-center px-8 pt-20 pb-[calc(3rem+env(safe-area-inset-bottom))] sm:pt-28"
           style={{ gap: '4.5rem' }}
         >
           <Routes>

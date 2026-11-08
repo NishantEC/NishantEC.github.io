@@ -24,7 +24,7 @@ import type { PanelTab } from '../panel/PanelProvider';
  * must be an `h2` because the sidebar already carries the page's `h1`.
  */
 const StandaloneItem = ({ tab }: { tab: PanelTab }) => (
-  <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-fg/20 scrollbar-track-transparent">
+  <div>
     <main className="w-full px-6 pt-16 pb-24 sm:px-10 sm:pt-24">
       {/* On the reading column's left edge, so it lines up with the title and
           the prose rather than floating in the margin.

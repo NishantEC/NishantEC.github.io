@@ -154,6 +154,13 @@
   border-width: 0;
 }
 
+/* The edge strips fade to --bg, which only matches a flat page. The Enform
+ * backgrounds change colour down the page, so the fade showed as a tinted band
+ * (navy over ember, blue over peach): there the strips are blur only. */
+:root[data-palette="enform"] .blur-tint {
+  display: none;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;
