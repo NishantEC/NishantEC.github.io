@@ -35,7 +35,7 @@ const buttonVariants = cva(
       },
       variant: {
         default: cn(
-          'border-transparent bg-fg text-bg shadow-xs',
+          'border-transparent bg-fg text-on-fg shadow-xs',
           'not-disabled:before:inset-shadow-[0_1px_--theme(--color-white/16%)]',
           'hover:opacity-90 active:scale-[0.98] active:shadow-none',
         ),

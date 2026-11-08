@@ -1,0 +1,161 @@
+/*
+ * The redesign, as CSS keyed off <html data-palette data-surface>.
+ * Values come from src/design/design.ts; decisions in docs/design/portfolio-decisions.md.
+ * Unlayered on purpose, so it wins over the base tokens and Tailwind utilities
+ * it replaces without !important.
+ */
+
+/* ---------- palette: Enform sky (light) and night (dark) ---------- */
+:root[data-palette="enform"] {
+  --bg: #5b9cf0;
+  --surface: rgb(255 255 255 / 0.6);
+  --fg: #17181c;
+  --muted: #3d4350;
+  --border: rgb(23 24 28 / 0.1);
+  --accent: oklch(0.42 0.2 275);
+  --on-fg: #fff;
+}
+:root[data-palette="enform"].dark {
+  --bg: #0b1222;
+  --surface: #141d32;
+  --fg: #f4f4f5;
+  --muted: #b4b8c4;
+  --border: rgb(255 255 255 / 0.08);
+  --accent: oklch(0.72 0.15 288);
+  --on-fg: #0b1222;
+}
+/* The sky changes as you scroll: the gradient lives on the scroller with
+ * `local` attachment, so it moves with the content rather than the window. */
+:root[data-palette="enform"] .page-scroller {
+  background: linear-gradient(
+      180deg,
+      #5b9cf0 0,
+      #86b6f3 800px,
+      #b4cdf3 1600px,
+      #d9dcef 2400px,
+      #f3d9c2 3200px,
+      #f1cfb0 100%
+    )
+    local;
+}
+:root[data-palette="enform"].dark .page-scroller {
+  background: linear-gradient(
+      180deg,
+      #0b1222 0,
+      #0e1830 800px,
+      #131b2e 1700px,
+      #1a1715 2600px,
+      #3a1a0c 3300px,
+      #6b2a0d 100%
+    )
+    local;
+}
+
+/* ---------- glass: Enform's window recipe ----------
+ * From hushbacks apps/landing (journey/window/glass.css, merged/sticky/app/app.css).
+ * No outline. Depth is a two-step drop shadow and a 1px top highlight; the
+ * glass is frost + corner specular + diagonal sheen + a 40px top shine + grain.
+ * Highlights run at full strength in light mode and ~15% in dark. */
+:root {
+  --g-shell: rgb(255 255 255 / 0.6);
+  --g-hi: 0.9;
+  --g-k: 1;
+  --g-shadow: 60 40 20;
+  --g-a: 0.08;
+  --g-b: 0.42;
+}
+:root.dark {
+  --g-shell: hsl(24 5% 13% / 0.6);
+  --g-hi: 0.07;
+  --g-k: 0.14;
+  --g-shadow: 0 0 0;
+  --g-a: 0.3;
+  --g-b: 0.75;
+}
+:root[data-palette="enform"] {
+  --g-shell: rgb(230 237 251 / 0.5);
+  --g-shadow: 20 44 96;
+}
+:root[data-palette="enform"].dark {
+  --g-shell: rgb(17 20 30 / 0.55);
+  --g-k: 0.16;
+  --g-shadow: 0 0 0;
+}
+
+:root[data-surface="glass"] {
+  --shell-pad: 7px;
+}
+:root[data-surface="glass"] .shell {
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+  background: var(--g-shell);
+  backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / var(--g-hi)),
+    0 2px 6px rgb(var(--g-shadow) / var(--g-a)),
+    0 30px 64px -22px rgb(var(--g-shadow) / var(--g-b));
+}
+:root[data-surface="glass"] .shell.squircle-outer {
+  padding: var(--shell-pad);
+}
+:root[data-surface="glass"] .shell::before,
+:root[data-surface="glass"] .shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  /* inherit does not bring corner-shape along (see index.css), so without it
+   * the glass draws a circular arc that bows past the squircle edge */
+  border-radius: inherit;
+  corner-shape: inherit;
+  opacity: var(--g-k);
+}
+:root[data-surface="glass"] .shell::before {
+  inset: 0;
+  background:
+    radial-gradient(
+      70% 62% at 0% 0%,
+      rgb(255 255 255 / 0.66),
+      rgb(255 255 255 / 0.2) 42%,
+      transparent 72%
+    ),
+    linear-gradient(
+      122deg,
+      transparent 20%,
+      rgb(255 255 255 / 0.3) 30%,
+      rgb(255 255 255 / 0.08) 37%,
+      transparent 44%
+    ),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.2),
+      rgb(255 255 255 / 0.05) 40%,
+      rgb(255 255 255 / 0.02) 78%,
+      rgb(255 255 255 / 0.1)
+    ),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23g)' opacity='.16'/></svg>");
+}
+:root[data-surface="glass"] .shell::after {
+  inset: 0 0 auto;
+  height: 40px;
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.9),
+    rgb(255 255 255 / 0.32) 14%,
+    transparent
+  );
+  mask-image: linear-gradient(90deg, rgb(0 0 0 / 0.5), #000 8%, #000 62%, rgb(0 0 0 / 0.25));
+}
+/* Removed, not made transparent: a transparent border still paints the tile's
+ * own gradient underneath it, which showed as a bright 1px band outside the
+ * gem's inset rim. */
+:root[data-surface="glass"] .shell-in {
+  border-width: 0;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}

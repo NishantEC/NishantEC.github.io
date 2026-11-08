@@ -30,9 +30,9 @@ const HomeFooter = () => {
 
   return (
     <footer className="section flex flex-col gap-5">
-      <div className="squircle-outer border border-border bg-bg p-[3px]">
+      <div className="shell squircle-outer border border-border bg-bg p-[3px]">
         <div
-          className="gem squircle-inner relative overflow-hidden border border-white/10"
+          className="shell-in gem squircle-inner relative overflow-hidden border border-white/10"
           style={gemVars}
         >
           <GemShader light={CITRINE.light} dark={CITRINE.dark} />

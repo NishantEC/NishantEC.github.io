@@ -8,6 +8,8 @@ import { ThemeProvider } from './components/theme/ThemeProvider';
 import { startAnalytics } from './utils/analytics';
 import { printConsoleGreeting } from './utils/console-greeting';
 import './index.css';
+import './design/design.css';
+import './design/design';
 
 printConsoleGreeting();
 startAnalytics();

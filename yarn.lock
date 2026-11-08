@@ -513,6 +513,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@paper-design/shaders-react@npm:0.0.82":
+  version: 0.0.82
+  resolution: "@paper-design/shaders-react@npm:0.0.82"
+  dependencies:
+    "@paper-design/shaders": "npm:0.0.82"
+  peerDependencies:
+    "@types/react": ^18 || ^19
+    react: ^18 || ^19
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+  checksum: 10c0/827f70b413a8d33f216b327417389f8957f4f5f1d398e0294e0e11bfca9f43da24ffeadd72b5d6c55a62e1d693303a3f142a9d881322e7a3a8c66da3f7867a46
+  languageName: node
+  linkType: hard
+
+"@paper-design/shaders@npm:0.0.82":
+  version: 0.0.82
+  resolution: "@paper-design/shaders@npm:0.0.82"
+  checksum: 10c0/2af4145ab90878b620d50e42c45baef7093ca9604275a3c6f805166409715e85c9fd991d4a78e9d84e4f0fff8ce94868fdad1ebc97a0d4180ff4023232545fd3
+  languageName: node
+  linkType: hard
+
 "@puppeteer/browsers@npm:3.1.0":
   version: 3.1.0
   resolution: "@puppeteer/browsers@npm:3.1.0"
@@ -3312,6 +3334,7 @@ __metadata:
     "@iconify-json/simple-icons": "npm:^1.2.92"
     "@mdx-js/react": "npm:^3.1.1"
     "@mdx-js/rollup": "npm:^3.1.1"
+    "@paper-design/shaders-react": "npm:0.0.82"
     "@sparticuz/chromium": "npm:^149.0.0"
     "@svgr/core": "npm:^8.1.0"
     "@svgr/plugin-jsx": "npm:^8.1.0"

@@ -76,8 +76,9 @@ const gemVars = ([l1, l2, l3]: Palette, [g1, g2, g3]: Palette) =>
 // Squircle corners come from the utilities in index.css; the 3px ring between
 // the two borders is the page background.
 const FRAME =
-  'group w-full squircle-outer border border-border bg-bg p-[3px] transition-transform duration-300 hover:-translate-y-0.5';
-const INNER = 'relative block h-full w-full overflow-hidden squircle-inner border border-white/10';
+  'shell group w-full squircle-outer border border-border bg-bg p-[3px] transition-transform duration-300 hover:-translate-y-0.5';
+const INNER =
+  'shell-in relative block h-full w-full overflow-hidden squircle-inner border border-white/10';
 const LIFT =
   'transition-transform duration-500 ease-out group-hover:-translate-y-1.5 motion-reduce:transform-none';
 const SHADOW = 'shadow-[0_18px_40px_rgb(0_0_0/0.5)] ring-1 ring-white/10';
@@ -118,11 +119,12 @@ const Shots = ({ media }: { media: Media }) => {
 // One line per card, short enough to show whole. The full tagline lives on
 // the project page; a truncated sentence on a card only hides its point.
 const CARD_LINE: Record<string, string> = {
-  enform: 'An AI form builder that reads the answers.',
-  'the-resume-thing': 'A résumé where every line cites a PR.',
-  neko: 'A macOS launcher for apps and agents.',
-  herm: 'A private AI agent box, no open ports.',
-  cterm: "Ghostty's real terminal, in a browser.",
+  enform: 'A survey tool that reads every reply.',
+  'the-resume-thing': 'A résumé built from your GitHub and Linear work.',
+  neko: 'A macOS workspace where agents work your tickets.',
+  herm: 'An always-on AI agent VM with no public ports.',
+  cterm: "Ghostty's real terminal engine, in a browser tab.",
+  hale: 'A WHOOP 4.0 tracker that never leaves your phone.',
 };
 
 const SelectedWork = () => {

@@ -65,7 +65,7 @@ const CommandPalette = () => {
       ...skills.map((item) => ({
         id: `skill:${item.slug}`,
         label: item.title,
-        group: 'Skills',
+        group: 'Agent skills',
         icon: <ArchiveIcon />,
         keywords: `${item.blurb} ${item.slug}`,
         run: () => navigate(`/skills/${item.slug}`),

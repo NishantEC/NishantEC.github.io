@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { lazy, Suspense, useRef } from 'react';
 import { Route, Routes, useLocation, useParams } from 'react-router';
 import CommandPalette from './components/palette/CommandPalette';
 import PanelRouteSync, { tabFromPath } from './components/panel/PanelRouteSync';
@@ -9,7 +9,12 @@ import SelectedWork from './components/sections/SelectedWork';
 import StandaloneItem from './components/standalone/StandaloneItem';
 import BlurGradient from './components/ui/BlurGradient';
 import { projects, skills } from './content/collections';
+import PrintBackground from './design/PrintBackground';
 import NotFound from './pages/NotFound';
+
+/** The design editor overlay: dev, or `?design` on a deployed build. Never part of the visitor bundle. */
+const DesignEditor = lazy(() => import('./design/DesignEditor'));
+const showEditor = import.meta.env.DEV || new URLSearchParams(window.location.search).has('design');
 
 const Page = () => (
   <>
@@ -71,16 +76,17 @@ function App() {
 
       <div
         ref={pageScrollerRef}
-        className="min-w-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-fg/20 scrollbar-track-transparent"
+        className="page-scroller relative min-w-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-fg/20 scrollbar-track-transparent"
       >
         <BlurGradient scrollContainerRef={pageScrollerRef} />
+        <PrintBackground />
 
         {/* The landing top padding is tuned for a full-width composition and is
             far too much in a 340px column, so the sidebar pulls itself up by a
             negative margin rather than overriding the padding — that keeps the
             responsive `sm:` step intact and still animates. */}
         <main
-          className="flex flex-col items-center px-8 pt-20 pb-12 sm:pt-28"
+          className="relative flex flex-col items-center px-8 pt-20 pb-12 sm:pt-28"
           style={{ gap: '4.5rem' }}
         >
           <Routes>
@@ -96,6 +102,11 @@ function App() {
       </div>
 
       <CommandPalette />
+      {showEditor && (
+        <Suspense>
+          <DesignEditor />
+        </Suspense>
+      )}
     </div>
   );
 }

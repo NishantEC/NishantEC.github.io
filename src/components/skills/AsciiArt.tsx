@@ -898,7 +898,7 @@ const AsciiArt = () => {
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
+                className="rounded-lg bg-fg px-3.5 py-2 text-on-fg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
               >
                 Choose a video
               </button>
@@ -950,7 +950,7 @@ const AsciiArt = () => {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="rounded-lg bg-fg px-3.5 py-2 text-bg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
+                  className="rounded-lg bg-fg px-3.5 py-2 text-on-fg text-xs outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-accent active:scale-[0.96]"
                 >
                   Choose a video
                 </button>

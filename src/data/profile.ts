@@ -36,16 +36,18 @@ export const experience: Job[] = [
     logo: healthifymeLogo,
     bullets: [
       {
+        text: 'Launched Healthifyme in the UAE: built the web signup and checkout funnels with Stripe, and set up the UAE deployment.',
+      },
+      {
+        text: 'Brought RIA to WhatsApp: members get nudges with reply buttons, image cards of their day, and can send voice notes.',
+      },
+      {
         text: 'Built RIA, Healthifyme’s AI health coach, across chat and voice: members ask it questions, share health reports and get coached.',
       },
       {
         text: 'Built Coach Copilot, an AI assistant for Healthifyme’s coaches: it preps them for calls, drafts replies, suggests next steps and answers questions about each member’s food, sleep, activity and glucose.',
       },
-      {
-        text: 'Shipped thousands of food nutrition pages, each scoring 100 on Google’s SEO audit.',
-      },
-      { text: 'Moved 20+ apps to a faster build tool and server-side rendering.' },
-      { text: 'Merged 260+ pull requests in a year.' },
+      { text: 'Merged 360+ pull requests in the last year.' },
     ],
     stack: ['Next.js', 'React', 'TypeScript', 'Jotai', 'PandaCSS'],
   },

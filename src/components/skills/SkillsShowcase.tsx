@@ -138,7 +138,7 @@ const SkillsShowcase = () => {
       </button>
 
       <span className="pointer-events-none absolute top-5 left-6 font-mono text-[11px] tracking-widest text-muted uppercase transition-colors duration-700">
-        skills · open source
+        agent skills · open source
       </span>
 
       <span

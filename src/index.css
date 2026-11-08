@@ -12,6 +12,7 @@
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-fg: var(--fg);
+  --color-on-fg: var(--on-fg);
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
@@ -29,6 +30,9 @@
     --muted: var(--color-stone-600);
     --border: --alpha(var(--color-stone-900) / 18%);
     --accent: oklch(0.52 0.19 288);
+    /* Text on an fg-filled control. The page colour works for stone, but not
+     * for a page colour that is itself a hue (the redesign's sky is blue). */
+    --on-fg: var(--bg);
   }
 
   .dark {
@@ -593,17 +597,17 @@
  * elsewhere. A squircle reads smaller than a circle at the same radius, so the
  * supported path uses a larger one to land on the same visual size. */
 @utility squircle-outer {
-  border-radius: 1.25rem;
+  border-radius: var(--shell-r, 1.25rem);
   @supports (corner-shape: squircle) {
     corner-shape: squircle;
-    border-radius: 2rem;
+    border-radius: calc(var(--shell-r, 1.25rem) * 1.6);
   }
 }
 @utility squircle-inner {
-  border-radius: calc(1.25rem - 3px);
+  border-radius: calc(var(--shell-r, 1.25rem) - var(--shell-pad, 3px));
   @supports (corner-shape: squircle) {
     corner-shape: squircle;
-    border-radius: calc(2rem - 3px);
+    border-radius: calc(var(--shell-r, 1.25rem) * 1.6 - var(--shell-pad, 3px));
   }
 }
 

@@ -1,11 +1,13 @@
 import avatar from '../../assets/me.jpeg';
 import { profile } from '../../data/profile';
+import { useDesign } from '../../design/design';
 import { useCompact } from '../panel/useCompact';
 import Contacts from '../ui/Contacts';
 import CopyEmailButton from '../ui/CopyEmailButton';
 
 const Hero = () => {
   const compact = useCompact();
+  const { statusPill } = useDesign();
 
   if (compact) {
     return (
@@ -26,7 +28,7 @@ const Hero = () => {
             is one scroll away in the experience section, and naming it here
             made the whole panel read as a job title rather than an index. */}
         <p className="text-sm leading-[22px] text-muted">
-          Building stuff — product interfaces, and developer tools on the side.
+          Building product interfaces, and developer tools on the side.
         </p>
 
         <div className="flex items-center gap-3">
@@ -39,6 +41,15 @@ const Hero = () => {
 
   return (
     <section className="section flex scroll-mt-24 flex-col gap-12" id="hero">
+      {statusPill && (
+        <span className="shell -mb-6 inline-flex items-center gap-2.5 self-start rounded-full border border-border px-3.5 py-1.5 text-sm text-fg">
+          <i
+            aria-hidden="true"
+            className="size-2 rounded-full bg-emerald-400 shadow-[0_0_8px] shadow-emerald-400"
+          />
+          Now building RIA, Healthifyme's AI health coach
+        </span>
+      )}
       <div className="flex flex-col gap-1">
         <h1 className="font-display text-2xl leading-8 tracking-[-0.6px] italic">{profile.name}</h1>
         <p className="font-mono text-[11px] tracking-widest text-muted uppercase">

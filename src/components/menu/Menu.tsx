@@ -63,7 +63,7 @@ const Menu = () => {
             onSelect: () => scrollToSection('experience'),
           },
           {
-            name: 'Skills',
+            name: 'Agent skills',
             icon: <ArchiveIcon />,
             onSelect: () => scrollToSection('skills'),
           },
