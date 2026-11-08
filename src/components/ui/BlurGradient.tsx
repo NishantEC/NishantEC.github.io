@@ -56,7 +56,7 @@ const BlurStrip = ({ edge }: { edge: 'top' | 'bottom' }) => {
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 ${isTop ? 'top-0' : 'bottom-0'} z-40 h-16`}
+      className={`pointer-events-none absolute inset-x-0 ${isTop ? 'top-0' : 'bottom-0'} z-40 h-16`}
     >
       <div
         className={`absolute inset-0 ${isTop ? 'bg-linear-to-b' : 'bg-linear-to-t'} from-bg to-transparent`}

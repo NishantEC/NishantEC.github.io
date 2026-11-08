@@ -71,14 +71,17 @@ function App() {
   }
 
   return (
-    <div className="flex h-dvh overflow-hidden">
+    // lvh, not dvh: on iOS 26 Safari the toolbar floats over the page, and a
+    // dvh shell stopped at its top edge, so the page (and the bottom blur)
+    // ended above the toolbar instead of running under it.
+    <div className="relative flex h-lvh overflow-hidden">
       <PanelRouteSync />
+      <BlurGradient scrollContainerRef={pageScrollerRef} />
 
       <div
         ref={pageScrollerRef}
         className="page-scroller relative min-w-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-fg/20 scrollbar-track-transparent"
       >
-        <BlurGradient scrollContainerRef={pageScrollerRef} />
         <PrintBackground />
 
         {/* The landing top padding is tuned for a full-width composition and is
@@ -86,7 +89,7 @@ function App() {
             negative margin rather than overriding the padding — that keeps the
             responsive `sm:` step intact and still animates. */}
         <main
-          className="relative flex flex-col items-center px-8 pt-20 pb-12 sm:pt-28"
+          className="relative flex flex-col items-center px-8 pt-20 pb-[calc(3rem+100lvh-100dvh)] sm:pt-28"
           style={{ gap: '4.5rem' }}
         >
           <Routes>
